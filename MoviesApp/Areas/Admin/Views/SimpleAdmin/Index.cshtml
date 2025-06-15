@@ -1,0 +1,194 @@
+@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h2 mb-4">
+                <i class="fas fa-shield-alt me-2"></i>
+                Admin Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h3 class="text-primary">@ViewBag.TotalUsers</h3>
+                    <p class="card-text">Tổng Users</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-film fa-3x text-success mb-3"></i>
+                    <h3 class="text-success">@ViewBag.TotalMovies</h3>
+                    <p class="card-text">Tổng Phim</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-play-circle fa-3x text-warning mb-3"></i>
+                    <h3 class="text-warning">@ViewBag.TotalEpisodes</h3>
+                    <p class="card-text">Tổng Tập Phim</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-check fa-3x text-info mb-3"></i>
+                    <h3 class="text-info">@Model.Count(u => u.IsActive)</h3>
+                    <p class="card-text">Users Hoạt Động</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        Thao Tác Nhanh
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Users" class="btn btn-primary w-100">
+                                <i class="fas fa-users me-2"></i>
+                                Quản lý Users
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-action="Movies" class="btn btn-success w-100">
+                                <i class="fas fa-film me-2"></i>
+                                Quản lý Phim
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a asp-controller="Phim" asp-action="Create" asp-area="" class="btn btn-warning w-100">
+                                <i class="fas fa-plus me-2"></i>
+                                Thêm Phim Mới
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/" class="btn btn-info w-100">
+                                <i class="fas fa-home me-2"></i>
+                                Về Trang Chủ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        10 Users Mới Nhất
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tên</th>
+                                        <th>Email</th>
+                                        <th>Ngày Tạo</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                                         style="width: 40px; height: 40px;">
+                                                        @user.FullName.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                    <strong>@user.FullName</strong>
+                                                </div>
+                                            </td>
+                                            <td>@user.Email</td>
+                                            <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <span class="badge bg-@(user.IsActive ? "success" : "secondary")">
+                                                    @(user.IsActive ? "Hoạt động" : "Tạm khóa")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-@(user.IsActive ? "warning" : "success")" 
+                                                        onclick="toggleUserStatus('@user.Id', @user.IsActive.ToString().ToLower())">
+                                                    <i class="fas fa-@(user.IsActive ? "lock" : "unlock")"></i>
+                                                    @(user.IsActive ? "Khóa" : "Mở khóa")
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Chưa có user nào.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus(userId, currentStatus) {
+    const action = currentStatus ? 'khóa' : 'mở khóa';
+    if (confirm(`Bạn có chắc chắn muốn ${action} tài khoản này?`)) {
+        fetch('@Url.Action("ToggleUserStatus")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({ userId: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra');
+        });
+    }
+}
+</script>

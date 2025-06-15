@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "JWT Token Generator";
+    var tokenInfo = ViewBag.TokenInfo;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-key me-2"></i>JWT Token Generated
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-check-circle me-2"></i>Token Generated Successfully!</h5>
+                    <p class="mb-0">Your JWT token has been generated. Use this token to authenticate API requests.</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user me-2"></i>User Information:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Email:</strong> @tokenInfo.Email</li>
+                            <li><strong>Full Name:</strong> @tokenInfo.FullName</li>
+                            <li><strong>User ID:</strong> @tokenInfo.UserId</li>
+                            <li><strong>Expires At:</strong> @tokenInfo.ExpiresAt.ToString("dd/MM/yyyy HH:mm:ss")</li>
+                        </ul>
+                        
+                        <h6><i class="fas fa-shield-alt me-2"></i>Roles:</h6>
+                        @foreach (var role in tokenInfo.Roles)
+                        {
+                            string badgeClass = role switch
+                            {
+                                "Admin" => "bg-danger",
+                                "Premium User" => "bg-warning text-dark",
+                                "Free User" => "bg-primary",
+                                _ => "bg-secondary"
+                            };
+                            <span class="badge @badgeClass me-1">@role</span>
+                        }
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle me-2"></i>How to Use:</h6>
+                        <ol>
+                            <li>Copy the token below</li>
+                            <li>Add it to your HTTP headers:</li>
+                            <li><code>Authorization: Bearer &lt;your-token&gt;</code></li>
+                            <li>Make API requests to protected endpoints</li>
+                        </ol>
+                        
+                        <div class="mt-3">
+                            <a href="/swagger" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-code me-2"></i>Test in Swagger UI
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="fas fa-key me-1"></i>JWT Token:
+                    </label>
+                    <div class="input-group">
+                        <textarea id="jwtToken" class="form-control" rows="4" readonly>@tokenInfo.Token</textarea>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToken()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">Click the copy button to copy the token to clipboard</small>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Security Notice:</h6>
+                    <ul class="mb-0">
+                        <li>Keep your token secure and don't share it with others</li>
+                        <li>This token expires in 60 minutes</li>
+                        <li>Use HTTPS in production environments</li>
+                        <li>Store tokens securely in your applications</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a asp-action="Profile" class="btn btn-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                    </a>
+                    <a asp-action="GenerateToken" class="btn btn-warning">
+                        <i class="fas fa-sync-alt me-2"></i>Generate New Token
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToken() {
+    const tokenTextarea = document.getElementById('jwtToken');
+    tokenTextarea.select();
+    tokenTextarea.setSelectionRange(0, 99999); // For mobile devices
+    
+    navigator.clipboard.writeText(tokenTextarea.value).then(function() {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(function() {
+            button.innerHTML = originalContent;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+</script>

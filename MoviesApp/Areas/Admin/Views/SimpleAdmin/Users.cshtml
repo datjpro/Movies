@@ -1,0 +1,175 @@
+@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý Users";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">
+            <i class="fas fa-users me-2"></i>
+            Quản lý Users
+        </h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Quay lại Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                Danh sách Users (@ViewBag.TotalUsers)
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Thông tin</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                             style="width: 50px; height: 50px; font-size: 20px; font-weight: bold;">
+                                            @user.FullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@user.FullName</strong>
+                                        </div>
+                                        <div class="text-muted">@user.Email</div>
+                                        @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                                        {
+                                            <div class="text-muted small">📞 @user.PhoneNumber</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        @user.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="badge bg-@(user.IsActive ? "success" : "secondary") mb-1">
+                                                @(user.IsActive ? "Hoạt động" : "Tạm khóa")
+                                            </span>
+                                            @if (user.EmailConfirmed)
+                                            {
+                                                <span class="badge bg-success">Email xác thực</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Chưa xác thực</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-@(user.IsActive ? "warning" : "success")" 
+                                                    onclick="toggleUserStatus('@user.Id', @user.IsActive.ToString().ToLower())"
+                                                    title="@(user.IsActive ? "Khóa tài khoản" : "Kích hoạt tài khoản")">
+                                                <i class="fas fa-@(user.IsActive ? "lock" : "unlock")"></i>
+                                            </button>
+                                            
+                                            @if (user.Email != User.Identity.Name)
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="deleteUser('@user.Id', '@user.FullName')" 
+                                                        title="Xóa tài khoản">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.CurrentPage - 1 })">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            }
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Users", new { page = i })">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.CurrentPage + 1 })">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5>Không có user nào</h5>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus(userId, currentStatus) {
+    const action = currentStatus ? 'khóa' : 'mở khóa';
+    if (confirm(`Bạn có chắc chắn muốn ${action} tài khoản này?`)) {
+        fetch('@Url.Action("ToggleUserStatus")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({ userId: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra');
+            }
+        });
+    }
+}
+
+function deleteUser(userId, userName) {
+    if (confirm(`Bạn có chắc chắn muốn xóa tài khoản "${userName}"? Hành động này không thể hoàn tác.`)) {
+        // Implementation for delete user
+        alert('Tính năng xóa user đang được phát triển');
+    }
+}
+</script>

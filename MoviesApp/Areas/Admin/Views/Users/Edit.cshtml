@@ -1,0 +1,100 @@
+@model EditUserViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa User";
+    ViewData["Breadcrumb"] = "<li class='breadcrumb-item'><a href='/Admin'>Dashboard</a></li><li class='breadcrumb-item'><a href='/Admin/Users'>Quản lý User</a></li><li class='breadcrumb-item active'>Chỉnh sửa</li>";
+}
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-user-edit me-2"></i>
+            Chỉnh sửa thông tin User
+        </h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input asp-for="Id" type="hidden" />
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái</label>
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label">
+                                Tài khoản hoạt động
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input asp-for="EmailConfirmed" class="form-check-input" />
+                            <label asp-for="EmailConfirmed" class="form-check-label">
+                                Email đã xác thực
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Roles</label>
+                <div class="row">
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="SelectedRoles" value="@role" 
+                                       id="role_@role" @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                                <label class="form-check-label" for="role_@role">
+                                    @role
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Quay lại
+                </a>
+                
+                <button type="submit" class="btn btn-admin-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

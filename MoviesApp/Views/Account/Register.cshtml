@@ -1,0 +1,107 @@
+@model MoviesApp.Models.RegisterDto
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Email *
+                            </label>
+                            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FullName" class="form-label">
+                                <i class="fas fa-user me-1"></i>Full Name *
+                            </label>
+                            <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Password *
+                            </label>
+                            <input asp-for="Password" class="form-control" type="password" placeholder="Enter password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <small class="form-text text-muted">Minimum 6 characters, include uppercase and digit</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Confirm Password *
+                            </label>
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Confirm password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DateOfBirth" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Date of Birth
+                            </label>
+                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Address" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>Address
+                            </label>
+                            <input asp-for="Address" class="form-control" placeholder="Enter your address (optional)" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-0">Already have an account?</p>
+                    <a asp-action="Login" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login Here
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-gift me-2"></i>Account Benefits:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Free User:</strong> Watch movies, rate and comment</li>
+                            <li><strong>Premium User:</strong> Access to exclusive content</li>
+                            <li><strong>Admin:</strong> Full system management</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

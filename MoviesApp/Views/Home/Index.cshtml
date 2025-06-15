@@ -2,7 +2,142 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section bg-primary text-white py-5 mb-5 rounded">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-film me-3"></i>Welcome to Movies App
+        </h1>
+        <p class="lead">Your ultimate destination for movie streaming with modern authentication and API access</p>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="mt-4">
+                <h5>Welcome back, @User.Identity.Name!</h5>
+                <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-light btn-lg me-3">
+                    <i class="fas fa-user-circle me-2"></i>View Profile
+                </a>
+                <a asp-controller="Phim" asp-action="Index" class="btn btn-light btn-lg">
+                    <i class="fas fa-film me-2"></i>Browse Movies
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="mt-4">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card h-100 shadow">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h5>Secure Authentication</h5>
+                <p class="text-muted">
+                    Advanced security with ASP.NET Identity, JWT tokens, and role-based access control.
+                </p>
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-right me-1"></i>Join Now
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 shadow">
+            <div class="card-body text-center">
+                <i class="fas fa-code fa-3x text-success mb-3"></i>
+                <h5>RESTful API</h5>
+                <p class="text-muted">
+                    Full-featured REST API with Swagger documentation for developers and third-party integrations.
+                </p>
+                <a href="/swagger" target="_blank" class="btn btn-outline-success">
+                    <i class="fas fa-external-link-alt me-1"></i>Explore API
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100 shadow">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x text-warning mb-3"></i>
+                <h5>Role Management</h5>
+                <p class="text-muted">
+                    Three-tier user system: Free Users, Premium Users, and Administrators with different access levels.
+                </p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Account" asp-action="ManageUsers" class="btn btn-outline-warning">
+                        <i class="fas fa-cogs me-1"></i>Manage Users
+                    </a>
+                }
+                else if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-warning">
+                        <i class="fas fa-user me-1"></i>View Profile
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-warning">
+                        <i class="fas fa-sign-in-alt me-1"></i>Login
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h4 class="text-center mb-4">
+                    <i class="fas fa-key me-2"></i>API Authentication Guide
+                </h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-step-forward me-2"></i>Getting Started:</h6>
+                        <ol>
+                            <li>Register an account or login</li>
+                            <li>Generate a JWT token from your profile</li>
+                            <li>Use the token in API requests</li>
+                            <li>Access protected endpoints based on your role</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle me-2"></i>User Roles & Permissions:</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-primary me-2">Free User</span>Basic movie access</li>
+                            <li><span class="badge bg-warning text-dark me-2">Premium User</span>Premium content access</li>
+                            <li><span class="badge bg-danger me-2">Admin</span>Full system management</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="fas fa-gift me-2"></i>Demo Account:</h6>
+                        <p class="mb-0">
+                            Try the admin features with: <strong>admin@moviesapp.com</strong> / <strong>Admin123!</strong>
+                        </p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,0 +1,192 @@
+@model List<MoviesApp.Controllers.UserViewModel>
+
+@{
+    ViewData["Title"] = "Manage Users";
+    var allRoles = new[] { "Admin", "Premium User", "Free User" };
+}
+
+<div class="card shadow">
+    <div class="card-header bg-danger text-white">
+        <h4 class="mb-0">
+            <i class="fas fa-users-cog me-2"></i>User Management
+        </h4>
+        <small>Manage user accounts and roles</small>
+    </div>
+    <div class="card-body">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-user me-1"></i>User</th>
+                        <th><i class="fas fa-shield-alt me-1"></i>Roles</th>
+                        <th><i class="fas fa-calendar me-1"></i>Created</th>
+                        <th><i class="fas fa-toggle-on me-1"></i>Status</th>
+                        <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>@user.FullName</strong>
+                                    <br>
+                                    <small class="text-muted">@user.Email</small>
+                                </div>
+                            </td>
+                            <td>
+                                @if (user.Roles.Any())
+                                {
+                                    @foreach (var role in user.Roles)
+                                    {
+                                        string badgeClass = role switch
+                                        {
+                                            "Admin" => "bg-danger",
+                                            "Premium User" => "bg-warning text-dark",
+                                            "Free User" => "bg-primary",
+                                            _ => "bg-secondary"
+                                        };
+                                        <span class="badge @badgeClass me-1">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No roles</span>
+                                }
+                            </td>
+                            <td>
+                                <small>@user.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            </td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" 
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-plus me-1"></i>Add Role
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var role in allRoles)
+                                        {
+                                            @if (!user.Roles.Contains(role))
+                                            {
+                                                <li>
+                                                    <form asp-action="AssignRole" method="post" class="d-inline">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <input type="hidden" name="role" value="@role" />
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-plus me-2"></i>@role
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                                
+                                @if (user.Roles.Any())
+                                {
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-danger dropdown-toggle" 
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-minus me-1"></i>Remove Role
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            @foreach (var role in user.Roles)
+                                            {
+                                                <li>
+                                                    <form asp-action="RemoveRole" method="post" class="d-inline">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <input type="hidden" name="role" value="@role" />
+                                                        <button type="submit" class="dropdown-item text-danger"
+                                                                onclick="return confirm('Are you sure you want to remove the @role role from @user.FullName?')">
+                                                            <i class="fas fa-minus me-2"></i>@role
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No users found</h5>
+                <p class="text-muted">There are no users registered in the system yet.</p>
+            </div>
+        }
+        
+        <hr>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-info">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-info-circle me-2"></i>Role Descriptions
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>Admin:</strong> Full system access and user management</li>
+                            <li><strong>Premium User:</strong> Access to premium content and features</li>
+                            <li><strong>Free User:</strong> Basic access to public content</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Management Tips
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li>Users can have multiple roles</li>
+                            <li>Be careful when removing Admin roles</li>
+                            <li>New users get "Free User" role by default</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a asp-action="Profile" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Profile
+            </a>
+        </div>
+    </div>
+</div>
