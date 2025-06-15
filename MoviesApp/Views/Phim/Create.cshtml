@@ -1,0 +1,155 @@
+@model MoviesApp.Models.Phim
+
+@{
+    ViewData["Title"] = "Thêm phim mới";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Thêm phim mới
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="MaPhim" class="form-label">Mã phim <span class="text-danger">*</span></label>
+                                    <input asp-for="MaPhim" class="form-control" placeholder="Nhập mã phim" />
+                                    <span asp-validation-for="MaPhim" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="TenPhim" class="form-label">Tên phim <span class="text-danger">*</span></label>
+                                    <input asp-for="TenPhim" class="form-control" placeholder="Nhập tên phim" />
+                                    <span asp-validation-for="TenPhim" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="MaQG" class="form-label">Quốc gia <span class="text-danger">*</span></label>                                    <select asp-for="MaQG" class="form-select">
+                                        <option value="">-- Chọn quốc gia --</option>
+                                        @if (ViewBag.QuocGias != null)
+                                        {
+                                            @foreach (var qg in ViewBag.QuocGias as List<MoviesApp.Models.QuocGia>)
+                                            {
+                                                <option value="@qg.MaQG">@qg.TenQG</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="MaQG" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="MaTL" class="form-label">Thể loại <span class="text-danger">*</span></label>                                    <select asp-for="MaTL" class="form-select">
+                                        <option value="">-- Chọn thể loại --</option>
+                                        @if (ViewBag.TheLoaiPhims != null)
+                                        {
+                                            @foreach (var tl in ViewBag.TheLoaiPhims as List<MoviesApp.Models.TheLoaiPhim>)
+                                            {
+                                                <option value="@tl.MaTL">@tl.TenTL</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="MaTL" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="MaDM" class="form-label">Danh mục <span class="text-danger">*</span></label>                                    <select asp-for="MaDM" class="form-select">
+                                        <option value="">-- Chọn danh mục --</option>
+                                        @if (ViewBag.DanhMucs != null)
+                                        {
+                                            @foreach (var dm in ViewBag.DanhMucs as List<MoviesApp.Models.DanhMuc>)
+                                            {
+                                                <option value="@dm.MaDM">@dm.TenDM</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="MaDM" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="MoTaPhim" class="form-label">Mô tả phim</label>
+                            <textarea asp-for="MoTaPhim" class="form-control" rows="4" placeholder="Nhập mô tả phim..."></textarea>
+                            <span asp-validation-for="MoTaPhim" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="AnhPhim" class="form-label">Đường dẫn ảnh phim</label>
+                            <input asp-for="AnhPhim" class="form-control" placeholder="Nhập URL ảnh phim" />
+                            <span asp-validation-for="AnhPhim" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group mb-3">
+                                    <label asp-for="SoTap" class="form-label">Số tập</label>
+                                    <input asp-for="SoTap" class="form-control" type="number" min="1" value="1" />
+                                    <span asp-validation-for="SoTap" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-3">
+                                    <label asp-for="NamPhatHanh" class="form-label">Năm phát hành</label>
+                                    <input asp-for="NamPhatHanh" class="form-control" type="number" min="1900" max="2030" />
+                                    <span asp-validation-for="NamPhatHanh" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ThoiLuongPhim" class="form-label">Thời lượng (phút)</label>
+                                    <input asp-for="ThoiLuongPhim" class="form-control" type="number" min="1" />
+                                    <span asp-validation-for="ThoiLuongPhim" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-3">
+                                    <label asp-for="TinhTrang" class="form-label">Tình trạng</label>
+                                    <select asp-for="TinhTrang" class="form-select">
+                                        <option value="">-- Chọn tình trạng --</option>
+                                        <option value="Hoàn thành">Hoàn thành</option>
+                                        <option value="Đang phát sóng">Đang phát sóng</option>
+                                        <option value="Sắp ra mắt">Sắp ra mắt</option>
+                                        <option value="Tạm dừng">Tạm dừng</option>
+                                    </select>
+                                    <span asp-validation-for="TinhTrang" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save me-1"></i>
+                                Lưu phim
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+}

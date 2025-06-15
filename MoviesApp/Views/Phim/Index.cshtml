@@ -1,0 +1,97 @@
+@model IEnumerable<MoviesApp.Models.Phim>
+
+@{
+    ViewData["Title"] = "Danh sách Phim";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">
+                    <i class="fas fa-film me-2"></i>
+                    Danh sách Phim
+                </h2>
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus me-1"></i>
+                    Thêm phim mới
+                </a>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                @if (!string.IsNullOrEmpty(item.AnhPhim))
+                                {
+                                    <img src="@item.AnhPhim" class="card-img-top" alt="@item.TenPhim" style="height: 300px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                }
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-truncate" title="@item.TenPhim">@item.TenPhim</h5>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <strong>Thể loại:</strong> @item.TheLoaiPhim?.TenTL<br>
+                                            <strong>Quốc gia:</strong> @item.QuocGia?.TenQG<br>
+                                            <strong>Danh mục:</strong> @item.DanhMuc?.TenDM<br>
+                                            <strong>Năm:</strong> @item.NamPhatHanh<br>
+                                            <strong>Số tập:</strong> @item.SoTap<br>
+                                            @if (item.ThongKePhim != null)                                            {
+                                                <strong>Lượt xem:</strong> @item.ThongKePhim.TongLuotXem.ToString("N0")<br>
+                                                <strong>Điểm:</strong> @item.ThongKePhim.DiemTrungBinh.ToString("0.0")<text>/10</text>
+                                            }
+                                        </small>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(item.MoTaPhim))
+                                    {
+                                        <p class="card-text flex-grow-1">
+                                            @(item.MoTaPhim.Length > 100 ? item.MoTaPhim.Substring(0, 100) + "..." : item.MoTaPhim)
+                                        </p>
+                                    }
+                                    
+                                    <div class="mt-auto">
+                                        <div class="btn-group w-100" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.MaPhim" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye me-1"></i>Chi tiết
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.MaPhim" class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-edit me-1"></i>Sửa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-film fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có phim nào</h4>
+                    <p class="text-muted">Hãy thêm phim đầu tiên của bạn!</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>
+                        Thêm phim mới
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+}
