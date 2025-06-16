@@ -7,9 +7,7 @@ namespace MoviesApp.Data
     {
         public WebMoviesDbContext(DbContextOptions<WebMoviesDbContext> options) : base(options)
         {
-        }
-
-        // DbSets
+        }        // DbSets
         public DbSet<NguoiDung> NguoiDungs { get; set; }
         public DbSet<QuocGia> QuocGias { get; set; }
         public DbSet<TheLoaiPhim> TheLoaiPhims { get; set; }
@@ -24,6 +22,13 @@ namespace MoviesApp.Data
         public DbSet<LichSuXem> LichSuXems { get; set; }
         public DbSet<PhimYeuThich> PhimYeuThichs { get; set; }
         public DbSet<DanhGia> DanhGias { get; set; }
+
+        // Compatibility properties (singular names)
+        public DbSet<Phim> Phim => Set<Phim>();
+        public DbSet<QuocGia> QuocGia => Set<QuocGia>();
+        public DbSet<TheLoaiPhim> TheLoaiPhim => Set<TheLoaiPhim>();
+        public DbSet<DanhMuc> DanhMuc => Set<DanhMuc>();
+        public DbSet<TapPhim> TapPhim => Set<TapPhim>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -277,7 +277,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("MaTap")
                         .HasDatabaseName("IX_BinhLuan_MaTap");
 
-                    b.ToTable("BinhLuan");
+                    b.ToTable("BinhLuan", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.DangKy", b =>
@@ -320,7 +320,7 @@ namespace MoviesApp.Migrations
 
                     b.HasIndex("MaND");
 
-                    b.ToTable("DangKy");
+                    b.ToTable("DangKy", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.DanhGia", b =>
@@ -364,7 +364,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("MaTap", "MaND")
                         .IsUnique();
 
-                    b.ToTable("DanhGia");
+                    b.ToTable("DanhGia", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.DanhMuc", b =>
@@ -384,7 +384,7 @@ namespace MoviesApp.Migrations
 
                     b.HasKey("MaDM");
 
-                    b.ToTable("DanhMuc");
+                    b.ToTable("DanhMuc", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.LichSuXem", b =>
@@ -424,7 +424,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("ThoiDiemXem")
                         .HasDatabaseName("IX_LichSuXem_ThoiDiemXem");
 
-                    b.ToTable("LichSuXem");
+                    b.ToTable("LichSuXem", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.LoaiNguoiDung", b =>
@@ -450,7 +450,7 @@ namespace MoviesApp.Migrations
 
                     b.HasKey("MaLoaiND");
 
-                    b.ToTable("LoaiNguoiDung");
+                    b.ToTable("LoaiNguoiDung", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.NguoiDung", b =>
@@ -489,7 +489,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("NguoiDung");
+                    b.ToTable("NguoiDung", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.Phim", b =>
@@ -555,7 +555,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("TenPhim")
                         .HasDatabaseName("IX_Phim_TenPhim");
 
-                    b.ToTable("Phim");
+                    b.ToTable("Phim", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.PhimYeuThich", b =>
@@ -589,7 +589,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("MaND", "MaPhim")
                         .IsUnique();
 
-                    b.ToTable("PhimYeuThich");
+                    b.ToTable("PhimYeuThich", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.QuocGia", b =>
@@ -613,7 +613,7 @@ namespace MoviesApp.Migrations
 
                     b.HasKey("MaQG");
 
-                    b.ToTable("QuocGia");
+                    b.ToTable("QuocGia", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.TapPhim", b =>
@@ -655,7 +655,7 @@ namespace MoviesApp.Migrations
                     b.HasIndex("MaPhim", "SoTapThuTu")
                         .IsUnique();
 
-                    b.ToTable("TapPhim");
+                    b.ToTable("TapPhim", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.TheLoaiPhim", b =>
@@ -675,7 +675,7 @@ namespace MoviesApp.Migrations
 
                     b.HasKey("MaTL");
 
-                    b.ToTable("TheLoaiPhim");
+                    b.ToTable("TheLoaiPhim", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.ThongKePhim", b =>
@@ -698,7 +698,7 @@ namespace MoviesApp.Migrations
 
                     b.HasKey("MaPhim");
 
-                    b.ToTable("ThongKePhim");
+                    b.ToTable("ThongKePhim", (string)null);
                 });
 
             modelBuilder.Entity("MoviesApp.Models.ThongKeTapPhim", b =>
@@ -715,7 +715,7 @@ namespace MoviesApp.Migrations
 
                     b.HasKey("MaTap");
 
-                    b.ToTable("ThongKeTapPhim");
+                    b.ToTable("ThongKeTapPhim", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

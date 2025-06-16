@@ -6,9 +6,9 @@ namespace MoviesApp.Models
     {
         public string? FullName { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public string? Address { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public string? Address { get; set; }        public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = true;
+        public DateTime? LastLoginTime { get; set; }
         
         // Navigation properties
         public virtual ICollection<BinhLuan> BinhLuans { get; set; } = new List<BinhLuan>();

@@ -16,10 +16,9 @@
             <div class="col-md-3">
                 <label class="form-label">Thể loại</label>
                 <select class="form-select" name="filterGenre">
-                    <option value="">Tất cả thể loại</option>
-                    @foreach (var genre in Model.Genres)
+                    <option value="">Tất cả thể loại</option>                    @foreach (var genre in Model.Genres)
                     {
-                        <option value="@genre.TheLoaiPhimId" selected="@(Model.FilterGenre == genre.TheLoaiPhimId)">
+                        <option value="@genre.TheLoaiPhimId" selected="@(Model.FilterGenre.ToString() == genre.TheLoaiPhimId)">
                             @genre.TenTheLoai
                         </option>
                     }
@@ -28,10 +27,9 @@
             <div class="col-md-3">
                 <label class="form-label">Quốc gia</label>
                 <select class="form-select" name="filterCountry">
-                    <option value="">Tất cả quốc gia</option>
-                    @foreach (var country in Model.Countries)
+                    <option value="">Tất cả quốc gia</option>                    @foreach (var country in Model.Countries)
                     {
-                        <option value="@country.QuocGiaId" selected="@(Model.FilterCountry == country.QuocGiaId)">
+                        <option value="@country.QuocGiaId" selected="@(Model.FilterCountry.ToString() == country.QuocGiaId)">
                             @country.TenQuocGia
                         </option>
                     }

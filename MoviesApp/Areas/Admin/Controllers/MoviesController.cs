@@ -41,18 +41,16 @@ namespace MoviesApp.Areas.Admin.Controllers
                 {
                     query = query.Where(p => p.TenPhim.Contains(search) || 
                                            p.MoTa.Contains(search));
-                }
-
-                // Genre filter
+                }                // Genre filter
                 if (filterGenre.HasValue && filterGenre.Value > 0)
                 {
-                    query = query.Where(p => p.TheLoaiPhimId == filterGenre.Value);
+                    query = query.Where(p => p.MaTL == filterGenre.Value.ToString());
                 }
 
                 // Country filter
                 if (filterCountry.HasValue && filterCountry.Value > 0)
                 {
-                    query = query.Where(p => p.QuocGiaId == filterCountry.Value);
+                    query = query.Where(p => p.MaQG == filterCountry.Value.ToString());
                 }
 
                 var totalMovies = await query.CountAsync();
@@ -95,16 +93,13 @@ namespace MoviesApp.Areas.Admin.Controllers
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách phim.";
                 return View(new MovieManagementViewModel());
             }
-        }
-
-        public async Task<IActionResult> Details(int id)
-        {
-            var movie = await _context.Phim
+        }        public async Task<IActionResult> Details(string id)
+        {            var movie = await _context.Phim
                 .Include(p => p.TheLoaiPhim)
                 .Include(p => p.QuocGia)
                 .Include(p => p.DanhMuc)
                 .Include(p => p.TapPhims)
-                .FirstOrDefaultAsync(p => p.PhimId == id);
+                .FirstOrDefaultAsync(p => p.MaPhim == id);
 
             if (movie == null)
             {
@@ -122,13 +117,12 @@ namespace MoviesApp.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
-            {
-                var movie = await _context.Phim
+            {                var movie = await _context.Phim
                     .Include(p => p.TapPhims)
-                    .FirstOrDefaultAsync(p => p.PhimId == id);
+                    .FirstOrDefaultAsync(p => p.MaPhim == id);
 
                 if (movie == null)
                 {

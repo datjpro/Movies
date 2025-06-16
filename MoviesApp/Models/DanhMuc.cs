@@ -12,10 +12,12 @@ namespace MoviesApp.Models
 
         [Required]
         [StringLength(100)]
-        public string TenDM { get; set; } = string.Empty;
-
-        [StringLength(500)]
+        public string TenDM { get; set; } = string.Empty;        [StringLength(500)]
         public string? MoTa { get; set; }
+
+        // Compatibility properties
+        [NotMapped]
+        public string TenDanhMuc => TenDM;
 
         // Navigation properties
         public virtual ICollection<Phim> Phims { get; set; } = new List<Phim>();

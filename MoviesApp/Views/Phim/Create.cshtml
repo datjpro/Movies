@@ -15,6 +15,36 @@
                     </h4>
                 </div>
                 <div class="card-body">
+                    <!-- OMDb Search Section -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-search me-2"></i>
+                                Tìm kiếm thông tin từ OMDb API
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" id="omdbSearch" class="form-control" placeholder="Nhập tên phim để tìm kiếm..." />
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" id="searchOMDb" class="btn btn-info">
+                                        <i class="fas fa-search me-1"></i>Tìm kiếm
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="omdbResults" class="mt-3" style="display: none;">
+                                <div class="alert alert-info">
+                                    <div id="movieInfo"></div>
+                                    <button type="button" id="fillForm" class="btn btn-success btn-sm mt-2">
+                                        <i class="fas fa-download me-1"></i>Điền vào form
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         
@@ -38,7 +68,8 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
-                                    <label asp-for="MaQG" class="form-label">Quốc gia <span class="text-danger">*</span></label>                                    <select asp-for="MaQG" class="form-select">
+                                    <label asp-for="MaQG" class="form-label">Quốc gia <span class="text-danger">*</span></label>
+                                    <select asp-for="MaQG" class="form-select">
                                         <option value="">-- Chọn quốc gia --</option>
                                         @if (ViewBag.QuocGias != null)
                                         {
@@ -53,7 +84,8 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
-                                    <label asp-for="MaTL" class="form-label">Thể loại <span class="text-danger">*</span></label>                                    <select asp-for="MaTL" class="form-select">
+                                    <label asp-for="MaTL" class="form-label">Thể loại <span class="text-danger">*</span></label>
+                                    <select asp-for="MaTL" class="form-select">
                                         <option value="">-- Chọn thể loại --</option>
                                         @if (ViewBag.TheLoaiPhims != null)
                                         {
@@ -68,7 +100,8 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
-                                    <label asp-for="MaDM" class="form-label">Danh mục <span class="text-danger">*</span></label>                                    <select asp-for="MaDM" class="form-select">
+                                    <label asp-for="MaDM" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                    <select asp-for="MaDM" class="form-select">
                                         <option value="">-- Chọn danh mục --</option>
                                         @if (ViewBag.DanhMucs != null)
                                         {
@@ -132,6 +165,22 @@
                             </div>
                         </div>
 
+                        <!-- Hidden fields for OMDb data -->
+                        <input type="hidden" asp-for="BienKich" />
+                        <input type="hidden" asp-for="DaoDien" />
+                        <input type="hidden" asp-for="DiemImdb" />
+                        <input type="hidden" asp-for="DiemMetascore" />
+                        <input type="hidden" asp-for="DienVien" />
+                        <input type="hidden" asp-for="GiaiThuong" />
+                        <input type="hidden" asp-for="ImdbId" />
+                        <input type="hidden" asp-for="LoaiPhim" />
+                        <input type="hidden" asp-for="LuotVoteImdb" />
+                        <input type="hidden" asp-for="NgayKhoiChieu" />
+                        <input type="hidden" asp-for="NgonNgu" />
+                        <input type="hidden" asp-for="QuocGiaSanXuat" />
+                        <input type="hidden" asp-for="TongSoMua" />
+                        <input type="hidden" asp-for="XepHang" />
+
                         <div class="form-group text-center">
                             <button type="submit" class="btn btn-success me-2">
                                 <i class="fas fa-save me-1"></i>
@@ -152,4 +201,231 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    
+    <script>
+        let omdbMovieData = null;
+
+        document.getElementById('searchOMDb').addEventListener('click', function() {
+            const searchTerm = document.getElementById('omdbSearch').value.trim();
+            if (!searchTerm) {
+                alert('Vui lòng nhập tên phim để tìm kiếm!');
+                return;
+            }
+
+            // Show loading
+            const button = this;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang tìm...';
+            button.disabled = true;
+
+            // Call OMDb API
+            const isImdbId = searchTerm.startsWith('tt') && searchTerm.length > 2;
+            const endpoint = isImdbId ? 
+                `/Phim/SearchOMDb?imdbId=${encodeURIComponent(searchTerm)}` :
+                `/Phim/SearchOMDb?query=${encodeURIComponent(searchTerm)}`;
+                
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.movie) {
+                        omdbMovieData = data.movie;
+                        displayMovieInfo(data.movie);
+                        document.getElementById('omdbResults').style.display = 'block';
+                    } else if (data.title && data.response !== "False") {
+                        // Direct OMDb response
+                        omdbMovieData = data;
+                        displayMovieInfo(data);
+                        document.getElementById('omdbResults').style.display = 'block';
+                    } else {
+                        alert(data.message || 'Không tìm thấy phim hoặc có lỗi xảy ra!');
+                        document.getElementById('omdbResults').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi khi tìm kiếm!');
+                })
+                .finally(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+        });
+
+        document.getElementById('fillForm').addEventListener('click', function() {
+            if (!omdbMovieData) return;
+
+            // Fill form fields - handle both response formats
+            document.getElementById('TenPhim').value = omdbMovieData.title || omdbMovieData.Title || '';
+            document.getElementById('MoTaPhim').value = omdbMovieData.plot || omdbMovieData.Plot || '';
+            document.getElementById('AnhPhim').value = omdbMovieData.poster || omdbMovieData.Poster || '';
+            
+            const year = omdbMovieData.year || omdbMovieData.Year;
+            if (year) {
+                document.getElementById('NamPhatHanh').value = parseInt(year);
+            }
+            
+            const runtime = omdbMovieData.runtime || omdbMovieData.Runtime;
+            if (runtime && runtime !== 'N/A') {
+                const runtimeValue = parseInt(runtime.replace(' min', ''));
+                if (!isNaN(runtimeValue)) {
+                    document.getElementById('ThoiLuongPhim').value = runtimeValue;
+                }
+            }
+
+            // Auto-select dropdowns based on OMDb data
+            const country = (omdbMovieData.country || omdbMovieData.Country || '').toLowerCase().trim();
+            const genre = (omdbMovieData.genre || omdbMovieData.Genre || '').toLowerCase().trim().split(',')[0].trim();
+            const type = (omdbMovieData.type || omdbMovieData.Type || '').toLowerCase();
+
+            console.log('OMDb data:', { country, genre, type });
+
+            // Set default values for dropdowns (you need to adjust these based on your actual data)
+            // For country
+            if (country.includes('united states') || country.includes('usa') || country.includes('us')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Mỹ');
+            } else if (country.includes('united kingdom') || country.includes('uk')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Anh');
+            } else if (country.includes('japan')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Nhật Bản');
+            } else if (country.includes('france')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Pháp');
+            } else if (country.includes('germany')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Đức');
+            } else if (country.includes('china')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Trung Quốc');
+            } else if (country.includes('south korea') || country.includes('korea')) {
+                setDropdownValue('MaQG', 'findValueByText', 'Hàn Quốc');
+            }
+
+            // For genre
+            if (genre.includes('action')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Hành động');
+            } else if (genre.includes('drama')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Chính kịch');
+            } else if (genre.includes('comedy')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Hài hước');
+            } else if (genre.includes('horror')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Kinh dị');
+            } else if (genre.includes('thriller')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Ly kỳ');
+            } else if (genre.includes('romance')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Lãng mạn');
+            } else if (genre.includes('sci-fi') || genre.includes('science fiction')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Khoa học viễn tưởng');
+            } else if (genre.includes('adventure')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Phiêu lưu');
+            } else if (genre.includes('animation')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Hoạt hình');
+            } else if (genre.includes('documentary')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Tài liệu');
+            } else if (genre.includes('fantasy')) {
+                setDropdownValue('MaTL', 'findValueByText', 'Viễn tưởng');
+            }
+
+            // For category (based on type)
+            if (type === 'series') {
+                setDropdownValue('MaDM', 'findValueByText', 'Phim bộ');
+            } else {
+                setDropdownValue('MaDM', 'findValueByText', 'Phim lẻ');
+            }
+
+            // Fill hidden fields for OMDb data
+            document.querySelector('input[name="BienKich"]').value = omdbMovieData.writer || omdbMovieData.Writer || '';
+            document.querySelector('input[name="DaoDien"]').value = omdbMovieData.director || omdbMovieData.Director || '';
+            
+            const imdbRating = omdbMovieData.imdbRating || omdbMovieData.imdbrating;
+            if (imdbRating && imdbRating !== 'N/A') {
+                document.querySelector('input[name="DiemImdb"]').value = parseFloat(imdbRating);
+            }
+            
+            const metascore = omdbMovieData.metascore || omdbMovieData.Metascore;
+            if (metascore && metascore !== 'N/A') {
+                document.querySelector('input[name="DiemMetascore"]').value = parseInt(metascore);
+            }
+            
+            document.querySelector('input[name="DienVien"]').value = omdbMovieData.actors || omdbMovieData.Actors || '';
+            document.querySelector('input[name="GiaiThuong"]').value = omdbMovieData.awards || omdbMovieData.Awards || '';
+            document.querySelector('input[name="ImdbId"]').value = omdbMovieData.imdbId || omdbMovieData.imdbID || '';
+            document.querySelector('input[name="LoaiPhim"]').value = omdbMovieData.type || omdbMovieData.Type || '';
+            
+            const imdbVotes = omdbMovieData.imdbVotes || omdbMovieData.imdbvotes;
+            if (imdbVotes && imdbVotes !== 'N/A') {
+                const votes = parseInt(imdbVotes.replace(/,/g, ''));
+                if (!isNaN(votes)) {
+                    document.querySelector('input[name="LuotVoteImdb"]').value = votes;
+                }
+            }
+            
+            const released = omdbMovieData.released || omdbMovieData.Released;
+            if (released && released !== 'N/A') {
+                const releaseDate = new Date(released);
+                if (!isNaN(releaseDate.getTime())) {
+                    document.querySelector('input[name="NgayKhoiChieu"]').value = releaseDate.toISOString().split('T')[0];
+                }
+            }
+            
+            document.querySelector('input[name="NgonNgu"]').value = omdbMovieData.language || omdbMovieData.Language || '';
+            document.querySelector('input[name="QuocGiaSanXuat"]').value = omdbMovieData.country || omdbMovieData.Country || '';
+            document.querySelector('input[name="XepHang"]').value = omdbMovieData.rated || omdbMovieData.Rated || '';
+            
+            const boxOffice = omdbMovieData.boxOffice || omdbMovieData.BoxOffice;
+            if (boxOffice && boxOffice !== 'N/A') {
+                const boxOfficeValue = parseInt(boxOffice.replace(/[$,]/g, ''));
+                if (!isNaN(boxOfficeValue)) {
+                    document.querySelector('input[name="TongSoMua"]').value = boxOfficeValue;
+                }
+            }
+
+            // Hide the results section
+            document.getElementById('omdbResults').style.display = 'none';
+            document.getElementById('omdbSearch').value = '';
+            
+            alert('Đã điền thông tin vào form!');
+        });
+
+        // Helper function to set dropdown value by finding text match
+        function setDropdownValue(dropdownId, mode, searchText) {
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+
+            for (let i = 0; i < dropdown.options.length; i++) {
+                const option = dropdown.options[i];
+                if (option.text.toLowerCase().includes(searchText.toLowerCase())) {
+                    dropdown.selectedIndex = i;
+                    console.log(`Set ${dropdownId} to: ${option.text} (${option.value})`);
+                    return;
+                }
+            }
+            console.log(`No match found for ${dropdownId} with text: ${searchText}`);
+        }
+
+        // Allow enter key to search
+        document.getElementById('omdbSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchOMDb').click();
+            }
+        });
+
+        function displayMovieInfo(movie) {
+            const movieInfo = document.getElementById('movieInfo');
+            movieInfo.innerHTML = `
+                <div class="row">
+                    <div class="col-md-3">
+                        <img src="${(movie.poster && movie.poster !== 'N/A') ? movie.poster : '/images/no-poster.jpg'}" 
+                             class="img-fluid rounded" alt="Poster" style="max-height: 200px;">
+                    </div>
+                    <div class="col-md-9">
+                        <h6><strong>${movie.title || movie.Title}</strong> (${movie.year || movie.Year})</h6>
+                        <p><strong>Đạo diễn:</strong> ${movie.director || movie.Director || 'N/A'}</p>
+                        <p><strong>Diễn viên:</strong> ${movie.actors || movie.Actors || 'N/A'}</p>
+                        <p><strong>Thể loại:</strong> ${movie.genre || movie.Genre || 'N/A'}</p>
+                        <p><strong>Thời lượng:</strong> ${movie.runtime || movie.Runtime || 'N/A'}</p>
+                        <p><strong>IMDb Rating:</strong> ${movie.imdbRating || movie.imdbRating || 'N/A'}/10</p>
+                        <p><strong>Tóm tắt:</strong> ${movie.plot || movie.Plot || 'N/A'}</p>
+                        <p><strong>IMDb ID:</strong> ${movie.imdbID || movie.imdbID || 'N/A'}</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
 }

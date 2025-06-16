@@ -159,6 +159,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 
+// Add HttpClient and OMDb service
+builder.Services.AddHttpClient<OMDbService>();
+builder.Services.Configure<OMDbSettings>(builder.Configuration.GetSection("OMDbSettings"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
