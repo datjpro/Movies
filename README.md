@@ -5,6 +5,7 @@ A comprehensive web application for managing movies with OMDb API integration, b
 ## ✨ Features
 
 ### 🔍 OMDb API Integration
+
 - **Automatic Movie Data Fetching**: Search movies by title or IMDb ID
 - **Auto-fill Forms**: Automatically populate movie information from OMDb database
 - **Rich Movie Data**: Director, cast, plot, ratings, awards, runtime, and more
@@ -13,12 +14,14 @@ A comprehensive web application for managing movies with OMDb API integration, b
 - **Data Validation**: Ensures data integrity when importing from OMDb
 
 ### 📱 Complete CRUD Operations
+
 - **Create Movies**: Add new movies with comprehensive information
 - **View Details**: Beautiful detailed view with all movie information
 - **Edit Movies**: Full editing capabilities with validation
 - **Delete Movies**: Safe deletion with confirmation dialog
 
 ### 🎨 Modern UI/UX
+
 - **Responsive Design**: Works perfectly on desktop, tablet, and mobile
 - **Bootstrap 5**: Modern and clean interface
 - **Movie Cards**: Beautiful grid layout with posters and information
@@ -26,6 +29,7 @@ A comprehensive web application for managing movies with OMDb API integration, b
 - **Modal Dialogs**: Smooth user interactions
 
 ### 🗄️ Database Features
+
 - **Entity Framework Core**: Robust data management
 - **SQL Server**: Reliable database backend
 - **Foreign Key Relationships**: Proper data relationships
@@ -50,13 +54,16 @@ A comprehensive web application for managing movies with OMDb API integration, b
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/datjpro/Movies.git
 cd Movies/MoviesApp
 ```
 
 ### 2. Configure Database
+
 Update `appsettings.json` with your SQL Server connection string:
+
 ```json
 {
   "ConnectionStrings": {
@@ -66,7 +73,9 @@ Update `appsettings.json` with your SQL Server connection string:
 ```
 
 ### 3. Configure OMDb API
+
 Get your free API key from [OMDb API](http://www.omdbapi.com/) and update `appsettings.json`:
+
 ```json
 {
   "OMDbSettings": {
@@ -77,11 +86,13 @@ Get your free API key from [OMDb API](http://www.omdbapi.com/) and update `appse
 ```
 
 ### 4. Run Database Migrations
+
 ```bash
 dotnet ef database update
 ```
 
 ### 5. Run the Application
+
 ```bash
 dotnet run
 ```
@@ -91,6 +102,7 @@ Navigate to `https://localhost:5001` or `http://localhost:5000`
 ## 📖 Usage
 
 ### Adding a New Movie
+
 1. Click "Thêm phim mới" (Add New Movie)
 2. Use OMDb search to find movie information
 3. Click "Điền vào form" to auto-fill movie details
@@ -98,12 +110,14 @@ Navigate to `https://localhost:5001` or `http://localhost:5000`
 5. Save the movie
 
 ### Managing Movies
+
 - **View All Movies**: Browse the movie gallery on the homepage
 - **Movie Details**: Click "Chi tiết" to see comprehensive movie information
 - **Edit Movie**: Click "Sửa" to modify movie information
 - **Delete Movie**: Click "Xóa" and confirm deletion
 
 ### OMDb Integration
+
 - Search by movie title: `Inception`, `The Dark Knight`
 - Search by IMDb ID: `tt1375666`, `tt0468569`
 - Automatic mapping of countries and genres
@@ -112,6 +126,7 @@ Navigate to `https://localhost:5001` or `http://localhost:5000`
 ## 🔧 Configuration
 
 ### Database Settings
+
 ```json
 {
   "ConnectionStrings": {
@@ -121,6 +136,7 @@ Navigate to `https://localhost:5001` or `http://localhost:5000`
 ```
 
 ### OMDb API Settings
+
 ```json
 {
   "OMDbSettings": {
@@ -131,6 +147,7 @@ Navigate to `https://localhost:5001` or `http://localhost:5000`
 ```
 
 ### JWT Settings (for API)
+
 ```json
 {
   "JwtSettings": {
@@ -170,18 +187,21 @@ MoviesApp/
 ## 🌟 Key Features Showcase
 
 ### OMDb Integration
+
 - Real-time movie search and data fetching
 - Automatic form population with IMDb data
 - Smart mapping of genres and countries
 - Support for both movie titles and IMDb IDs
 
 ### Movie Management
+
 - Complete CRUD operations with validation
 - Rich movie details with posters and metadata
 - Responsive design for all screen sizes
 - User-friendly confirmation dialogs
 
 ### Data Model
+
 - Comprehensive movie information storage
 - Support for series and individual movies
 - IMDb ratings and metadata integration
@@ -209,6 +229,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 If you have any questions or need help, please:
+
 - Open an issue on GitHub
 - Check the documentation in the `docs/` folder
 - Review the OMDb integration guide
@@ -225,6 +246,7 @@ If you have any questions or need help, please:
 ## 📋 Recent Updates (v1.0)
 
 ### ✅ Latest Features
+
 - **Complete OMDb Integration**: Full integration with OMDb API for automatic movie data fetching
 - **CRUD Operations**: Complete Create, Read, Update, Delete functionality for movies
 - **Smart Form Auto-fill**: Intelligent form population with automatic dropdown selection
@@ -234,6 +256,7 @@ If you have any questions or need help, please:
 - **Error Handling**: Robust error handling and logging for better debugging
 
 ### 🔧 Technical Improvements
+
 - Enhanced `Phim` model with comprehensive movie metadata
 - Optimized OMDbService with proper error handling and logging
 - Improved JavaScript for real-time form interactions
