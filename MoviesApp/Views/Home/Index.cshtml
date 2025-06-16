@@ -1,143 +1,234 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Movies App";
 }
 
-<div class="hero-section bg-primary text-white py-5 mb-5 rounded">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bold">
-            <i class="fas fa-film me-3"></i>Welcome to Movies App
-        </h1>
-        <p class="lead">Your ultimate destination for movie streaming with modern authentication and API access</p>
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <div class="mt-4">
-                <h5>Welcome back, @User.Identity.Name!</h5>
-                <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-light btn-lg me-3">
-                    <i class="fas fa-user-circle me-2"></i>View Profile
-                </a>
-                <a asp-controller="Phim" asp-action="Index" class="btn btn-light btn-lg">
-                    <i class="fas fa-film me-2"></i>Browse Movies
-                </a>
-            </div>
-        }
-        else
-        {
-            <div class="mt-4">
-                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg me-3">
-                    <i class="fas fa-user-plus me-2"></i>Get Started
-                </a>
-                <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg">
-                    <i class="fas fa-sign-in-alt me-2"></i>Login
-                </a>
-            </div>
-        }
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <div class="card h-100 shadow">
-            <div class="card-body text-center">
-                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
-                <h5>Secure Authentication</h5>
-                <p class="text-muted">
-                    Advanced security with ASP.NET Identity, JWT tokens, and role-based access control.
-                </p>
-                @if (User.Identity?.IsAuthenticated != true)
-                {
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-right me-1"></i>Join Now
-                    </a>
-                }
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card h-100 shadow">
-            <div class="card-body text-center">
-                <i class="fas fa-code fa-3x text-success mb-3"></i>
-                <h5>RESTful API</h5>
-                <p class="text-muted">
-                    Full-featured REST API with Swagger documentation for developers and third-party integrations.
-                </p>
-                <a href="/swagger" target="_blank" class="btn btn-outline-success">
-                    <i class="fas fa-external-link-alt me-1"></i>Explore API
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card h-100 shadow">
-            <div class="card-body text-center">
-                <i class="fas fa-users fa-3x text-warning mb-3"></i>
-                <h5>Role Management</h5>
-                <p class="text-muted">
-                    Three-tier user system: Free Users, Premium Users, and Administrators with different access levels.
-                </p>
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Account" asp-action="ManageUsers" class="btn btn-outline-warning">
-                        <i class="fas fa-cogs me-1"></i>Manage Users
-                    </a>
-                }
-                else if (User.Identity?.IsAuthenticated == true)
-                {
-                    <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-warning">
-                        <i class="fas fa-user me-1"></i>View Profile
-                    </a>
-                }
-                else
-                {
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-warning">
-                        <i class="fas fa-sign-in-alt me-1"></i>Login
-                    </a>
-                }
+<!-- Top Movies Carousel -->
+<div class="container-fluid mb-4">
+    <h5 class="mb-3"><i class="fas fa-star text-warning me-2"></i>Phim Nổi Bật</h5>
+    <div class="row" id="topMoviesCarousel">
+        <!-- Sẽ được load bằng JavaScript từ API -->
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-5">
-    <div class="col-12">
-        <div class="card bg-light">
-            <div class="card-body">
-                <h4 class="text-center mb-4">
-                    <i class="fas fa-key me-2"></i>API Authentication Guide
-                </h4>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6><i class="fas fa-step-forward me-2"></i>Getting Started:</h6>
-                        <ol>
-                            <li>Register an account or login</li>
-                            <li>Generate a JWT token from your profile</li>
-                            <li>Use the token in API requests</li>
-                            <li>Access protected endpoints based on your role</li>
-                        </ol>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <h6><i class="fas fa-info-circle me-2"></i>User Roles & Permissions:</h6>
-                        <ul class="list-unstyled">
-                            <li><span class="badge bg-primary me-2">Free User</span>Basic movie access</li>
-                            <li><span class="badge bg-warning text-dark me-2">Premium User</span>Premium content access</li>
-                            <li><span class="badge bg-danger me-2">Admin</span>Full system management</li>
-                        </ul>
+<!-- Featured Movie -->
+<div class="container mb-5">
+    <div class="card bg-dark text-white" id="featuredMovie">
+        <div class="card-body text-center">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Đang tải phim đặc biệt...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Movies List -->
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5><i class="fas fa-film me-2"></i>Tất Cả Phim</h5>
+        <a asp-controller="Phim" asp-action="Index" class="btn btn-outline-primary btn-sm">
+            Xem Thêm
+        </a>
+    </div>
+    
+    <div class="row" id="allMoviesList">
+        <!-- Sẽ được load bằng JavaScript từ API -->
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải danh sách phim...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.movie-card-small {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.movie-card-small:hover {
+    transform: scale(1.05);
+}
+
+.movie-poster {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.movie-poster-small {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.featured-movie-bg {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 400px;
+    position: relative;
+}
+
+.featured-movie-overlay {
+    background: linear-gradient(45deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4));
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0.375rem;
+}
+</style>
+
+<!-- JavaScript để load data từ API -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadTopMovies();
+    loadFeaturedMovie();
+    loadAllMovies();
+});
+
+// Load 8 phim nổi bật
+async function loadTopMovies() {
+    try {
+        const response = await fetch('/api/PhimApi?pageSize=8');
+        const data = await response.json();
+        
+        let html = '';
+        data.forEach(movie => {
+            html += `
+                <div class="col-lg-1-5 col-md-3 col-sm-4 col-6 mb-3">
+                    <div class="movie-card-small" onclick="viewMovie('${movie.maPhim}')">
+                        <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
+                             alt="${movie.tenPhim}" 
+                             class="movie-poster-small">
+                        <div class="mt-2">
+                            <small class="text-truncate d-block" title="${movie.tenPhim}">
+                                ${movie.tenPhim}
+                            </small>
+                            <small class="text-muted">${movie.namPhatHanh || 'N/A'}</small>
+                        </div>
                     </div>
                 </div>
-                
-                @if (User.Identity?.IsAuthenticated != true)
-                {
-                    <div class="alert alert-info mt-3">
-                        <h6><i class="fas fa-gift me-2"></i>Demo Account:</h6>
-                        <p class="mb-0">
-                            Try the admin features with: <strong>admin@moviesapp.com</strong> / <strong>Admin123!</strong>
-                        </p>
+            `;
+        });
+        
+        document.getElementById('topMoviesCarousel').innerHTML = html;
+    } catch (error) {
+        console.error('Error loading top movies:', error);
+        document.getElementById('topMoviesCarousel').innerHTML = 
+            '<div class="col-12 text-center text-danger">Không thể tải phim nổi bật</div>';
+    }
+}
+
+// Load 1 phim đặc biệt (phim đầu tiên)
+async function loadFeaturedMovie() {
+    try {
+        const response = await fetch('/api/PhimApi?pageSize=1');
+        const data = await response.json();
+        
+        if (data.length > 0) {
+            const movie = data[0];
+            const html = `
+                <div class="featured-movie-bg" style="background-image: url('${movie.anhPhim || '/images/no-image.jpg'}')">
+                    <div class="featured-movie-overlay"></div>
+                    <div class="card-body position-relative" style="z-index: 2;">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="card-title">${movie.tenPhim}</h2>
+                                <p class="card-text">${movie.moTaPhim || 'Chưa có mô tả'}</p>
+                                <div class="mb-3">
+                                    <span class="badge bg-warning text-dark me-2">
+                                        <i class="fas fa-star me-1"></i>${movie.diemImdb || 'N/A'}
+                                    </span>
+                                    <span class="badge bg-info me-2">${movie.namPhatHanh || 'N/A'}</span>
+                                    <span class="badge bg-secondary">${movie.thoiLuongPhim || 'N/A'} phút</span>
+                                </div>
+                                <button class="btn btn-primary btn-lg me-3" onclick="viewMovie('${movie.maPhim}')">
+                                    <i class="fas fa-play me-2"></i>Xem Chi Tiết
+                                </button>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <button class="btn btn-outline-light" onclick="addToWatchlist('${movie.maPhim}')">
+                                        <i class="fas fa-heart me-2"></i>Yêu Thích
+                                    </button>
+                                }
+                            </div>
+                        </div>
                     </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
+                </div>
+            `;
+            
+            document.getElementById('featuredMovie').innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Error loading featured movie:', error);
+        document.getElementById('featuredMovie').innerHTML = 
+            '<div class="card-body text-center text-danger">Không thể tải phim đặc biệt</div>';
+    }
+}
+
+// Load tất cả phim (giới hạn 12 phim)
+async function loadAllMovies() {
+    try {
+        const response = await fetch('/api/PhimApi?pageSize=12');
+        const data = await response.json();
+        
+        let html = '';
+        data.forEach(movie => {
+            html += `
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                    <div class="card h-100 movie-card-small" onclick="viewMovie('${movie.maPhim}')">
+                        <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
+                             alt="${movie.tenPhim}" 
+                             class="card-img-top movie-poster">
+                        <div class="card-body p-2">
+                            <h6 class="card-title text-truncate" title="${movie.tenPhim}">
+                                ${movie.tenPhim}
+                            </h6>
+                            <small class="text-muted">${movie.namPhatHanh || 'N/A'}</small>
+                            ${movie.diemImdb ? `<div class="mt-1"><small class="text-warning"><i class="fas fa-star"></i> ${movie.diemImdb}</small></div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        document.getElementById('allMoviesList').innerHTML = html;
+    } catch (error) {
+        console.error('Error loading all movies:', error);
+        document.getElementById('allMoviesList').innerHTML = 
+            '<div class="col-12 text-center text-danger">Không thể tải danh sách phim</div>';
+    }
+}
+
+// Function để xem chi tiết phim
+function viewMovie(movieId) {
+    window.location.href = `/Phim/Details/${movieId}`;
+}
+
+// Function để thêm vào danh sách yêu thích
+function addToWatchlist(movieId) {
+    // TODO: Implement add to watchlist functionality
+    alert('Tính năng yêu thích sẽ được cập nhật sau!');
+}
+</script>
+
+<!-- Custom CSS cho responsive -->
+<style>
+@@media (min-width: 992px) {
+    .col-lg-1-5 {
+        flex: 0 0 auto;
+        width: 12.5%;
+    }
+}
+</style>

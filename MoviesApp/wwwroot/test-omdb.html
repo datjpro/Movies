@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test OMDb API</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h4>Test OMDb API</h4>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="movieTitle" class="form-label"
+                  >Tên phim (tiếng Anh):</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="movieTitle"
+                  placeholder="Ví dụ: The Matrix, Avengers, Inception"
+                />
+              </div>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="testOMDbAPI()"
+              >
+                Test API
+              </button>
+
+              <div id="result" class="mt-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function testOMDbAPI() {
+        const title = document.getElementById("movieTitle").value.trim();
+        if (!title) {
+          alert("Vui lòng nhập tên phim!");
+          return;
+        }
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML =
+          '<div class="text-center"><div class="spinner-border" role="status"></div><p>Đang tải...</p></div>';
+
+        try {
+          // Test trực tiếp với OMDb API
+          const apiKey = "5d4d8ff1";
+          const url = `http://www.omdbapi.com/?t=${encodeURIComponent(
+            title
+          )}&apikey=${apiKey}`;
+
+          console.log("URL:", url);
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          console.log("OMDb Response:", data);
+
+          if (data.Response === "True") {
+            displayResult(data);
+          } else {
+            resultDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h5>Không tìm thấy phim!</h5>
+                            <p>Lỗi: ${data.Error}</p>
+                            <p>Hãy thử tên phim khác hoặc kiểm tra chính tả.</p>
+                        </div>
+                    `;
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>Lỗi kết nối API!</h5>
+                        <p>Chi tiết: ${error.message}</p>
+                        <p>Có thể do CORS policy hoặc mạng. Kiểm tra Console để biết thêm chi tiết.</p>
+                    </div>
+                `;
+        }
+      }
+
+      function displayResult(movie) {
+        const resultDiv = document.getElementById("result");
+
+        resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>✅ Tìm thấy phim!</h5>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5>${movie.Title} (${movie.Year})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img src="${
+                                  movie.Poster !== "N/A"
+                                    ? movie.Poster
+                                    : "https://via.placeholder.com/200x300?text=No+Poster"
+                                }" 
+                                     class="img-fluid rounded" alt="Poster" style="max-height: 300px;">
+                            </div>
+                            <div class="col-md-9">
+                                <h6><strong>Thông tin cơ bản:</strong></h6>
+                                <p><strong>Tên:</strong> ${
+                                  movie.Title || "N/A"
+                                }</p>
+                                <p><strong>Năm:</strong> ${
+                                  movie.Year || "N/A"
+                                }</p>
+                                <p><strong>Xếp hạng:</strong> ${
+                                  movie.Rated || "N/A"
+                                }</p>
+                                <p><strong>Ngày phát hành:</strong> ${
+                                  movie.Released || "N/A"
+                                }</p>
+                                <p><strong>Thời lượng:</strong> ${
+                                  movie.Runtime || "N/A"
+                                }</p>
+                                <p><strong>Thể loại:</strong> ${
+                                  movie.Genre || "N/A"
+                                }</p>
+                                
+                                <h6><strong>Đoàn làm phim:</strong></h6>
+                                <p><strong>Đạo diễn:</strong> ${
+                                  movie.Director || "N/A"
+                                }</p>
+                                <p><strong>Biên kịch:</strong> ${
+                                  movie.Writer || "N/A"
+                                }</p>
+                                <p><strong>Diễn viên:</strong> ${
+                                  movie.Actors || "N/A"
+                                }</p>
+                                
+                                <h6><strong>Sản xuất:</strong></h6>
+                                <p><strong>Ngôn ngữ:</strong> ${
+                                  movie.Language || "N/A"
+                                }</p>
+                                <p><strong>Quốc gia:</strong> ${
+                                  movie.Country || "N/A"
+                                }</p>
+                                <p><strong>Giải thưởng:</strong> ${
+                                  movie.Awards || "N/A"
+                                }</p>
+                                
+                                <h6><strong>Đánh giá:</strong></h6>
+                                <p><strong>IMDb Rating:</strong> ${
+                                  movie.imdbRating || "N/A"
+                                }/10</p>
+                                <p><strong>Metascore:</strong> ${
+                                  movie.Metascore || "N/A"
+                                }/100</p>
+                                <p><strong>IMDb Votes:</strong> ${
+                                  movie.imdbVotes || "N/A"
+                                }</p>
+                                
+                                <h6><strong>Khác:</strong></h6>
+                                <p><strong>IMDb ID:</strong> ${
+                                  movie.imdbID || "N/A"
+                                }</p>
+                                <p><strong>Loại:</strong> ${
+                                  movie.Type || "N/A"
+                                }</p>
+                                <p><strong>Box Office:</strong> ${
+                                  movie.BoxOffice || "N/A"
+                                }</p>
+                                
+                                <h6><strong>Tóm tắt:</strong></h6>
+                                <p>${movie.Plot || "N/A"}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6>Raw JSON Response</h6>
+                    </div>
+                    <div class="card-body">
+                        <pre><code>${JSON.stringify(
+                          movie,
+                          null,
+                          2
+                        )}</code></pre>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Allow Enter key to search
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("movieTitle")
+          .addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              testOMDbAPI();
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

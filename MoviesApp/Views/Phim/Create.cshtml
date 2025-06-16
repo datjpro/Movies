@@ -4,6 +4,21 @@
     ViewData["Title"] = "Thêm phim mới";
 }
 
+@if (!User.IsInRole("Admin"))
+{
+    <div class="container mt-4">
+        <div class="alert alert-danger text-center">
+            <h4><i class="fas fa-exclamation-triangle me-2"></i>Truy cập bị từ chối</h4>
+            <p>Bạn không có quyền thêm phim mới. Chỉ Admin mới có thể thực hiện chức năng này.</p>
+            <a asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách phim
+            </a>
+        </div>
+    </div>
+}
+else
+{
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -327,9 +342,7 @@
                 setDropdownValue('MaDM', 'findValueByText', 'Phim bộ');
             } else {
                 setDropdownValue('MaDM', 'findValueByText', 'Phim lẻ');
-            }
-
-            // Fill hidden fields for OMDb data
+            }            // Fill hidden fields for OMDb data
             document.querySelector('input[name="BienKich"]').value = omdbMovieData.writer || omdbMovieData.Writer || '';
             document.querySelector('input[name="DaoDien"]').value = omdbMovieData.director || omdbMovieData.Director || '';
             
@@ -368,6 +381,14 @@
             document.querySelector('input[name="QuocGiaSanXuat"]').value = omdbMovieData.country || omdbMovieData.Country || '';
             document.querySelector('input[name="XepHang"]').value = omdbMovieData.rated || omdbMovieData.Rated || '';
             
+            // Xử lý số tập (cho series)
+            const totalSeasons = omdbMovieData.totalSeasons;
+            if (totalSeasons && totalSeasons !== 'N/A') {
+                // Ước tính số tập từ số mùa (giả sử mỗi mùa có 10-12 tập)
+                const estimatedEpisodes = parseInt(totalSeasons) * 12;
+                document.querySelector('input[name="SoTap"]').value = estimatedEpisodes;
+            }
+            
             const boxOffice = omdbMovieData.boxOffice || omdbMovieData.BoxOffice;
             if (boxOffice && boxOffice !== 'N/A') {
                 const boxOfficeValue = parseInt(boxOffice.replace(/[$,]/g, ''));
@@ -404,9 +425,7 @@
             if (e.key === 'Enter') {
                 document.getElementById('searchOMDb').click();
             }
-        });
-
-        function displayMovieInfo(movie) {
+        });        function displayMovieInfo(movie) {
             const movieInfo = document.getElementById('movieInfo');
             movieInfo.innerHTML = `
                 <div class="row">
@@ -416,16 +435,25 @@
                     </div>
                     <div class="col-md-9">
                         <h6><strong>${movie.title || movie.Title}</strong> (${movie.year || movie.Year})</h6>
+                        <p><strong>Loại:</strong> ${movie.type || movie.Type || 'N/A'} ${movie.totalSeasons ? '- ' + movie.totalSeasons + ' mùa' : ''}</p>
                         <p><strong>Đạo diễn:</strong> ${movie.director || movie.Director || 'N/A'}</p>
+                        <p><strong>Biên kịch:</strong> ${movie.writer || movie.Writer || 'N/A'}</p>
                         <p><strong>Diễn viên:</strong> ${movie.actors || movie.Actors || 'N/A'}</p>
                         <p><strong>Thể loại:</strong> ${movie.genre || movie.Genre || 'N/A'}</p>
                         <p><strong>Thời lượng:</strong> ${movie.runtime || movie.Runtime || 'N/A'}</p>
-                        <p><strong>IMDb Rating:</strong> ${movie.imdbRating || movie.imdbRating || 'N/A'}/10</p>
+                        <p><strong>Ngày phát hành:</strong> ${movie.released || movie.Released || 'N/A'}</p>
+                        <p><strong>Ngôn ngữ:</strong> ${movie.language || movie.Language || 'N/A'}</p>
+                        <p><strong>Quốc gia:</strong> ${movie.country || movie.Country || 'N/A'}</p>
+                        <p><strong>Xếp hạng:</strong> ${movie.rated || movie.Rated || 'N/A'}</p>
+                        <p><strong>IMDb Rating:</strong> ${movie.imdbRating || 'N/A'}/10 (${movie.imdbVotes || 'N/A'} votes)</p>
+                        <p><strong>Metascore:</strong> ${movie.metascore || movie.Metascore || 'N/A'}</p>
+                        <p><strong>Giải thưởng:</strong> ${movie.awards || movie.Awards || 'N/A'}</p>
                         <p><strong>Tóm tắt:</strong> ${movie.plot || movie.Plot || 'N/A'}</p>
-                        <p><strong>IMDb ID:</strong> ${movie.imdbID || movie.imdbID || 'N/A'}</p>
+                        <p><strong>IMDb ID:</strong> ${movie.imdbID || 'N/A'}</p>
                     </div>
                 </div>
             `;
         }
     </script>
+}
 }

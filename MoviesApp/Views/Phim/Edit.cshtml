@@ -4,6 +4,21 @@
     ViewData["Title"] = "Chỉnh sửa phim";
 }
 
+@if (!User.IsInRole("Admin") && !User.IsInRole("User"))
+{
+    <div class="container mt-4">
+        <div class="alert alert-danger text-center">
+            <h4><i class="fas fa-exclamation-triangle me-2"></i>Truy cập bị từ chối</h4>
+            <p>Bạn không có quyền chỉnh sửa phim. Chỉ Admin và User mới có thể thực hiện chức năng này.</p>
+            <a asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách phim
+            </a>
+        </div>
+    </div>
+}
+else
+{
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -320,10 +335,9 @@
                     }
                 });
             }
-        });
-
-        function isValidImageUrl(url) {
+        });        function isValidImageUrl(url) {
             return /\.(jpg|jpeg|png|gif|bmp|webp)(\?|$)/i.test(url) || url.includes('imdb') || url.includes('tmdb');
         }
     </script>
+}
 }

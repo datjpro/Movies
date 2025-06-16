@@ -2,49 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>@ViewData["Title"] - Movie Streaming App</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>@ViewData["Title"] - CCFilm</title>
+    <script type="importmap"></script>    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MoviesApp.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-film me-2"></i>Movie App
+            <div class="container-fluid">                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home me-2"></i>CCFilm
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">                    <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home me-1"></i>Trang chủ
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Phim" asp-action="Index">
                                 <i class="fas fa-film me-1"></i>Phim
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Phim" asp-action="OMDbIntegration">
-                                <i class="fas fa-database me-1"></i>OMDb Integration
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-list me-1"></i>Danh mục
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-fire me-2"></i>Phim hot</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-star me-2"></i>Phim lẻ</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-tv me-2"></i>Phim bộ</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-play-circle me-2"></i>Phim chiếu rạp</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="/swagger" target="_blank">
-                                <i class="fas fa-code me-1"></i>API Docs
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe me-1"></i>Quốc gia
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Việt Nam</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Hàn Quốc</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Nhật Bản</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Trung Quốc</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Âu Mỹ</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">
-                                <i class="fas fa-shield-alt me-1"></i>Bảo mật
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-theater-masks me-1"></i>Thể loại
                             </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-laugh me-2"></i>Hài hước</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-fist-raised me-2"></i>Hành động</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-heart me-2"></i>Tình cảm</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-ghost me-2"></i>Kinh dị</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-magic me-2"></i>Khoa học viễn tưởng</a></li>
+                            </ul>
                         </li>
-                    </ul>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/swagger" target="_blank">
+                                    <i class="fas fa-code me-1"></i>API Docs
+                                </a>
+                            </li>
+                        }                    </ul>
+                    
+                    <!-- Search Box -->
+                    <div class="d-flex me-3">
+                        <div class="input-group" style="width: 300px;">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm phim..." aria-label="Search">
+                            <button class="btn btn-outline-light" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
                     
                     <!-- Authentication Menu -->
                     <ul class="navbar-nav">
@@ -114,7 +145,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    &copy; 2025 - Movie Streaming App - Tất cả quyền được bảo lưu
+                    &copy; 2025 - CCFilm - Tất cả quyền được bảo lưu
                 </div>
                 <div class="col-md-6 text-end">
                     <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Chính sách bảo mật</a>

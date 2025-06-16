@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MoviesApp.Controllers
 {
@@ -17,15 +18,65 @@ namespace MoviesApp.Controllers
             _omdbService = omdbService;
         }
 
-        // GET: Phim
-        public async Task<IActionResult> Index()
+        // GET: Phim - Công khai cho tất cả users
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 12, string search = "", string quocGia = "", string theLoai = "", string danhMuc = "")
         {
-            var phims = await _context.Phims
+            var query = _context.Phims
                 .Include(p => p.QuocGia)
                 .Include(p => p.TheLoaiPhim)
                 .Include(p => p.DanhMuc)
                 .Include(p => p.ThongKePhim)
+                .AsQueryable();
+
+            // Tìm kiếm theo tên phim
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.TenPhim.Contains(search));
+            }
+
+            // Lọc theo quốc gia
+            if (!string.IsNullOrEmpty(quocGia))
+            {
+                query = query.Where(p => p.MaQG == quocGia);
+            }
+
+            // Lọc theo thể loại
+            if (!string.IsNullOrEmpty(theLoai))
+            {
+                query = query.Where(p => p.MaTL == theLoai);
+            }
+
+            // Lọc theo danh mục
+            if (!string.IsNullOrEmpty(danhMuc))
+            {
+                query = query.Where(p => p.MaDM == danhMuc);
+            }
+
+            // Phân trang
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            
+            var phims = await query
+                .OrderByDescending(p => p.NgayTao)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            // Dữ liệu cho dropdown filters
+            ViewBag.QuocGias = await _context.QuocGias.ToListAsync();
+            ViewBag.TheLoaiPhims = await _context.TheLoaiPhims.ToListAsync();
+            ViewBag.DanhMucs = await _context.DanhMucs.ToListAsync();
+
+            // Thông tin phân trang
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.Search = search;
+            ViewBag.QuocGia = quocGia;
+            ViewBag.TheLoai = theLoai;
+            ViewBag.DanhMuc = danhMuc;
+
             return View(phims);
         }
 
@@ -51,18 +102,18 @@ namespace MoviesApp.Controllers
             }
 
             return View(phim);
-        }
-
-        // GET: Phim/Create
+        }        // GET: Phim/Create - Chỉ cho phép Admin
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewBag.QuocGias = _context.QuocGias.ToList();
             ViewBag.TheLoaiPhims = _context.TheLoaiPhims.ToList();
             ViewBag.DanhMucs = _context.DanhMucs.ToList();
             return View();
-        }        // POST: Phim/Create
+        }        // POST: Phim/Create - Chỉ cho phép Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("MaPhim,MaQG,MaTL,MaDM,TenPhim,MoTaPhim,AnhPhim,SoTap,TinhTrang,NamPhatHanh,ThoiLuongPhim,BienKich,DaoDien,DiemImdb,DiemMetascore,DienVien,GiaiThuong,ImdbId,LoaiPhim,LuotVoteImdb,NgayKhoiChieu,NgonNgu,QuocGiaSanXuat,TongSoMua,XepHang")] Phim phim)
         {
             // Remove navigation properties from ModelState validation
@@ -90,10 +141,9 @@ namespace MoviesApp.Controllers
             ViewBag.TheLoaiPhims = _context.TheLoaiPhims.ToList();
             ViewBag.DanhMucs = _context.DanhMucs.ToList();
             return View(phim);
-        }
-
-        // GET: Phim/SearchOMDb
+        }        // GET: Phim/SearchOMDb - Chỉ cho phép Admin
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SearchOMDb(string query, string imdbId)
         {
             if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(imdbId))
@@ -152,9 +202,8 @@ namespace MoviesApp.Controllers
             {
                 return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
-        }
-
-        // GET: Phim/Edit/5
+        }        // GET: Phim/Edit/5 - Chỉ cho phép Admin và User
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -172,11 +221,10 @@ namespace MoviesApp.Controllers
             ViewBag.TheLoaiPhims = _context.TheLoaiPhims.ToList();
             ViewBag.DanhMucs = _context.DanhMucs.ToList();
             return View(phim);
-        }
-
-        // POST: Phim/Edit/5
+        }        // POST: Phim/Edit/5 - Chỉ cho phép Admin và User
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(string id, [Bind("MaPhim,MaQG,MaTL,MaDM,TenPhim,MoTaPhim,AnhPhim,SoTap,TinhTrang,NamPhatHanh,ThoiLuongPhim,BienKich,DaoDien,DiemImdb,DiemMetascore,DienVien,GiaiThuong,ImdbId,LoaiPhim,LuotVoteImdb,NgayKhoiChieu,NgonNgu,QuocGiaSanXuat,TongSoMua,XepHang,NgayTao")] Phim phim)
         {
             if (id != phim.MaPhim)
@@ -216,9 +264,8 @@ namespace MoviesApp.Controllers
             ViewBag.TheLoaiPhims = _context.TheLoaiPhims.ToList();
             ViewBag.DanhMucs = _context.DanhMucs.ToList();
             return View(phim);
-        }
-
-        // GET: Phim/Delete/5
+        }        // GET: Phim/Delete/5 - Chỉ cho phép Admin
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -239,11 +286,10 @@ namespace MoviesApp.Controllers
             }
 
             return View(phim);
-        }
-
-        // POST: Phim/Delete/5
+        }        // POST: Phim/Delete/5 - Chỉ cho phép Admin
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             if (string.IsNullOrEmpty(id))

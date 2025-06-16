@@ -18,12 +18,9 @@ namespace MoviesApp.Controllers.Api
         {
             _context = context;
             _logger = logger;
-        }
-
-        // GET: api/PhimApi
+        }        // GET: api/PhimApi
         [HttpGet]
-        [Authorize(Policy = "AllUsers")]
-        public async Task<ActionResult<IEnumerable<Phim>>> GetPhims()
+        public async Task<ActionResult<IEnumerable<object>>> GetPhims(int pageSize = 20)
         {
             try
             {
@@ -31,6 +28,26 @@ namespace MoviesApp.Controllers.Api
                     .Include(p => p.TheLoaiPhim)
                     .Include(p => p.QuocGia)
                     .Include(p => p.DanhMuc)
+                    .Take(pageSize)
+                    .Select(p => new {
+                        p.MaPhim,
+                        p.TenPhim,
+                        p.AnhPhim,
+                        p.MoTaPhim,
+                        p.NamPhatHanh,
+                        p.ThoiLuongPhim,
+                        p.DiemImdb,
+                        p.DaoDien,
+                        p.DienVien,
+                        p.BienKich,
+                        p.LoaiPhim,
+                        p.NgonNgu,
+                        p.QuocGiaSanXuat,
+                        p.XepHang,
+                        TheLoai = p.TheLoaiPhim != null ? p.TheLoaiPhim.TenTL : "",
+                        QuocGia = p.QuocGia != null ? p.QuocGia.TenQG : "",
+                        DanhMuc = p.DanhMuc != null ? p.DanhMuc.TenDM : ""
+                    })
                     .ToListAsync();
                 
                 return Ok(phims);

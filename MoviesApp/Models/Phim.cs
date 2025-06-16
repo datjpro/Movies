@@ -39,13 +39,11 @@ namespace MoviesApp.Models
 
         public int? NamPhatHanh { get; set; }        public int? ThoiLuongPhim { get; set; } // Tính bằng phút
 
-        public DateTime NgayTao { get; set; } = DateTime.Now;
-
-        // Thêm các trường mới từ OMDb API
-        [StringLength(255)]
+        public DateTime NgayTao { get; set; } = DateTime.Now;        // Các thuộc tính OMDb
+        [StringLength(500)]
         public string? BienKich { get; set; }
 
-        [StringLength(255)]
+        [StringLength(500)]
         public string? DaoDien { get; set; }
 
         [Column(TypeName = "decimal(3,1)")]
@@ -53,10 +51,10 @@ namespace MoviesApp.Models
 
         public int? DiemMetascore { get; set; }
 
-        [Column(TypeName = "ntext")]
+        [StringLength(1000)]
         public string? DienVien { get; set; }
 
-        [Column(TypeName = "ntext")]
+        [StringLength(500)]
         public string? GiaiThuong { get; set; }
 
         [StringLength(20)]
@@ -75,12 +73,10 @@ namespace MoviesApp.Models
         [StringLength(100)]
         public string? QuocGiaSanXuat { get; set; }
 
-        public int? TongSoMua { get; set; }        [StringLength(20)]
-        public string? XepHang { get; set; }        // Trailer URL from YouTube
-        [StringLength(255)]
-        public string? TrailerUrl { get; set; }
+        public int? TongSoMua { get; set; }
 
-        // Compatibility properties
+        [StringLength(20)]
+        public string? XepHang { get; set; }        // Compatibility properties
         [NotMapped]
         public string PhimId => MaPhim;
         
