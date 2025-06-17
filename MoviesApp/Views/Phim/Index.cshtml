@@ -12,343 +12,620 @@
     var danhMuc = ViewBag.DanhMuc ?? "";
 }
 
-<div class="container mt-4">
-    <!-- Header và nút thêm phim -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-primary">
-                    <i class="fas fa-film me-2"></i>
-                    Danh sách Phim
-                </h2>
+@section Scripts {
+    <script>
+        // Load movies from API
+        async function loadMoviesFromAPI(pageSize = 50) {
+            try {
+                const response = await fetch(`/api/PhimApi?pageSize=${pageSize}`);
+                if (response.ok) {
+                    const movies = await response.json();
+                    updateMoviesGrid(movies);
+                }
+            } catch (error) {
+                console.error('Error loading movies from API:', error);
+            }
+        }
+
+        function updateMoviesGrid(movies) {
+            const moviesGrid = document.getElementById('movies-grid');
+            if (!moviesGrid || !movies || movies.length === 0) return;
+
+            let html = '';            movies.forEach(movie => {
+                html += `
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                        <div class="movie-card" onclick="window.location.href='/Phim/Details/${movie.maPhim}'" style="cursor: pointer;">
+                            <div class="movie-poster-wrapper">
+                                <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
+                                     alt="${movie.tenPhim}" 
+                                     class="movie-poster"
+                                     onerror="this.src='/images/no-image.jpg'">
+                                <div class="movie-overlay">
+                                    <div class="overlay-content">
+                                        ${movie.diemImdb ? `<div class="rating"><i class="fas fa-star"></i> ${movie.diemImdb.toFixed(1)}</div>` : ''}
+                                        <div class="action-buttons">
+                                            <div class="btn btn-primary btn-sm">
+                                                <i class="fas fa-play"></i> Xem
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h6 class="movie-title" title="${movie.tenPhim}">${movie.tenPhim}</h6>
+                                <div class="movie-meta">
+                                    <span class="year">${movie.namPhatHanh || ''}</span>
+                                    ${movie.thoiLuongPhim ? `<span class="duration">${movie.thoiLuongPhim} phút</span>` : ''}
+                                </div>
+                                <div class="movie-genre">
+                                    ${movie.theLoai ? `<span class="badge bg-secondary">${movie.theLoai}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Only update if we have new content
+            if (html) {
+                moviesGrid.innerHTML = html;
+            }
+        }
+
+        // Load movies when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load additional movies from API if current page has few movies
+            const currentMoviesCount = document.querySelectorAll('#movies-grid .movie-card').length;
+            if (currentMoviesCount < 12) {
+                loadMoviesFromAPI(50);
+            }
+        });
+    </script>
+}
+
+<!-- Header Section -->
+<div class="hero-section bg-gradient text-white py-4 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-0">
+                    <i class="fas fa-film me-3"></i>Khám Phá Điện Ảnh
+                </h1>
+                <p class="lead mb-0">Bộ sưu tập phim đa dạng với @totalItems bộ phim</p>
+            </div>
+            <div class="col-md-4 text-end">
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-action="Create" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i>
-                        Thêm phim mới
+                    <a asp-action="Create" class="btn btn-light btn-lg">
+                        <i class="fas fa-plus me-2"></i>Thêm Phim
                     </a>
                 }
             </div>
         </div>
-    </div>    <!-- Bộ lọc và tìm kiếm -->
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search & Filter Section -->
     <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card filter-card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>
-                        Lọc và tìm kiếm
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" asp-action="Index">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="search" class="form-label">Tìm kiếm phim</label>
-                                <input type="text" class="form-control" id="search" name="search" value="@search" placeholder="Nhập tên phim...">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="quocGia" class="form-label">Quốc gia</label>
-                                <select class="form-select" id="quocGia" name="quocGia">
-                                    <option value="">Tất cả quốc gia</option>
-                                    @if (ViewBag.QuocGias != null)
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="get" asp-action="Index" class="search-form">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-search me-1"></i>Tìm kiếm
+                                </label>
+                                <input type="text" class="form-control form-control-lg" name="search" 
+                                       value="@search" placeholder="Nhập tên phim...">
+                            </div>                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Quốc gia</label>
+                                <select class="form-select" name="quocGia">
+                                    <option value="">Tất cả</option>
+                                    @if (ViewBag.QuocGiaList != null)
                                     {
-                                        @foreach (var qg in ViewBag.QuocGias)
+                                        @foreach (var qg in ViewBag.QuocGiaList as IEnumerable<SelectListItem>)
                                         {
-                                            <option value="@qg.MaQG" selected="@(quocGia == qg.MaQG)">@qg.TenQG</option>
+                                            <option value="@qg.Value" selected="@(qg.Value == quocGia)">@qg.Text</option>
                                         }
                                     }
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label for="theLoai" class="form-label">Thể loại</label>
-                                <select class="form-select" id="theLoai" name="theLoai">
-                                    <option value="">Tất cả thể loại</option>
-                                    @if (ViewBag.TheLoaiPhims != null)
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Thể loại</label>
+                                <select class="form-select" name="theLoai">
+                                    <option value="">Tất cả</option>
+                                    @if (ViewBag.TheLoaiList != null)
                                     {
-                                        @foreach (var tl in ViewBag.TheLoaiPhims)
+                                        @foreach (var tl in ViewBag.TheLoaiList as IEnumerable<SelectListItem>)
                                         {
-                                            <option value="@tl.MaTL" selected="@(theLoai == tl.MaTL)">@tl.TenTL</option>
+                                            <option value="@tl.Value" selected="@(tl.Value == theLoai)">@tl.Text</option>
                                         }
                                     }
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label for="danhMuc" class="form-label">Danh mục</label>
-                                <select class="form-select" id="danhMuc" name="danhMuc">
-                                    <option value="">Tất cả danh mục</option>
-                                    @if (ViewBag.DanhMucs != null)
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Danh mục</label>
+                                <select class="form-select" name="danhMuc">
+                                    <option value="">Tất cả</option>
+                                    @if (ViewBag.DanhMucList != null)
                                     {
-                                        @foreach (var dm in ViewBag.DanhMucs)
+                                        @foreach (var dm in ViewBag.DanhMucList as IEnumerable<SelectListItem>)
                                         {
-                                            <option value="@dm.MaDM" selected="@(danhMuc == dm.MaDM)">@dm.TenDM</option>
+                                            <option value="@dm.Value" selected="@(dm.Value == danhMuc)">@dm.Text</option>
                                         }
                                     }
                                 </select>
                             </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-search me-1"></i>
-                                    Tìm kiếm
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-search me-1"></i>Lọc
                                 </button>
-                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-1"></i>
-                                    Xóa bộ lọc
-                                </a>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>    <!-- Thông tin phân trang -->
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <div class="search-info d-flex justify-content-between align-items-center">
-                <div class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Hiển thị <strong>@(((currentPage - 1) * pageSize) + 1)</strong> - <strong>@(Math.Min(currentPage * pageSize, totalItems))</strong> trong tổng số <strong>@totalItems</strong> phim
-                    @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(quocGia) || !string.IsNullOrEmpty(theLoai) || !string.IsNullOrEmpty(danhMuc))
-                    {
-                        <span class="badge bg-primary ms-2">Đã lọc</span>
-                    }
-                </div>
-                <div class="text-muted">
-                    <i class="fas fa-bookmark me-1"></i>
-                    Trang <strong>@currentPage</strong> / <strong>@totalPages</strong>
-                </div>
-            </div>
-        </div>
-    </div><!-- Danh sách phim -->
-    <div class="row">
-        <div class="col-md-12">
-            @if (Model.Any())
+    </div>    <!-- Movies Grid -->
+    <div class="row g-4 mb-5" id="movies-grid">        @if (Model != null && Model.Any())
+        {
+            @foreach (var phim in Model)
             {
-                <div class="row">                    @foreach (var item in Model)
-                    {
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100 shadow-sm movie-card">
-                                @if (!string.IsNullOrEmpty(item.AnhPhim))
-                                {
-                                    <img src="@item.AnhPhim" class="card-img-top" alt="@item.TenPhim" style="height: 300px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
-                                        <i class="fas fa-image fa-3x text-muted"></i>
-                                    </div>
-                                }
-                                
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title text-truncate" title="@item.TenPhim">@item.TenPhim</h5>
-                                    
-                                    <div class="mb-2">
-                                        <small class="text-muted">
-                                            <strong>Thể loại:</strong> @item.TheLoaiPhim?.TenTL<br>
-                                            <strong>Quốc gia:</strong> @item.QuocGia?.TenQG<br>
-                                            <strong>Danh mục:</strong> @item.DanhMuc?.TenDM<br>
-                                            <strong>Năm:</strong> @item.NamPhatHanh<br>
-                                            <strong>Số tập:</strong> @item.SoTap<br>
-                                            @if (item.ThongKePhim != null)
-                                            {
-                                                <strong>Lượt xem:</strong> @item.ThongKePhim.TongLuotXem.ToString("N0")<br>
-                                                <strong>Điểm:</strong> @item.ThongKePhim.DiemTrungBinh.ToString("0.0")<text>/10</text>
-                                            }
-                                        </small>
-                                    </div>
-                                    
-                                    @if (!string.IsNullOrEmpty(item.MoTaPhim))
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                    <div class="movie-card" onclick="window.location.href='@Url.Action("Details", "Phim", new { id = phim.MaPhim })'" style="cursor: pointer;">
+                        <div class="movie-poster-wrapper">
+                            <img src="@(phim.AnhPhim ?? "/images/no-image.jpg")" 
+                                 alt="@phim.TenPhim" 
+                                 class="movie-poster"
+                                 onerror="this.src='/images/no-image.jpg'">
+                            <div class="movie-overlay">
+                                <div class="overlay-content">
+                                    @if (phim.DiemImdb.HasValue)
                                     {
-                                        <p class="card-text flex-grow-1">
-                                            @(item.MoTaPhim.Length > 100 ? item.MoTaPhim.Substring(0, 100) + "..." : item.MoTaPhim)
-                                        </p>
+                                        <div class="rating">
+                                            <i class="fas fa-star"></i>
+                                            @phim.DiemImdb.Value.ToString("F1")
+                                        </div>
                                     }
-                                    
-                                    <div class="mt-auto">
-                                        <div class="btn-group w-100 btn-group-actions" role="group">
-                                            <a asp-action="Details" asp-route-id="@item.MaPhim" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye me-1"></i>Chi tiết
-                                            </a>
-                                            @if (User.IsInRole("Admin") || User.IsInRole("User"))
-                                            {
-                                                <a asp-action="Edit" asp-route-id="@item.MaPhim" class="btn btn-outline-warning btn-sm">
-                                                    <i class="fas fa-edit me-1"></i>Sửa
-                                                </a>
-                                            }
-                                            @if (User.IsInRole("Admin"))
-                                            {
-                                                <a asp-action="Delete" asp-route-id="@item.MaPhim" class="btn btn-outline-danger btn-sm">
-                                                    <i class="fas fa-trash me-1"></i>Xóa
-                                                </a>
-                                            }
+                                    <div class="action-buttons">
+                                        <div class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play"></i> Xem
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>                        <div class="movie-info">
+                            <h6 class="movie-title" title="@phim.TenPhim">@phim.TenPhim</h6>
+                            <div class="movie-meta">
+                                <span class="year">@(phim.NamPhatHanh ?? 0)</span>
+                                @if (phim.ThoiLuongPhim.HasValue)
+                                {
+                                    <span class="duration">@phim.ThoiLuongPhim phút</span>
+                                }
+                            </div>
+                            <div class="movie-genre-actions">
+                                @if (phim.TheLoaiPhim != null)
+                                {
+                                    <span class="badge bg-secondary">@phim.TheLoaiPhim.TenTL</span>
+                                }
+                                
+                                @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                                {
+                                    <div class="admin-actions mt-2">
+                                        <a asp-action="Edit" asp-route-id="@phim.MaPhim" 
+                                           class="btn btn-warning btn-sm me-1" onclick="event.stopPropagation();">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@phim.MaPhim" 
+                                               class="btn btn-danger btn-sm" onclick="event.stopPropagation();">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                                }
+                            </div>
                         </div>
-                    }
+                    </div>
                 </div>
             }
-            else
-            {
+        }
+        else
+        {
+            <div class="col-12">
                 <div class="text-center py-5">
-                    <i class="fas fa-film fa-4x text-muted mb-3"></i>
-                    <h4 class="text-muted">Không tìm thấy phim nào</h4>
-                    <p class="text-muted">
-                        @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(quocGia) || !string.IsNullOrEmpty(theLoai) || !string.IsNullOrEmpty(danhMuc))
-                        {
-                            <span>Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm!</span>
-                        }
-                        else
-                        {
-                            <span>Hãy thêm phim đầu tiên của bạn!</span>
-                        }
-                    </p>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a asp-action="Create" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i>
-                            Thêm phim mới
-                        </a>
-                    }
+                    <div class="loading-spinner mb-3" id="loading-spinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                    <div id="no-movies-message" style="display: none;">
+                        <i class="fas fa-film fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Không tìm thấy phim nào</h4>
+                        <p class="text-muted">Hãy thử thay đổi tiêu chí tìm kiếm</p>
+                    </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 
-    <!-- Phân trang -->
+    <!-- Pagination -->
     @if (totalPages > 1)
     {
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <nav aria-label="Phân trang danh sách phim">
-                    <ul class="pagination justify-content-center">
-                        <!-- Nút Previous -->
-                        @if (currentPage > 1)
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Phân trang">
+                    <ul class="pagination justify-content-center pagination-lg">
+                        <!-- Previous Button -->
+                        <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, pageSize = pageSize, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
                         {
-                            <li class="page-item">
-                                <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })" aria-label="Trang trước">
-                                    <span aria-hidden="true">&laquo;</span>
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = pageSize, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })">
+                                    @i
                                 </a>
                             </li>
                         }
-                        else
-                        {
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-label="Trang trước">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </span>
-                            </li>
-                        }
 
-                        <!-- Hiển thị các trang -->
-                        @{
-                            int startPage = Math.Max(1, currentPage - 2);
-                            int endPage = Math.Min(totalPages, currentPage + 2);
-                            
-                            // Hiển thị trang đầu nếu cần
-                            if (startPage > 1)
-                            {
-                                <li class="page-item">
-                                    <a class="page-link" href="@Url.Action("Index", new { page = 1, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })">1</a>
-                                </li>
-                                if (startPage > 2)
-                                {
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                }
-                            }
-                            
-                            // Hiển thị các trang trong khoảng
-                            for (int i = startPage; i <= endPage; i++)
-                            {
-                                if (i == currentPage)
-                                {
-                                    <li class="page-item active">
-                                        <span class="page-link">@i</span>
-                                    </li>
-                                }
-                                else
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" href="@Url.Action("Index", new { page = i, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })">@i</a>
-                                    </li>
-                                }
-                            }
-                            
-                            // Hiển thị trang cuối nếu cần
-                            if (endPage < totalPages)
-                            {
-                                if (endPage < totalPages - 1)
-                                {
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                }
-                                <li class="page-item">
-                                    <a class="page-link" href="@Url.Action("Index", new { page = totalPages, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })">@totalPages</a>
-                                </li>
-                            }
-                        }
-
-                        <!-- Nút Next -->
-                        @if (currentPage < totalPages)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })" aria-label="Trang sau">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-label="Trang sau">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </span>
-                            </li>
-                        }
+                        <!-- Next Button -->
+                        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, pageSize = pageSize, search = search, quocGia = quocGia, theLoai = theLoai, danhMuc = danhMuc })">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
+                
+                <!-- Pagination Info -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Hiển thị @((currentPage - 1) * pageSize + 1) - @(Math.Min(currentPage * pageSize, totalItems)) 
+                        trong tổng số @totalItems phim
+                    </small>
+                </div>
             </div>
         </div>
     }
 </div>
 
-@section Scripts {
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-    <script>
-        // Smooth scroll khi click pagination
-        document.querySelectorAll('.pagination .page-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Add loading spinner to clicked link
-                const spinner = document.createElement('span');
-                spinner.className = 'loading-spinner ms-1';
-                this.appendChild(spinner);
-            });
-        });
-
-        // Auto submit form khi thay đổi filter
-        document.querySelectorAll('#quocGia, #theLoai, #danhMuc').forEach(select => {
-            select.addEventListener('change', function() {
-                // Optional: Auto submit form when filter changes
-                // this.form.submit();
-            });
-        });
-
-        // Enter key support for search
-        document.getElementById('search').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                this.form.submit();
-            }
-        });
-
-        // Scroll to top after page change
-        if (window.location.search.includes('page=')) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    </script>
+<!-- Custom CSS -->
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    margin: 0 15px;
+    position: relative;
+    overflow: hidden;
 }
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.15"/><circle cx="10" cy="90" r="0.5" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+.movie-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    height: 100%;
+    position: relative;
+}
+
+.movie-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.movie-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+}
+
+.movie-card:hover::before {
+    opacity: 1;
+}
+
+.movie-poster-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px 20px 0 0;
+}
+
+.movie-poster {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    filter: brightness(0.9);
+}
+
+.movie-card:hover .movie-poster {
+    transform: scale(1.15);
+    filter: brightness(1.1);
+}
+
+.movie-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    display: flex;
+    align-items: end;
+    padding: 20px;
+    z-index: 2;
+}
+
+.movie-card:hover .movie-overlay {
+    opacity: 1;
+}
+
+.overlay-content {
+    width: 100%;
+}
+
+.rating {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons .btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.action-buttons .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.action-buttons .btn-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.action-buttons .btn-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+}
+
+.action-buttons .btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.movie-info {
+    padding: 20px;
+    background: linear-gradient(to bottom, white 0%, #f8f9ff 100%);
+}
+
+.movie-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.6em;
+    line-height: 1.3;
+    color: #2d3748;
+}
+
+.movie-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.movie-genre .badge {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+    color: #4a5568 !important;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.search-form {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 20px;
+    padding: 2rem;
+}
+
+.search-form .form-control,
+.search-form .form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-form .form-control:focus,
+.search-form .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.search-form .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.search-form .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.pagination {
+    margin-top: 3rem;
+}
+
+.pagination .page-link {
+    border: none;
+    border-radius: 50%;
+    margin: 0 5px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.pagination .page-link:hover {
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.loading-spinner {
+    animation: pulse 2s infinite;
+}
+
+@@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .hero-section .display-5 {
+        font-size: 1.8rem;
+    }
+    
+    .hero-section .lead {
+        font-size: 1rem;
+    }
+    
+    .movie-poster {
+        height: 280px;
+    }
+    
+    .search-form {
+        padding: 1.5rem;
+    }
+    
+    .search-form .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .movie-card:hover {
+        transform: translateY(-10px) scale(1.01);
+    }
+}
+
+@@media (max-width: 576px) {
+    .movie-poster {
+        height: 250px;
+    }
+    
+    .hero-section {
+        margin: 0 10px;
+        border-radius: 15px;
+    }
+    
+    .pagination .page-link {
+        width: 40px;
+        height: 40px;
+        margin: 0 2px;
+    }
+}
+
+/* Dark mode support */
+@@media (prefers-color-scheme: dark) {
+    .movie-info {
+        background: linear-gradient(to bottom, #2d3748 0%, #1a202c 100%);
+    }
+    
+    .movie-title {
+        color: #e2e8f0;
+    }
+    
+    .search-form {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    }
+    
+    .search-form .form-control,
+    .search-form .form-select {
+        background: #4a5568;
+        border-color: #718096;
+        color: #e2e8f0;
+    }
+}
+</style>

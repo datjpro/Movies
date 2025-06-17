@@ -144,10 +144,69 @@
             background: var(--admin-secondary);
             border-color: var(--admin-secondary);
             color: white;
+        }        .table-hover tbody tr:hover {
+            background-color: rgba(52, 73, 94, 0.05);
         }
 
-        .table-hover tbody tr:hover {
-            background-color: rgba(52, 73, 94, 0.05);
+        /* Admin Pagination Styles */
+        .pagination {
+            --bs-pagination-border-color: rgba(52, 73, 94, 0.2);
+            --bs-pagination-border-radius: 12px;
+            gap: 0.5rem;
+        }
+
+        .pagination .page-item {
+            --bs-pagination-border-radius: 12px;
+        }
+
+        .pagination .page-link {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(52, 73, 94, 0.2);
+            color: var(--admin-primary);
+            border-radius: 12px !important;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination .page-link:hover {
+            background: linear-gradient(135deg, var(--admin-accent), #5dade2);
+            color: white;
+            border-color: var(--admin-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+            border-color: var(--admin-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background: rgba(248, 249, 250, 0.5);
+            color: #6c757d;
+            border-color: rgba(52, 73, 94, 0.1);
+            cursor: not-allowed;
+        }
+
+        .pagination .page-link i {
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Pagination */
+        @@media (max-width: 768px) {
+            .pagination {
+                gap: 0.25rem;
+            }
+            
+            .pagination .page-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
         }
 
         .breadcrumb {

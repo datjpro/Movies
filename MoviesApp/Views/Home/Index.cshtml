@@ -1,234 +1,1564 @@
 ﻿@{
-    ViewData["Title"] = "Movies App";
+    ViewData["Title"] = "CCFilm - Khám Phá Thế Giới Điện Ảnh";
 }
 
-<!-- Top Movies Carousel -->
-<div class="container-fluid mb-4">
-    <h5 class="mb-3"><i class="fas fa-star text-warning me-2"></i>Phim Nổi Bật</h5>
-    <div class="row" id="topMoviesCarousel">
-        <!-- Sẽ được load bằng JavaScript từ API -->
-        <div class="col-12 text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Đang tải...</span>
+<!-- Hero Section with Video Background -->
+<section class="hero-section">
+    <div class="hero-video-container">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="container">
+                <div class="row align-items-center min-vh-100">
+                    <div class="col-lg-6">
+                        <div class="hero-text">
+                            <span class="hero-badge">🎬 Xu hướng</span>
+                            <h1 class="hero-title" id="heroTitle">
+                                Khám Phá<br>
+                                <span class="gradient-text">Thế Giới Điện Ảnh</span>
+                            </h1>
+                            <p class="hero-description" id="heroDescription">
+                                Trải nghiệm những bộ phim đỉnh cao với chất lượng 4K Ultra HD. 
+                                Từ blockbuster Hollywood đến những tác phẩm indie độc đáo.
+                            </p>
+                            <div class="hero-actions">
+                                <button class="btn-primary-custom" id="heroWatchBtn">
+                                    <i class="fas fa-play"></i>
+                                    <span>Xem Ngay</span>
+                                </button>
+                                <button class="btn-secondary-custom" id="heroTrailerBtn">
+                                    <i class="fas fa-film"></i>
+                                    <span>Xem Trailer</span>
+                                </button>
+                            </div>
+                            <div class="hero-stats">
+                                <div class="stat-item">
+                                    <span class="stat-number" id="totalMovies">2,500+</span>
+                                    <span class="stat-label">Bộ Phim</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">4K</span>
+                                    <span class="stat-label">Chất Lượng</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">24/7</span>
+                                    <span class="stat-label">Trực Tuyến</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="hero-movie-showcase" id="heroMovieShowcase">
+                            <div class="showcase-loader">
+                                <div class="pulse-loader"></div>
+                                <p>Đang tải phim nổi bật...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Featured Movie -->
-<div class="container mb-5">
-    <div class="card bg-dark text-white" id="featuredMovie">
-        <div class="card-body text-center">
-            <div class="spinner-border text-light" role="status">
-                <span class="visually-hidden">Đang tải phim đặc biệt...</span>
+<!-- Trending Movies Section -->
+<section class="trending-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="title-icon">🔥</span>
+                Xu Hướng Hôm Nay
+            </h2>
+            <p class="section-subtitle">Những bộ phim đang được yêu thích nhất</p>
+        </div>
+        
+        <div class="trending-carousel" id="trendingCarousel">
+            <div class="trending-loader">
+                <div class="spinner-custom"></div>
+                <p>Đang tải xu hướng...</p>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- All Movies List -->
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5><i class="fas fa-film me-2"></i>Tất Cả Phim</h5>
-        <a asp-controller="Phim" asp-action="Index" class="btn btn-outline-primary btn-sm">
-            Xem Thêm
-        </a>
-    </div>
-    
-    <div class="row" id="allMoviesList">
-        <!-- Sẽ được load bằng JavaScript từ API -->
-        <div class="col-12 text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Đang tải danh sách phim...</span>
+<!-- Featured Categories -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="title-icon">🎭</span>
+                Khám Phá Theo Thể Loại
+            </h2>
+            <p class="section-subtitle">Tìm kiếm phim theo sở thích cá nhân</p>
+        </div>
+        
+        <div class="categories-grid" id="categoriesGrid">
+            <div class="category-card" data-category="action">
+                <div class="category-icon">⚡</div>
+                <h3>Hành Động</h3>
+                <p>Những pha hành động nghẹt thở</p>
+            </div>
+            <div class="category-card" data-category="drama">
+                <div class="category-icon">🎭</div>
+                <h3>Tâm Lý</h3>
+                <p>Câu chuyện cảm động sâu sắc</p>
+            </div>
+            <div class="category-card" data-category="comedy">
+                <div class="category-icon">😄</div>
+                <h3>Hài Kịch</h3>
+                <p>Giải trí cười thoải mái</p>
+            </div>
+            <div class="category-card" data-category="horror">
+                <div class="category-icon">👻</div>
+                <h3>Kinh Dị</h3>
+                <p>Cảm giác hồi hộp gay cấn</p>
+            </div>
+            <div class="category-card" data-category="romance">
+                <div class="category-icon">💕</div>
+                <h3>Lãng Mạn</h3>
+                <p>Tình yêu ngọt ngào</p>
+            </div>
+            <div class="category-card" data-category="sci-fi">
+                <div class="category-icon">🚀</div>
+                <h3>Khoa Học</h3>
+                <p>Tương lai và công nghệ</p>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Custom CSS -->
+<!-- Recommended Section -->
+<section class="recommended-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="title-icon">✨</span>
+                Đề Xuất Cho Bạn
+            </h2>
+            <p class="section-subtitle">Dựa trên sở thích và lịch sử xem của bạn</p>
+        </div>
+        
+        <div class="movies-grid" id="recommendedMovies">
+            <div class="movies-loader">
+                <div class="grid-loader">
+                    <div class="loader-item"></div>
+                    <div class="loader-item"></div>
+                    <div class="loader-item"></div>
+                    <div class="loader-item"></div>
+                </div>
+                <p>Đang tải đề xuất...</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a asp-controller="Phim" asp-action="Index" class="btn-more">
+                Xem Tất Cả Phim
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section">
+    <div class="container">
+        <div class="newsletter-card">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h3 class="newsletter-title">Không Bỏ Lỡ Phim Mới</h3>
+                    <p class="newsletter-text">Đăng ký nhận thông báo về những bộ phim mới nhất và những ưu đãi đặc biệt</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="newsletter-form">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Nhập email của bạn">
+                            <button class="btn-subscribe" type="button">
+                                <i class="fas fa-paper-plane"></i>
+                                Đăng Ký
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modern 2025 UI Styles -->
 <style>
-.movie-card-small {
-    transition: transform 0.2s;
-    cursor: pointer;
+:root {
+    /* 2025 Color Palette - Deep Jewel Tones */
+    --primary-bg: #0A0A0B;
+    --secondary-bg: #1A1A1C;
+    --accent-blue: #004D61;
+    --accent-purple: #822659;
+    --accent-gold: #FFB800;
+    --text-primary: #E0E0E0;
+    --text-secondary: #B0B0B0;
+    --text-muted: #808080;
+    --border-color: #2A2A2C;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    --gradient-gold: linear-gradient(135deg, #FFB800, #FF8C00);
+    --gradient-text: linear-gradient(135deg, #00D4FF, #FF6B9D);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-strong: 0 8px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 30px rgba(0, 212, 255, 0.3);
 }
 
-.movie-card-small:hover {
-    transform: scale(1.05);
+/* Global Styles */
+body {
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
 }
 
-.movie-poster {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.movie-poster-small {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.featured-movie-bg {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    min-height: 400px;
+/* Hero Section */
+.hero-section {
     position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
 }
 
-.featured-movie-overlay {
-    background: linear-gradient(45deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4));
+.hero-video-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 0.375rem;
+    background: linear-gradient(135deg, rgba(10, 10, 11, 0.9) 0%, rgba(26, 26, 28, 0.7) 100%);
+    z-index: 1;
 }
-</style>
 
-<!-- JavaScript để load data từ API -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    loadTopMovies();
-    loadFeaturedMovie();
-    loadAllMovies();
-});
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem 0;
+}
 
-// Load 8 phim nổi bật
-async function loadTopMovies() {
-    try {
-        const response = await fetch('/api/PhimApi?pageSize=8');
-        const data = await response.json();
-        
-        let html = '';
-        data.forEach(movie => {
-            html += `
-                <div class="col-lg-1-5 col-md-3 col-sm-4 col-6 mb-3">
-                    <div class="movie-card-small" onclick="viewMovie('${movie.maPhim}')">
-                        <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
-                             alt="${movie.tenPhim}" 
-                             class="movie-poster-small">
-                        <div class="mt-2">
-                            <small class="text-truncate d-block" title="${movie.tenPhim}">
-                                ${movie.tenPhim}
-                            </small>
-                            <small class="text-muted">${movie.namPhatHanh || 'N/A'}</small>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        document.getElementById('topMoviesCarousel').innerHTML = html;
-    } catch (error) {
-        console.error('Error loading top movies:', error);
-        document.getElementById('topMoviesCarousel').innerHTML = 
-            '<div class="col-12 text-center text-danger">Không thể tải phim nổi bật</div>';
+.hero-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.gradient-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    max-width: 500px;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.btn-primary-custom {
+    background: var(--gradient-primary);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-strong);
+}
+
+.btn-secondary-custom {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary-custom:hover {
+    background: var(--glass-border);
+    transform: translateY(-2px);
+}
+
+.hero-stats {
+    display: flex;
+    gap: 2rem;
+    animation: fadeInUp 0.8s ease-out 0.8s both;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.hero-movie-showcase {
+    position: relative;
+    animation: fadeInRight 1s ease-out 0.5s both;
+}
+
+.showcase-loader, .trending-loader, .movies-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+/* Pulse Loader */
+.pulse-loader {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    animation: pulse 2s infinite;
+    margin-bottom: 1rem;
+}
+
+@@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Section Styles */
+.trending-section, .categories-section, .recommended-section {
+    padding: 5rem 0;
+    position: relative;
+}
+
+.newsletter-section {
+    padding: 3rem 0;
+    background: var(--secondary-bg);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.title-icon {
+    font-size: 1.2em;
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Categories Grid */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.category-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.category-card:hover::before {
+    left: 100%;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-strong);
+    border-color: var(--accent-blue);
+}
+
+.category-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.category-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.category-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Trending Carousel */
+.trending-carousel {
+    position: relative;
+    overflow: hidden;
+}
+
+.trending-movies {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    animation: scroll-horizontal 30s linear infinite;
+}
+
+@@keyframes scroll-horizontal {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Movie Cards */
+.movie-card {
+    flex: 0 0 auto;
+    width: 280px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.movie-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--shadow-glow);
+}
+
+.movie-poster {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.movie-card:hover .movie-poster {
+    transform: scale(1.1);
+}
+
+.movie-info {
+    padding: 1.5rem;
+}
+
+.movie-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.movie-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.movie-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.movie-year {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.movie-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Movies Grid */
+.movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Newsletter */
+.newsletter-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+}
+
+.newsletter-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.newsletter-text {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.newsletter-form .input-group {
+    border-radius: 50px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+}
+
+.newsletter-form .form-control {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+}
+
+.newsletter-form .form-control:focus {
+    background: transparent;
+    box-shadow: none;
+    color: var(--text-primary);
+}
+
+.newsletter-form .form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.btn-subscribe {
+    background: var(--gradient-gold);
+    border: none;
+    padding: 1rem 1.5rem;
+    color: var(--primary-bg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-subscribe:hover {
+    transform: translateX(-2px);
+}
+
+.btn-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.btn-more:hover {
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Loaders */
+.spinner-custom {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--glass-border);
+    border-top: 3px solid var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.grid-loader {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.loader-item {
+    width: 60px;
+    height: 80px;
+    background: var(--glass-bg);
+    border-radius: 8px;
+    animation: shimmer 1.5s infinite;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@@keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-// Load 1 phim đặc biệt (phim đầu tiên)
-async function loadFeaturedMovie() {
-    try {
-        const response = await fetch('/api/PhimApi?pageSize=1');
-        const data = await response.json();
+@@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn-primary-custom, .btn-secondary-custom {
+        justify-content: center;
+    }
+    
+    .hero-stats {
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+    
+    .categories-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .newsletter-card {
+        padding: 2rem;
+    }
+    
+    .newsletter-form .input-group {
+        flex-direction: column;
+    }
+    
+    .btn-subscribe {
+        border-radius: 0 0 50px 50px;
+    }
+    
+    .movies-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@@media (max-width: 480px) {
+    .section-title {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .movie-card {
+        width: 100%;
+    }
+    
+    .trending-movies {
+        flex-direction: column;
+        animation: none;
+    }
+      .recommendation-badge {
+        font-size: 0.55rem;
+        padding: 2px 4px;
+        border-radius: 6px;
+        top: 4px;
+        left: 4px;
+        max-width: calc(100% - 8px);
+    }
+    
+    .recommendation-badge span {
+        max-width: 60px;
+    }
+    
+    .recommendation-badge i {
+        font-size: 0.5rem;
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-purple);
+}
+</style>
+
+<!-- Modern JavaScript with AI-powered features -->
+<script>
+// Modern 2025 Movie App JavaScript
+class CCFilmApp {
+    constructor() {
+        this.apiBase = '/api/PhimApi';
+        this.currentMovies = [];
+        this.trendingMovies = [];
+        this.isLoading = false;
+        this.init();
+    }
+
+    async init() {
+        await this.loadFeaturedContent();
+        await this.loadTrendingMovies();
+        await this.loadRecommendedMovies();
+        this.setupEventListeners();
+        this.startDynamicEffects();
+    }
+
+    // Load featured content for hero section
+    async loadFeaturedContent() {
+        try {
+            const response = await fetch(`${this.apiBase}?pageSize=1`);
+            const data = await response.json();
+            
+            if (data.length > 0) {
+                const movie = data[0];
+                this.updateHeroSection(movie);
+                this.updateMovieShowcase([movie]);
+            }
+        } catch (error) {
+            console.error('Error loading featured content:', error);
+            this.showError('heroMovieShowcase', 'Không thể tải nội dung nổi bật');
+        }
+    }
+
+    // Update hero section with dynamic content
+    updateHeroSection(movie) {
+        const heroTitle = document.getElementById('heroTitle');
+        const heroDescription = document.getElementById('heroDescription');
+        const heroWatchBtn = document.getElementById('heroWatchBtn');
+
+        if (movie && heroTitle) {
+            heroTitle.innerHTML = `
+                Khám Phá<br>
+                <span class="gradient-text">${movie.tenPhim}</span>
+            `;
+        }
+
+        if (movie && heroDescription) {
+            heroDescription.textContent = movie.moTaPhim || 'Trải nghiệm những bộ phim đỉnh cao với chất lượng 4K Ultra HD.';
+        }
+
+        if (movie && heroWatchBtn) {
+            heroWatchBtn.onclick = () => this.viewMovie(movie.maPhim);
+        }
+    }
+
+    // Update movie showcase with 3D card effect
+    updateMovieShowcase(movies) {
+        const showcase = document.getElementById('heroMovieShowcase');
+        if (!movies.length) return;
+
+        const movie = movies[0];
+        showcase.innerHTML = `
+            <div class="movie-showcase-card" onclick="ccFilmApp.viewMovie('${movie.maPhim}')">
+                <div class="showcase-poster">
+                    <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
+                         alt="${movie.tenPhim}" 
+                         class="showcase-image">
+                    <div class="showcase-overlay">
+                        <div class="play-button">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="showcase-info">
+                    <h3>${movie.tenPhim}</h3>
+                    <div class="showcase-meta">
+                        ${movie.diemImdb ? `<span class="rating"><i class="fas fa-star"></i> ${movie.diemImdb}</span>` : ''}
+                        ${movie.namPhatHanh ? `<span class="year">${movie.namPhatHanh}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add CSS for showcase card
+        this.addShowcaseStyles();
+    }
+
+    // Load trending movies with infinite scroll effect
+    async loadTrendingMovies() {
+        try {
+            const response = await fetch(`${this.apiBase}?pageSize=12`);
+            const data = await response.json();
+            this.trendingMovies = data;
+            this.renderTrendingCarousel(data);
+        } catch (error) {
+            console.error('Error loading trending movies:', error);
+            this.showError('trendingCarousel', 'Không thể tải phim xu hướng');
+        }
+    }
+
+    // Render trending carousel with smooth animation
+    renderTrendingCarousel(movies) {
+        const carousel = document.getElementById('trendingCarousel');
+        if (!movies.length) return;
+
+        // Duplicate movies for infinite scroll effect
+        const duplicatedMovies = [...movies, ...movies];
         
-        if (data.length > 0) {
-            const movie = data[0];
-            const html = `
-                <div class="featured-movie-bg" style="background-image: url('${movie.anhPhim || '/images/no-image.jpg'}')">
-                    <div class="featured-movie-overlay"></div>
-                    <div class="card-body position-relative" style="z-index: 2;">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h2 class="card-title">${movie.tenPhim}</h2>
-                                <p class="card-text">${movie.moTaPhim || 'Chưa có mô tả'}</p>
-                                <div class="mb-3">
-                                    <span class="badge bg-warning text-dark me-2">
-                                        <i class="fas fa-star me-1"></i>${movie.diemImdb || 'N/A'}
-                                    </span>
-                                    <span class="badge bg-info me-2">${movie.namPhatHanh || 'N/A'}</span>
-                                    <span class="badge bg-secondary">${movie.thoiLuongPhim || 'N/A'} phút</span>
+        const html = `
+            <div class="trending-movies">
+                ${duplicatedMovies.map(movie => `
+                    <div class="movie-card" onclick="ccFilmApp.viewMovie('${movie.maPhim}')">
+                        <div class="movie-poster-container">
+                            <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
+                                 alt="${movie.tenPhim}" 
+                                 class="movie-poster"
+                                 loading="lazy">
+                            <div class="movie-overlay">
+                                <div class="play-button-small">
+                                    <i class="fas fa-play"></i>
                                 </div>
-                                <button class="btn btn-primary btn-lg me-3" onclick="viewMovie('${movie.maPhim}')">
-                                    <i class="fas fa-play me-2"></i>Xem Chi Tiết
-                                </button>
-                                @if (User.Identity?.IsAuthenticated == true)
-                                {
-                                    <button class="btn btn-outline-light" onclick="addToWatchlist('${movie.maPhim}')">
-                                        <i class="fas fa-heart me-2"></i>Yêu Thích
-                                    </button>
-                                }
                             </div>
                         </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('featuredMovie').innerHTML = html;
-        }
-    } catch (error) {
-        console.error('Error loading featured movie:', error);
-        document.getElementById('featuredMovie').innerHTML = 
-            '<div class="card-body text-center text-danger">Không thể tải phim đặc biệt</div>';
-    }
-}
-
-// Load tất cả phim (giới hạn 12 phim)
-async function loadAllMovies() {
-    try {
-        const response = await fetch('/api/PhimApi?pageSize=12');
-        const data = await response.json();
-        
-        let html = '';
-        data.forEach(movie => {
-            html += `
-                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
-                    <div class="card h-100 movie-card-small" onclick="viewMovie('${movie.maPhim}')">
-                        <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
-                             alt="${movie.tenPhim}" 
-                             class="card-img-top movie-poster">
-                        <div class="card-body p-2">
-                            <h6 class="card-title text-truncate" title="${movie.tenPhim}">
-                                ${movie.tenPhim}
-                            </h6>
-                            <small class="text-muted">${movie.namPhatHanh || 'N/A'}</small>
-                            ${movie.diemImdb ? `<div class="mt-1"><small class="text-warning"><i class="fas fa-star"></i> ${movie.diemImdb}</small></div>` : ''}
+                        <div class="movie-info">
+                            <h4 class="movie-title">${this.truncateText(movie.tenPhim, 40)}</h4>
+                            <div class="movie-meta">
+                                ${movie.diemImdb ? `
+                                    <span class="movie-rating">
+                                        <i class="fas fa-star"></i> ${movie.diemImdb}
+                                    </span>
+                                ` : ''}
+                                ${movie.namPhatHanh ? `<span class="movie-year">${movie.namPhatHanh}</span>` : ''}
+                            </div>
+                            <p class="movie-description">${this.truncateText(movie.moTaPhim || 'Chưa có mô tả', 80)}</p>
                         </div>
                     </div>
+                `).join('')}
+            </div>
+        `;
+        
+        carousel.innerHTML = html;
+    }    // Load recommended movies with AI-like personalization
+    async loadRecommendedMovies() {
+        try {
+            // Use the new recommended endpoint for better suggestions
+            const response = await fetch(`${this.apiBase}/recommended?pageSize=8`);
+            const data = await response.json();
+            this.renderRecommendedGrid(data);
+        } catch (error) {
+            console.error('Error loading recommended movies:', error);
+            // Fallback to regular movies if recommendation fails
+            try {
+                const fallbackResponse = await fetch(`${this.apiBase}?pageSize=8`);
+                const fallbackData = await fallbackResponse.json();
+                this.renderRecommendedGrid(fallbackData, true);
+            } catch (fallbackError) {
+                this.showError('recommendedMovies', 'Không thể tải đề xuất phim');
+            }
+        }
+    }    // Render recommended movies grid
+    renderRecommendedGrid(movies, isFallback = false) {
+        const grid = document.getElementById('recommendedMovies');
+        if (!movies.length) return;
+
+        const html = `
+            <div class="movies-grid">
+                ${movies.map(movie => `
+                    <div class="movie-card recommended-card" onclick="ccFilmApp.viewMovie('${movie.maPhim}')">
+                        <div class="movie-poster-container">
+                            ${movie.recommendationReason && !isFallback ? `
+                                <div class="recommendation-badge">
+                                    <i class="fas fa-sparkles"></i>
+                                    <span>${movie.recommendationReason}</span>
+                                </div>
+                            ` : ''}
+                            <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
+                                 alt="${movie.tenPhim}" 
+                                 class="movie-poster"
+                                 loading="lazy">
+                            <div class="movie-overlay">
+                                <div class="play-button-small">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                                <div class="movie-actions">
+                                    <button class="action-btn" onclick="event.stopPropagation(); ccFilmApp.addToWatchlist('${movie.maPhim}')" title="Thêm vào danh sách">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="event.stopPropagation(); ccFilmApp.toggleFavorite('${movie.maPhim}')" title="Yêu thích">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="movie-info">
+                            <h4 class="movie-title">${this.truncateText(movie.tenPhim, 35)}</h4>
+                            <div class="movie-meta">
+                                ${movie.diemImdb ? `
+                                    <span class="movie-rating">
+                                        <i class="fas fa-star"></i> ${movie.diemImdb}
+                                    </span>
+                                ` : ''}
+                                ${movie.namPhatHanh ? `<span class="movie-year">${movie.namPhatHanh}</span>` : ''}
+                                ${movie.theLoai ? `<span class="movie-genre">${movie.theLoai}</span>` : ''}
+                            </div>
+                            <p class="movie-description">${this.truncateText(movie.moTaPhim || 'Chưa có mô tả', 60)}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        grid.innerHTML = html;
+    }
+
+    // Setup modern event listeners
+    setupEventListeners() {
+        // Category cards interaction
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const category = e.currentTarget.dataset.category;
+                this.filterByCategory(category);
+            });
+        });
+
+        // Newsletter subscription
+        const subscribeBtn = document.querySelector('.btn-subscribe');
+        if (subscribeBtn) {
+            subscribeBtn.addEventListener('click', this.handleNewsletterSubscription);
+        }
+
+        // Hero trailer button
+        const trailerBtn = document.getElementById('heroTrailerBtn');
+        if (trailerBtn) {
+            trailerBtn.addEventListener('click', this.playTrailer);
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(anchor.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Add scroll effects
+        this.setupScrollEffects();
+    }
+
+    // Modern scroll effects with intersection observer
+    setupScrollEffects() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    }
+
+    // Dynamic effects for modern UI
+    startDynamicEffects() {
+        // Animated counter for statistics
+        this.animateCounters();
+        
+        // Parallax effect for hero section
+        this.setupParallaxEffect();
+        
+        // Dynamic background particles (subtle)
+        this.createBackgroundParticles();
+    }
+
+    // Animate counters in hero stats
+    animateCounters() {
+        const totalMoviesElement = document.getElementById('totalMovies');
+        if (totalMoviesElement) {
+            this.animateValue(totalMoviesElement, 0, 2500, 2000, '+');
+        }
+    }
+
+    animateValue(element, start, end, duration, suffix = '') {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            element.textContent = value.toLocaleString() + suffix;
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Subtle parallax effect
+    setupParallaxEffect() {
+        let ticking = false;
+        
+        const updateParallax = () => {
+            const scrollY = window.pageYOffset;
+            const heroContent = document.querySelector('.hero-content');
+            
+            if (heroContent) {
+                const speed = scrollY * 0.5;
+                heroContent.style.transform = `translateY(${speed}px)`;
+            }
+            
+            ticking = false;
+        };
+
+        const requestTick = () => {
+            if (!ticking) {
+                requestAnimationFrame(updateParallax);
+                ticking = true;
+            }
+        };
+
+        window.addEventListener('scroll', requestTick, { passive: true });
+    }
+
+    // Create subtle background particles
+    createBackgroundParticles() {
+        const particleCount = 20;
+        const particles = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'bg-particle';
+            particle.style.cssText = `
+                position: fixed;
+                width: 2px;
+                height: 2px;
+                background: rgba(0, 212, 255, 0.3);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 0;
+                left: ${Math.random() * 100}vw;
+                top: ${Math.random() * 100}vh;
+                animation: float ${5 + Math.random() * 10}s infinite linear;
+            `;
+            document.body.appendChild(particle);
+            particles.push(particle);
+        }        // Add CSS animation for particles
+        const style = document.createElement('style');
+        style.textContent = 
+            '@@keyframes float {' +
+                '0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }' +
+                '10% { opacity: 1; }' +
+                '90% { opacity: 1; }' +
+                '100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }' +
+            '}';
+        document.head.appendChild(style);
+    }
+
+    // Utility functions
+    truncateText(text, maxLength) {
+        if (!text) return '';
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+
+    showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
                 </div>
             `;
-        });
+        }
+    }
+
+    // Navigation functions
+    viewMovie(movieId) {
+        // Add smooth transition effect
+        document.body.style.transition = 'opacity 0.3s ease';
+        document.body.style.opacity = '0.8';
         
-        document.getElementById('allMoviesList').innerHTML = html;
-    } catch (error) {
-        console.error('Error loading all movies:', error);
-        document.getElementById('allMoviesList').innerHTML = 
-            '<div class="col-12 text-center text-danger">Không thể tải danh sách phim</div>';
+        setTimeout(() => {
+            window.location.href = `/Phim/Details/${movieId}`;
+        }, 150);
+    }
+
+    filterByCategory(category) {
+        // Add loading state
+        const categoriesGrid = document.getElementById('categoriesGrid');
+        categoriesGrid.style.opacity = '0.7';
+        
+        // Navigate to filtered view
+        setTimeout(() => {
+            window.location.href = `/Phim?category=${category}`;
+        }, 200);
+    }
+
+    addToWatchlist(movieId) {
+        // Modern notification system
+        this.showNotification('Đã thêm vào danh sách xem sau', 'success');
+        // TODO: Implement actual watchlist functionality
+    }
+
+    toggleFavorite(movieId) {
+        this.showNotification('Đã thêm vào yêu thích', 'success');
+        // TODO: Implement actual favorite functionality
+    }
+
+    playTrailer() {
+        this.showNotification('Tính năng trailer sẽ được cập nhật sớm', 'info');
+    }
+
+    handleNewsletterSubscription() {
+        const emailInput = document.querySelector('.newsletter-form input[type="email"]');
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+            ccFilmApp.showNotification('Vui lòng nhập email', 'warning');
+            return;
+        }
+        
+        if (!ccFilmApp.validateEmail(email)) {
+            ccFilmApp.showNotification('Email không hợp lệ', 'error');
+            return;
+        }        
+        ccFilmApp.showNotification('Đăng ký thành công! Cảm ơn bạn', 'success');
+        emailInput.value = '';
+    }    validateEmail(email) {
+        return email.includes('@@') && email.includes('.');
+    }
+
+    // Modern notification system
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${this.getNotificationIcon(type)}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+
+    getNotificationIcon(type) {
+        const icons = {
+            success: 'check-circle',
+            error: 'exclamation-circle',
+            warning: 'exclamation-triangle',
+            info: 'info-circle'
+        };
+        return icons[type] || 'info-circle';
+    }
+
+    // Add showcase styles dynamically
+    addShowcaseStyles() {
+        if (document.getElementById('showcase-styles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'showcase-styles';
+        style.textContent = `
+            .movie-showcase-card {
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.5s ease;
+                backdrop-filter: blur(10px);
+                transform-style: preserve-3d;
+            }
+            
+            .movie-showcase-card:hover {
+                transform: translateY(-10px) rotateY(5deg);
+                box-shadow: var(--shadow-glow);
+            }
+            
+            .showcase-poster {
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .showcase-image {
+                width: 100%;
+                height: 400px;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+            
+            .movie-showcase-card:hover .showcase-image {
+                transform: scale(1.1);
+            }
+            
+            .showcase-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.3));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .movie-showcase-card:hover .showcase-overlay {
+                opacity: 1;
+            }
+            
+            .play-button {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: var(--gradient-primary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: white;
+                transition: transform 0.3s ease;
+            }
+            
+            .play-button:hover {
+                transform: scale(1.1);
+            }
+            
+            .showcase-info {
+                padding: 1.5rem;
+                text-align: center;
+            }
+            
+            .showcase-info h3 {
+                font-size: 1.3rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+                color: var(--text-primary);
+            }
+            
+            .showcase-meta {
+                display: flex;
+                justify-content: center;
+                gap: 1rem;
+                color: var(--text-secondary);
+            }
+              .movie-poster-container {
+                position: relative;
+                overflow: hidden;
+                border-radius: 15px 15px 0 0;
+            }
+              /* Recommendation Badge */
+            .recommendation-badge {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                background: linear-gradient(135deg, var(--accent-orange, #FFB800), #ff9500);
+                color: white;
+                padding: 3px 6px;
+                border-radius: 8px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                z-index: 3;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 2px 8px rgba(255, 184, 0, 0.4);
+                max-width: calc(100% - 12px);
+                overflow: hidden;
+                white-space: nowrap;
+            }
+            
+            .recommendation-badge i {
+                font-size: 0.6rem;
+                animation: sparkle 2s ease-in-out infinite;
+                flex-shrink: 0;
+            }
+            
+            .recommendation-badge span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 120px;
+            }
+            
+            @@keyframes sparkle {
+                0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+                50% { transform: scale(1.1) rotate(10deg); opacity: 0.8; }
+            }
+            
+            .recommended-card {
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .recommended-card::before {
+                content: '';
+                position: absolute;
+                top: -1px;
+                left: -1px;
+                right: -1px;
+                bottom: -1px;
+                background: linear-gradient(135deg, var(--accent-orange, #FFB800), var(--accent-purple, #822659));
+                border-radius: 16px;
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .recommended-card:hover::before {
+                opacity: 0.2;
+            }
+            
+            .recommended-card .movie-poster-container {
+                position: relative;
+                z-index: 1;
+            }
+            
+            .movie-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .movie-card:hover .movie-overlay {
+                opacity: 1;
+            }
+            
+            .play-button-small {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: var(--gradient-primary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                transition: transform 0.3s ease;
+            }
+            
+            .play-button-small:hover {
+                transform: scale(1.1);
+            }
+            
+            .movie-actions {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                display: flex;
+                gap: 0.5rem;
+            }
+            
+            .action-btn {
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                background: var(--glass-bg);
+                border: 1px solid var(--glass-border);
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+            
+            .action-btn:hover {
+                background: var(--accent-blue);
+                transform: scale(1.1);
+            }
+        `;
+        document.head.appendChild(style);
     }
 }
 
-// Function để xem chi tiết phim
-function viewMovie(movieId) {
-    window.location.href = `/Phim/Details/${movieId}`;
-}
+// Initialize the modern app
+const ccFilmApp = new CCFilmApp();
 
-// Function để thêm vào danh sách yêu thích
-function addToWatchlist(movieId) {
-    // TODO: Implement add to watchlist functionality
-    alert('Tính năng yêu thích sẽ được cập nhật sau!');
-}
+// Add global styles for animations
+document.addEventListener('DOMContentLoaded', function() {
+    const animationStyles = document.createElement('style');
+    animationStyles.textContent = `
+        .animate-in {
+            animation: slideInUp 0.8s ease-out forwards;
+        }
+        
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(animationStyles);
+});
 </script>
-
-<!-- Custom CSS cho responsive -->
-<style>
-@@media (min-width: 992px) {
-    .col-lg-1-5 {
-        flex: 0 0 auto;
-        width: 12.5%;
-    }
-}
-</style>

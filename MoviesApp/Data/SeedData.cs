@@ -54,9 +54,7 @@ namespace MoviesApp.Data
             };
             context.LoaiNguoiDungs.AddRange(loaiNguoiDungs);
 
-            await context.SaveChangesAsync();
-
-            // Seed Phim với ThongKePhim
+            await context.SaveChangesAsync();            // Seed Phim với ThongKePhim
             var phims = new List<Phim>
             {
                 new Phim 
@@ -71,7 +69,16 @@ namespace MoviesApp.Data
                     SoTap = 9,
                     TinhTrang = "Hoàn thành",
                     NamPhatHanh = 2021,
-                    ThoiLuongPhim = 60
+                    ThoiLuongPhim = 60,
+                    DaoDien = "Hwang Dong-hyuk",
+                    DienVien = "Lee Jung-jae, Park Hae-soo, Oh Young-soo, Wi Ha-joon, Jung Ho-yeon",
+                    BienKich = "Hwang Dong-hyuk",
+                    DiemImdb = 8.0m,
+                    DiemMetascore = 66,
+                    LuotVoteImdb = 500000,
+                    NgonNgu = "Korean",
+                    QuocGiaSanXuat = "South Korea",
+                    XepHang = "TV-MA"
                 },
                 new Phim 
                 { 
@@ -85,7 +92,17 @@ namespace MoviesApp.Data
                     SoTap = 1,
                     TinhTrang = "Hoàn thành",
                     NamPhatHanh = 2019,
-                    ThoiLuongPhim = 181
+                    ThoiLuongPhim = 181,
+                    DaoDien = "Anthony Russo, Joe Russo",
+                    DienVien = "Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth, Scarlett Johansson, Jeremy Renner",
+                    BienKich = "Christopher Markus, Stephen McFeely",
+                    DiemImdb = 8.4m,
+                    DiemMetascore = 78,
+                    LuotVoteImdb = 1200000,
+                    NgonNgu = "English",
+                    QuocGiaSanXuat = "United States",
+                    XepHang = "PG-13",
+                    GiaiThuong = "Saturn Award for Best Comic-to-Film Motion Picture"
                 },
                 new Phim 
                 { 
@@ -99,7 +116,16 @@ namespace MoviesApp.Data
                     SoTap = 75,
                     TinhTrang = "Hoàn thành",
                     NamPhatHanh = 2013,
-                    ThoiLuongPhim = 24
+                    ThoiLuongPhim = 24,
+                    DaoDien = "Tetsuro Araki",
+                    DienVien = "Marina Inoue, Yuki Kaji, Yui Ishikawa, Hiroshi Kamiya",
+                    BienKich = "Yasuko Kobayashi",
+                    DiemImdb = 9.0m,
+                    DiemMetascore = 85,
+                    LuotVoteImdb = 400000,
+                    NgonNgu = "Japanese",
+                    QuocGiaSanXuat = "Japan",
+                    XepHang = "TV-14"
                 }
             };
             context.Phims.AddRange(phims);

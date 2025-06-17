@@ -1,161 +1,1356 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>@ViewData["Title"] - CCFilm</title>
-    <script type="importmap"></script>    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CCFilm</title>
+    
+    <!-- Modern 2025 Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pagination.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MoviesApp.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="CCFilm - Khám phá thế giới điện ảnh với những bộ phim chất lượng cao, phụ đề Việt Nam">
+    <meta name="keywords" content="phim, movies, cinema, CCFilm, xem phim online">
+    <meta name="author" content="CCFilm Team">
+      <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="@ViewData["Title"] - CCFilm">
+    <meta property="og:description" content="Khám phá thế giới điện ảnh với CCFilm">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")">
 </head>
-<body>
-    <header>        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container-fluid">                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-home me-2"></i>CCFilm
+<body class="modern-2025-body">
+    <!-- Modern Navigation -->
+    <nav class="modern-navbar" id="mainNavbar">
+        <div class="navbar-container">
+            <!-- Brand -->
+            <div class="navbar-brand">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-link">
+                    <div class="brand-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <span class="brand-text">CCFilm</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Phim" asp-action="Index">
-                                <i class="fas fa-film me-1"></i>Phim
+            </div>            <!-- Desktop Navigation -->
+            <div class="navbar-menu desktop-menu">
+                <ul class="navbar-nav horizontal-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-home"></i>
+                            <span>Trang Chủ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a class="nav-link dropdown-trigger" href="#">
+                            <i class="fas fa-film"></i>
+                            <span>Phim</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" asp-controller="Phim" asp-action="Index">
+                                <i class="fas fa-list"></i>
+                                <span>Tất Cả Phim</span>
                             </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-list me-1"></i>Danh mục
+                            <a class="dropdown-item" href="#trending">
+                                <i class="fas fa-fire"></i>
+                                <span>Phim Hot</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-fire me-2"></i>Phim hot</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-star me-2"></i>Phim lẻ</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-tv me-2"></i>Phim bộ</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-play-circle me-2"></i>Phim chiếu rạp</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-globe me-1"></i>Quốc gia
+                            <a class="dropdown-item" href="#latest">
+                                <i class="fas fa-clock"></i>
+                                <span>Mới Cập Nhật</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Việt Nam</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Hàn Quốc</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Nhật Bản</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Trung Quốc</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Âu Mỹ</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-theater-masks me-1"></i>Thể loại
+                            <a class="dropdown-item" href="#toprated">
+                                <i class="fas fa-star"></i>
+                                <span>Đánh Giá Cao</span>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-laugh me-2"></i>Hài hước</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-fist-raised me-2"></i>Hành động</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-heart me-2"></i>Tình cảm</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-ghost me-2"></i>Kinh dị</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-magic me-2"></i>Khoa học viễn tưởng</a></li>
-                            </ul>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" href="/swagger" target="_blank">
-                                    <i class="fas fa-code me-1"></i>API Docs
-                                </a>
-                            </li>
-                        }                    </ul>
-                    
-                    <!-- Search Box -->
-                    <div class="d-flex me-3">
-                        <div class="input-group" style="width: 300px;">
-                            <input type="text" class="form-control" placeholder="Tìm kiếm phim..." aria-label="Search">
-                            <button class="btn btn-outline-light" type="button">
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a class="nav-link dropdown-trigger" href="#">
+                            <i class="fas fa-theater-masks"></i>
+                            <span>Thể Loại</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#" data-category="action">
+                                <i class="fas fa-fist-raised"></i>
+                                <span>Hành Động</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-category="drama">
+                                <i class="fas fa-heart"></i>
+                                <span>Tâm Lý</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-category="comedy">
+                                <i class="fas fa-laugh"></i>
+                                <span>Hài Kịch</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-category="horror">
+                                <i class="fas fa-ghost"></i>
+                                <span>Kinh Dị</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-category="sci-fi">
+                                <i class="fas fa-rocket"></i>
+                                <span>Khoa Học</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item has-dropdown">
+                        <a class="nav-link dropdown-trigger" href="#">
+                            <i class="fas fa-globe"></i>
+                            <span>Quốc Gia</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#" data-country="vn">
+                                <i class="fas fa-flag"></i>
+                                <span>Việt Nam</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-country="kr">
+                                <i class="fas fa-flag"></i>
+                                <span>Hàn Quốc</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-country="us">
+                                <i class="fas fa-flag"></i>
+                                <span>Âu Mỹ</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-country="jp">
+                                <i class="fas fa-flag"></i>
+                                <span>Nhật Bản</span>
+                            </a>
+                            <a class="dropdown-item" href="#" data-country="cn">
+                                <i class="fas fa-flag"></i>
+                                <span>Trung Quốc</span>
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Search and User Actions -->
+            <div class="navbar-actions">
+                <!-- Search -->
+                <div class="search-container">
+                    <button class="search-toggle" id="searchToggle">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div class="search-popup" id="searchPopup">
+                        <div class="search-input-wrapper">
+                            <input type="text" class="search-input" placeholder="Tìm kiếm phim..." id="searchInput">
+                            <button class="search-submit" id="searchSubmit">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
+                        <div class="search-suggestions" id="searchSuggestions">
+                            <!-- Dynamic search suggestions -->
+                        </div>
                     </div>
-                    
-                    <!-- Authentication Menu -->
-                    <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-user-circle me-1"></i>@User.Identity.Name
+                </div>
+
+                <!-- User Menu -->
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="user-menu has-dropdown">
+                        <button class="user-trigger dropdown-trigger">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="user-name">@User.Identity.Name</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu user-dropdown">
+                            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Trang Cá Nhân</span>
+                            </a>
+                            <a class="dropdown-item" href="#watchlist">
+                                <i class="fas fa-heart"></i>
+                                <span>Danh Sách Yêu Thích</span>
+                            </a>
+                            <a class="dropdown-item" href="#history">
+                                <i class="fas fa-history"></i>
+                                <span>Lịch Sử Xem</span>
+                            </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item admin-item" asp-area="Admin" asp-controller="SimpleAdmin" asp-action="Index">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Quản Trị</span>
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                                            <i class="fas fa-user me-2"></i>Profile
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Account" asp-action="GenerateToken">
-                                            <i class="fas fa-key me-2"></i>Generate JWT Token
-                                        </a>
-                                    </li>                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <li><hr class="dropdown-divider"></li>                                        <li>
-                                            <a class="dropdown-item text-warning" asp-area="Admin" asp-controller="SimpleAdmin" asp-action="Index">
-                                                <i class="fas fa-shield-alt me-2"></i>Admin Panel
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" asp-controller="Account" asp-action="ManageUsers">
-                                                <i class="fas fa-users-cog me-2"></i>Manage Users (Old)
-                                            </a>
-                                        </li>
-                                    }
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-controller="Account" asp-action="Login">
-                                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                                <a class="dropdown-item" href="/swagger" target="_blank">
+                                    <i class="fas fa-code"></i>
+                                    <span>API Docs</span>
                                 </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-controller="Account" asp-action="Register">
-                                    <i class="fas fa-user-plus me-1"></i>Register
-                                </a>
-                            </li>
-                        }
+                            }
+                            <div class="dropdown-divider"></div>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
+                                <button type="submit" class="dropdown-item logout-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Đăng Xuất</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="auth-buttons">
+                        <a asp-controller="Account" asp-action="Login" class="btn-auth login-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                        <a asp-controller="Account" asp-action="Register" class="btn-auth register-btn">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Đăng Ký</span>
+                        </a>
+                    </div>
+                }
+
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <h3>Menu</h3>
+                <button class="mobile-menu-close" id="mobileMenuClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-menu-content">
+                <!-- Mobile navigation items will be populated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main class="main-content" role="main">
+        @RenderBody()
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Brand Section -->
+                <div class="footer-section">
+                    <div class="footer-brand">
+                        <div class="brand-icon">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <span class="brand-text">CCFilm</span>
+                    </div>
+                    <p class="footer-description">
+                        Nền tảng xem phim hàng đầu Việt Nam, mang đến trải nghiệm điện ảnh 
+                        chất lượng cao với công nghệ streaming tiên tiến.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h4>Liên Kết Nhanh</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Phim Mới</a></li>
+                        <li><a href="#">Phim Hot</a></li>
+                        <li><a href="#">Top Rated</a></li>
+                        <li><a href="#">Sắp Chiếu</a></li>
+                    </ul>
+                </div>
+
+                <!-- Categories -->
+                <div class="footer-section">
+                    <h4>Thể Loại</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Hành Động</a></li>
+                        <li><a href="#">Hài Kịch</a></li>
+                        <li><a href="#">Tâm Lý</a></li>
+                        <li><a href="#">Kinh Dị</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section">
+                    <h4>Hỗ Trợ</h4>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="Privacy">Chính Sách Bảo Mật</a></li>
+                        <li><a href="#">Điều Khoản Sử Dụng</a></li>
+                        <li><a href="#">Trợ Giúp</a></li>
+                        <li><a href="#">Liên Hệ</a></li>
                     </ul>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>    <footer class="border-top footer text-muted bg-light py-3 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    &copy; 2025 - CCFilm - Tất cả quyền được bảo lưu
+
+            <div class="footer-bottom">
+                <div class="copyright">
+                    <p>&copy; 2025 CCFilm. Tất cả quyền được bảo lưu.</p>
                 </div>
-                <div class="col-md-6 text-end">
-                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Chính sách bảo mật</a>
+                <div class="footer-meta">
+                    <span>Made with ❤️ in Vietnam</span>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop">
+        <i class="fas fa-chevron-up"></i>
+    </button>    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Modern Navigation JavaScript -->
+    <script>
+    // Modern 2025 Navigation System
+    class ModernNavigation {
+        constructor() {
+            this.navbar = document.getElementById('mainNavbar');
+            this.mobileMenu = document.getElementById('mobileMenu');
+            this.searchPopup = document.getElementById('searchPopup');
+            this.init();
+        }
+
+        init() {
+            this.setupScrollEffects();
+            this.setupDropdowns();
+            this.setupMobileMenu();
+            this.setupSearch();
+            this.setupScrollToTop();
+        }
+
+        // Navbar scroll effects
+        setupScrollEffects() {
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+
+            const updateNavbar = () => {
+                const scrollY = window.scrollY;
+                
+                if (scrollY > 100) {
+                    this.navbar.classList.add('scrolled');
+                } else {
+                    this.navbar.classList.remove('scrolled');
+                }
+
+                if (scrollY > lastScrollY && scrollY > 200) {
+                    this.navbar.classList.add('hidden');
+                } else {
+                    this.navbar.classList.remove('hidden');
+                }
+
+                lastScrollY = scrollY;
+                ticking = false;
+            };
+
+            const requestTick = () => {
+                if (!ticking) {
+                    requestAnimationFrame(updateNavbar);
+                    ticking = true;
+                }
+            };
+
+            window.addEventListener('scroll', requestTick, { passive: true });
+        }
+
+        // Modern dropdown system
+        setupDropdowns() {
+            const dropdownTriggers = document.querySelectorAll('.dropdown-trigger');
+            
+            dropdownTriggers.forEach(trigger => {
+                const dropdown = trigger.nextElementSibling;
+                let timeout;
+
+                trigger.addEventListener('mouseenter', () => {
+                    clearTimeout(timeout);
+                    dropdown.classList.add('show');
+                });
+
+                trigger.addEventListener('mouseleave', () => {
+                    timeout = setTimeout(() => {
+                        dropdown.classList.remove('show');
+                    }, 200);
+                });
+
+                dropdown.addEventListener('mouseenter', () => {
+                    clearTimeout(timeout);
+                });
+
+                dropdown.addEventListener('mouseleave', () => {
+                    dropdown.classList.remove('show');
+                });
+            });
+        }
+
+        // Mobile menu functionality
+        setupMobileMenu() {
+            const mobileToggle = document.getElementById('mobileMenuToggle');
+            const mobileClose = document.getElementById('mobileMenuClose');
+
+            mobileToggle.addEventListener('click', () => {
+                this.mobileMenu.classList.add('active');
+                document.body.classList.add('mobile-menu-open');
+            });
+
+            mobileClose.addEventListener('click', () => {
+                this.mobileMenu.classList.remove('active');
+                document.body.classList.remove('mobile-menu-open');
+            });
+
+            // Close on overlay click
+            this.mobileMenu.addEventListener('click', (e) => {
+                if (e.target === this.mobileMenu) {
+                    this.mobileMenu.classList.remove('active');
+                    document.body.classList.remove('mobile-menu-open');
+                }
+            });
+        }
+
+        // Advanced search functionality
+        setupSearch() {
+            const searchToggle = document.getElementById('searchToggle');
+            const searchInput = document.getElementById('searchInput');
+            const searchSubmit = document.getElementById('searchSubmit');
+            const searchSuggestions = document.getElementById('searchSuggestions');
+
+            searchToggle.addEventListener('click', () => {
+                this.searchPopup.classList.toggle('active');
+                if (this.searchPopup.classList.contains('active')) {
+                    setTimeout(() => searchInput.focus(), 100);
+                }
+            });
+
+            // Live search suggestions
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length > 2) {
+                    searchTimeout = setTimeout(() => {
+                        this.performSearch(query);
+                    }, 300);
+                } else {
+                    searchSuggestions.innerHTML = '';
+                }
+            });
+
+            searchSubmit.addEventListener('click', () => {
+                this.executeSearch(searchInput.value);
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.executeSearch(searchInput.value);
+                }
+            });
+
+            // Close search on outside click
+            document.addEventListener('click', (e) => {
+                if (!this.searchPopup.contains(e.target) && !searchToggle.contains(e.target)) {
+                    this.searchPopup.classList.remove('active');
+                }
+            });
+        }
+
+        async performSearch(query) {
+            try {
+                const response = await fetch(`/api/PhimApi/search?query=${encodeURIComponent(query)}&limit=5`);
+                const results = await response.json();
+                this.displaySearchSuggestions(results);
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }
+
+        displaySearchSuggestions(results) {
+            const suggestions = document.getElementById('searchSuggestions');
+            
+            if (results.length === 0) {
+                suggestions.innerHTML = '<div class="no-results">Không tìm thấy kết quả</div>';
+                return;
+            }
+
+            const html = results.map(movie => `
+                <div class="search-suggestion" onclick="window.location.href='/Phim/Details/${movie.maPhim}'">
+                    <img src="${movie.anhPhim || '/images/no-image.jpg'}" alt="${movie.tenPhim}" class="suggestion-poster">
+                    <div class="suggestion-info">
+                        <h4>${movie.tenPhim}</h4>
+                        <p>${movie.namPhatHanh || 'N/A'} • ${movie.diemImdb ? movie.diemImdb + '/10' : 'N/A'}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            suggestions.innerHTML = html;
+        }
+
+        executeSearch(query) {
+            if (query.trim()) {
+                window.location.href = `/Phim?search=${encodeURIComponent(query)}`;
+            }
+        }
+
+        // Scroll to top functionality
+        setupScrollToTop() {
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            });
+
+            scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    }
+
+    // Initialize navigation when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new ModernNavigation();
+    });
+    </script>
+
+    <!-- Modern Navigation Styles -->
+    <style>    /* Modern 2025 Navigation Styles */
+    .modern-2025-body {
+        background: var(--primary-bg, #0A0A0B);
+        color: var(--text-primary, #E0E0E0);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .modern-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 10, 11, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+        transition: all 0.3s ease;
+        padding: 0.75rem 0;
+        height: 70px;
+        display: flex;
+        align-items: center;
+    }
+
+    .modern-navbar.scrolled {
+        background: rgba(10, 10, 11, 0.98);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 0.5rem 0;
+        height: 60px;
+    }
+
+    .modern-navbar.hidden {
+        transform: translateY(-100%);
+    }
+
+    .navbar-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 100%;
+    }
+
+    .navbar-brand {
+        flex-shrink: 0;
+    }
+
+    .navbar-brand .brand-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--text-primary, #E0E0E0);
+        font-size: 1.5rem;
+        font-weight: 800;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand .brand-link:hover {
+        color: #00D4FF;
+        transform: scale(1.05);
+    }
+
+    .brand-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #004D61, #822659);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(0, 77, 97, 0.3);
+    }
+
+    .brand-text {
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }    .navbar-menu {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        justify-content: center;
+    }    .navbar-nav,
+    .horizontal-nav {
+        display: flex !important;
+        flex-direction: row !important;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .nav-item {
+        position: relative;
+        display: flex;
+        margin-right: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary, #E0E0E0);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus {
+        color: #00D4FF;
+        background: rgba(0, 212, 255, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .nav-link i {
+        font-size: 1rem;
+    }
+
+    .has-dropdown .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(26, 26, 28, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.5rem;
+        min-width: 220px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-50%) translateY(-10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        z-index: 1001;
+    }
+
+    .has-dropdown:hover .dropdown-menu,
+    .has-dropdown .dropdown-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-primary, #E0E0E0);
+        text-decoration: none;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background: rgba(0, 212, 255, 0.1);
+        color: #00D4FF;
+        transform: translateX(4px);
+    }
+
+    .dropdown-item i {
+        font-size: 0.9rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    .navbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-shrink: 0;
+    }    .search-container {
+        position: relative;
+    }
+
+    .search-toggle {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary, #E0E0E0);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0.6rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-toggle:hover {
+        background: rgba(0, 212, 255, 0.1);
+        color: #00D4FF;
+        transform: scale(1.05);
+    }
+
+    .search-popup {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 350px;
+        background: rgba(26, 26, 28, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        z-index: 1001;
+    }
+
+    .search-popup.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .search-input-wrapper {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 0.75rem;
+        color: var(--text-primary, #E0E0E0);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input::placeholder {
+        color: var(--text-muted, #808080);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #00D4FF;
+        box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+    }
+
+    .search-submit {
+        background: linear-gradient(135deg, #004D61, #822659);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .search-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 77, 97, 0.4);
+    }
+
+    .auth-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-auth {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .login-btn {
+        color: var(--text-primary, #E0E0E0);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary, #E0E0E0);
+        transform: translateY(-1px);
+    }
+
+    .register-btn {
+        background: linear-gradient(135deg, #004D61, #822659);
+        color: white;
+        border: none;
+    }
+
+    .register-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 77, 97, 0.4);
+        color: white;
+    }
+
+    .user-menu {
+        position: relative;
+    }
+
+    .user-trigger {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary, #E0E0E0);
+        cursor: pointer;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .user-trigger:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #004D61, #822659);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .user-name {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        background: rgba(26, 26, 28, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.5rem;
+        min-width: 200px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        z-index: 1001;
+    }
+
+    .user-menu:hover .user-dropdown,
+    .user-dropdown.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .admin-item {
+        color: #FFB800 !important;
+    }
+
+    .logout-item {
+        color: #DC3545 !important;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: inherit;
+    }
+
+    .logout-form {
+        margin: 0;
+    }
+
+    .mobile-menu-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 3px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        padding: 0.6rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-menu-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu-toggle span {
+        width: 20px;
+        height: 2px;
+        background: var(--text-primary, #E0E0E0);
+        transition: all 0.3s ease;
+        border-radius: 1px;
+    }
+
+    .mobile-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 400px;
+        height: 100vh;
+        background: rgba(10, 10, 11, 0.98);
+        backdrop-filter: blur(20px);
+        z-index: 2000;
+        transition: all 0.3s ease;
+        overflow-y: auto;
+    }
+
+    .mobile-menu.active {
+        right: 0;
+    }
+
+    .mobile-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu-close {
+        background: none;
+        border: none;
+        color: var(--text-primary, #E0E0E0);
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    /* Footer Styles */
+    .modern-footer {
+        background: linear-gradient(135deg, #0A0A0B 0%, #1A1A1C 100%);
+        padding: 3rem 0 1rem;
+        margin-top: 5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .footer-description {
+        color: var(--text-secondary, #B0B0B0);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .social-link {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary, #E0E0E0);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+        background: linear-gradient(135deg, #004D61, #822659);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .footer-section h4 {
+        color: var(--text-primary, #E0E0E0);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+        color: var(--text-secondary, #B0B0B0);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        color: #00D4FF;
+    }
+
+    .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary, #B0B0B0);
+    }
+
+    .scroll-to-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #004D61, #822659);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .scroll-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .scroll-to-top:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 77, 97, 0.4);
+    }    .main-content {
+        margin-top: 70px;
+        min-height: calc(100vh - 70px);
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 400px;
+        height: 100vh;
+        background: rgba(10, 10, 11, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 2000;
+        transition: all 0.3s ease;
+        overflow-y: auto;
+    }
+
+    .mobile-menu.active {
+        right: 0;
+    }
+
+    .mobile-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu-header h3 {
+        color: var(--text-primary, #E0E0E0);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .mobile-menu-close {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-primary, #E0E0E0);
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-menu-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-menu-content {
+        padding: 1rem 2rem;
+    }
+
+    /* Search Suggestions */
+    .search-suggestions {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .search-suggestion {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .search-suggestion:hover {
+        background: rgba(0, 212, 255, 0.1);
+    }
+
+    .suggestion-poster {
+        width: 40px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .suggestion-info h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+        color: var(--text-primary, #E0E0E0);
+    }
+
+    .suggestion-info p {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #B0B0B0);
+        margin: 0;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted, #808080);
+        font-style: italic;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .navbar-nav {
+            gap: 1.5rem;
+        }
+        
+        .navbar-container {
+            padding: 0 1.5rem;
+        }
+        
+        .nav-link span {
+            display: none;
+        }
+        
+        .nav-link {
+            padding: 0.75rem;
+            justify-content: center;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .desktop-menu {
+            display: none;
+        }
+        
+        .mobile-menu-toggle {
+            display: flex;
+        }
+        
+        .navbar-container {
+            padding: 0 1rem;
+        }
+        
+        .search-popup {
+            width: 280px;
+        }
+        
+        .auth-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .btn-auth {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        .user-name {
+            display: none;
+        }
+        
+        .main-content {
+            margin-top: 60px;
+        }
+        
+        .modern-navbar {
+            height: 60px;
+            padding: 0.5rem 0;
+        }
+        
+        .footer-bottom {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .navbar-container {
+            padding: 0 0.75rem;
+        }
+        
+        .brand-text {
+            font-size: 1.25rem;
+        }
+        
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+        }
+        
+        .search-popup {
+            width: 260px;
+            right: -1rem;
+        }
+        
+        .auth-buttons {
+            gap: 0.25rem;
+        }
+        
+        .btn-auth {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-auth span {
+            display: none;
+        }
+    }
+    </style>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

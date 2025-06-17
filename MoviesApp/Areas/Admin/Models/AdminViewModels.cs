@@ -2,12 +2,12 @@ using MoviesApp.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace MoviesApp.Areas.Admin.Models
-{
-    public class UserManagementViewModel
+{    public class UserManagementViewModel
     {
         public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
         public Dictionary<string, List<string>> UserRoles { get; set; } = new Dictionary<string, List<string>>();
         public int TotalUsers { get; set; }
+        public int TotalItems => TotalUsers; // Alias for consistency
         public int CurrentPage { get; set; }
         public int PageSize { get; set; }
         public int TotalPages { get; set; }
@@ -38,9 +38,7 @@ namespace MoviesApp.Areas.Admin.Models
         
         public List<string> SelectedRoles { get; set; } = new List<string>();
         public List<string> AvailableRoles { get; set; } = new List<string>();
-    }
-
-    public class MovieManagementViewModel
+    }    public class MovieManagementViewModel
     {
         public List<Phim> Movies { get; set; } = new List<Phim>();
         public List<TheLoaiPhim> Genres { get; set; } = new List<TheLoaiPhim>();
@@ -48,6 +46,7 @@ namespace MoviesApp.Areas.Admin.Models
         public List<DanhMuc> Categories { get; set; } = new List<DanhMuc>();
         
         public int TotalMovies { get; set; }
+        public int TotalItems => TotalMovies; // Alias for consistency
         public int CurrentPage { get; set; }
         public int PageSize { get; set; }
         public int TotalPages { get; set; }

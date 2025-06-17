@@ -4,6 +4,7 @@ using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MoviesApp.Controllers
 {
@@ -60,12 +61,29 @@ namespace MoviesApp.Controllers
                 .OrderByDescending(p => p.NgayTao)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync();            // Dữ liệu cho dropdown filters
+            var quocGias = await _context.QuocGias.ToListAsync();
+            var theLoaiPhims = await _context.TheLoaiPhims.ToListAsync();
+            var danhMucs = await _context.DanhMucs.ToListAsync();            ViewBag.QuocGiaList = quocGias.Select(qg => new SelectListItem
+            {
+                Value = qg.MaQG,
+                Text = qg.TenQG,
+                Selected = qg.MaQG == quocGia
+            }).ToList();
 
-            // Dữ liệu cho dropdown filters
-            ViewBag.QuocGias = await _context.QuocGias.ToListAsync();
-            ViewBag.TheLoaiPhims = await _context.TheLoaiPhims.ToListAsync();
-            ViewBag.DanhMucs = await _context.DanhMucs.ToListAsync();
+            ViewBag.TheLoaiList = theLoaiPhims.Select(tl => new SelectListItem
+            {
+                Value = tl.MaTL,
+                Text = tl.TenTL,
+                Selected = tl.MaTL == theLoai
+            }).ToList();
+
+            ViewBag.DanhMucList = danhMucs.Select(dm => new SelectListItem
+            {
+                Value = dm.MaDM,
+                Text = dm.TenDM,
+                Selected = dm.MaDM == danhMuc
+            }).ToList();
 
             // Thông tin phân trang
             ViewBag.CurrentPage = page;
