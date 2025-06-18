@@ -5,200 +5,542 @@
     Layout = "_Layout";
 }
 
-@* Hidden CSRF token for admin delete functionality *@
-@Html.AntiForgeryToken()
+@section Scripts {
+    <script>
+        // Load movie details from API
+        async function loadMovieFromAPI(movieId) {
+            try {
+                const response = await fetch(`/api/PhimApi/${movieId}`);
+                if (response.ok) {
+                    const movie = await response.json();
+                    updateMovieDetails(movie);
+                }
+            } catch (error) {
+                console.error('Error loading movie from API:', error);
+            }
+        }
 
-<div class="movie-details-page">
-    <!-- Hero Section -->
-    <section class="movie-hero" style="background-image: linear-gradient(rgba(10,10,11,0.85), rgba(10,10,11,0.95)), url('@(Model.AnhPhim ?? "/images/hero-bg.jpg")');">
-        <div class="container">
-            <div class="row align-items-center py-5">
-                <!-- Left Side - Additional Poster -->
-                <div class="col-lg-2 col-md-3 d-none d-md-block">
-                    <div class="floating-poster-container">
-                        <div class="floating-poster">
+        function updateMovieDetails(movie) {
+            // Update various elements with API data if available
+            if (movie.anhPhim) {
+                document.querySelector('.movie-poster').src = movie.anhPhim;
+            }
+            // Add more updates as needed
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize movie details page
+            const movieId = @Model.MaPhim;
+            
+            // Add smooth scrolling for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Add loading animation
+            document.querySelector('.movie-poster').addEventListener('load', function() {
+                this.classList.add('loaded');
+            });
+        });
+    </script>
+}
+
+<div class="movie-details-container">
+    <!-- Modern Hero Section 2025 -->
+    <div class="movie-hero-modern" style="background-image: linear-gradient(135deg, rgba(10, 10, 11, 0.95), rgba(26, 26, 28, 0.9)), url('@(Model.AnhPhim ?? "/images/hero-bg.jpg")');">
+        <div class="container-fluid px-4">
+            <div class="row g-4 align-items-center min-vh-70">
+                <!-- Main Poster -->
+                <div class="col-lg-3 col-md-4">
+                    <div class="main-poster-container">
+                        <div class="poster-frame-modern">
                             <img src="@(Model.AnhPhim ?? "/images/no-image.jpg")" 
-                                 alt="@Model.TenPhim Poster" 
-                                 class="floating-poster-img"
+                                 alt="@Model.TenPhim" 
+                                 class="main-poster-modern"
                                  onerror="this.src='/images/no-image.jpg'">
-                            <div class="poster-glow"></div>
+                            <div class="poster-shine-modern"></div>
                         </div>
                         @if (Model.DiemImdb.HasValue)
                         {
-                            <div class="rating-badge">
-                                <div class="rating-score">@Model.DiemImdb.Value.ToString("F1")</div>
-                                <div class="rating-label">IMDb</div>
+                            <div class="rating-section-modern">
+                                <div class="rating-circle-modern">
+                                    <div class="rating-value-modern">@Model.DiemImdb.Value.ToString("F1")</div>
+                                    <div class="rating-label-modern">IMDb</div>
+                                </div>
+                                <div class="rating-stars-modern">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= Math.Round(Model.DiemImdb.Value / 2) ? "active" : "")"></i>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
                 </div>
+                
+                <!-- Movie Information -->
+                <div class="col-lg-6 col-md-5">
+                    <div class="movie-info-modern">
+                        <div class="title-section-modern">
+                            <h1 class="movie-title-modern">@Model.TenPhim</h1>
+                            <div class="movie-meta-modern">
+                                @if (Model.NamPhatHanh.HasValue)
+                                {
+                                    <span class="meta-item-modern year">
+                                        <i class="fas fa-calendar-alt"></i> @Model.NamPhatHanh
+                                    </span>
+                                }
+                                @if (Model.ThoiLuongPhim.HasValue)
+                                {
+                                    <span class="meta-item-modern duration">
+                                        <i class="fas fa-clock"></i> @Model.ThoiLuongPhim phút
+                                    </span>
+                                }
+                                @if (Model.TheLoaiPhim != null)
+                                {
+                                    <span class="meta-item-modern genre">
+                                        <i class="fas fa-masks-theater"></i> @Model.TheLoaiPhim.TenTL
+                                    </span>
+                                }
+                                @if (Model.QuocGia != null)
+                                {
+                                    <span class="meta-item-modern country">
+                                        <i class="fas fa-globe-americas"></i> @Model.QuocGia.TenQG
+                                    </span>
+                                }
+                            </div>
+                        </div>
 
-                <!-- Main Poster -->
-                <div class="col-lg-3 col-md-4">
-                    <div class="main-poster-container">
-                        <img src="@(Model.AnhPhim ?? "/images/no-image.jpg")" 
-                             alt="@Model.TenPhim" 
-                             class="main-poster"
-                             onerror="this.src='/images/no-image.jpg'">
+                        @if (!string.IsNullOrEmpty(Model.MoTaPhim))
+                        {
+                            <div class="synopsis-modern">
+                                <h3 class="section-title-modern">
+                                    <i class="fas fa-quote-left"></i> Nội dung phim
+                                </h3>
+                                <p class="synopsis-text-modern">@Model.MoTaPhim</p>
+                            </div>
+                        }
+
+                        <div class="additional-info-modern">
+                            @if (!string.IsNullOrEmpty(Model.DaoDien))
+                            {
+                                <div class="info-row-modern">
+                                    <span class="info-label-modern"><i class="fas fa-video"></i> Đạo diễn:</span>
+                                    <span class="info-value-modern">@Model.DaoDien</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.DienVien))
+                            {
+                                <div class="info-row-modern">
+                                    <span class="info-label-modern"><i class="fas fa-users"></i> Diễn viên:</span>
+                                    <span class="info-value-modern">@Model.DienVien</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="action-buttons-modern">
+                            <button class="btn-modern btn-primary-modern">
+                                <i class="fas fa-play"></i>
+                                <span>Xem ngay</span>
+                            </button>
+                            <button class="btn-modern btn-secondary-modern">
+                                <i class="fas fa-heart"></i>
+                                <span>Yêu thích</span>
+                            </button>
+                            <button class="btn-modern btn-ghost-modern">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Chia sẻ</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Movie Info -->
-                <div class="col-lg-7 col-md-5">
-                    <div class="movie-info">
-                        <h1 class="movie-title">@Model.TenPhim</h1>
+                
+                <!-- Decorative Poster -->
+                <div class="col-lg-3 col-md-3">
+                    <div class="decorative-poster-container">
+                        <div class="floating-poster-modern">
+                            <img src="@(Model.AnhPhim ?? "/images/no-image.jpg")" 
+                                 alt="@Model.TenPhim Decorative" 
+                                 class="decorative-poster-modern"
+                                 onerror="this.src='/images/no-image.jpg'">
+                            <div class="poster-glow-modern"></div>
+                        </div>
+                        <div class="quality-badges-modern">
+                            <span class="quality-badge-modern hd">HD</span>
+                            <span class="quality-badge-modern subtitle">Vietsub</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
                         
-                        <div class="movie-meta">
+                        <div class="movie-meta-tags">
                             @if (Model.NamPhatHanh.HasValue)
                             {
-                                <span class="meta-item">
-                                    <i class="fas fa-calendar"></i>
-                                    @Model.NamPhatHanh
+                                <span class="meta-tag year">
+                                    <i class="fas fa-calendar"></i> @Model.NamPhatHanh
                                 </span>
                             }
                             @if (Model.ThoiLuongPhim.HasValue)
                             {
-                                <span class="meta-item">
-                                    <i class="fas fa-clock"></i>
-                                    @Model.ThoiLuongPhim phút
+                                <span class="meta-tag duration">
+                                    <i class="fas fa-clock"></i> @Model.ThoiLuongPhim phút
                                 </span>
                             }
                             @if (Model.TheLoaiPhim != null)
                             {
-                                <span class="meta-item">
-                                    <i class="fas fa-theater-masks"></i>
-                                    @Model.TheLoaiPhim.TenTL
+                                <span class="meta-tag genre">
+                                    <i class="fas fa-theater-masks"></i> @Model.TheLoaiPhim.TenTL
                                 </span>
                             }
                             @if (Model.QuocGia != null)
                             {
-                                <span class="meta-item">
-                                    <i class="fas fa-globe"></i>
-                                    @Model.QuocGia.TenQG
+                                <span class="meta-tag country">
+                                    <i class="fas fa-globe"></i> @Model.QuocGia.TenQG
                                 </span>
                             }
                         </div>
 
                         @if (!string.IsNullOrEmpty(Model.MoTaPhim))
                         {
-                            <div class="movie-description">
-                                <p>@Model.MoTaPhim</p>
+                            <div class="movie-synopsis">
+                                <p class="lead">@Model.MoTaPhim</p>
                             </div>
-                        }                        <div class="action-buttons">
-                            <button class="btn btn-primary btn-lg">
-                                <i class="fas fa-play"></i>
-                                Xem Phim
+                        }
+
+                        <div class="action-buttons-hero">
+                            <button class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-play me-2"></i>Xem phim
                             </button>
-                            <button class="btn btn-secondary btn-lg">
-                                <i class="fas fa-heart"></i>
-                                Yêu Thích
+                            <button class="btn btn-outline-light btn-lg me-3">
+                                <i class="fas fa-bookmark me-2"></i>Lưu lại
                             </button>
                             <button class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-share"></i>
-                                Chia Sẻ
+                                <i class="fas fa-share me-2"></i>Chia sẻ
                             </button>
-                            
-                            @* Admin Controls - Only show for admin users *@
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <div class="admin-controls mt-3">
-                                    <hr class="admin-divider">
-                                    <h6 class="admin-controls-title">
-                                        <i class="fas fa-shield-alt"></i>
-                                        Quản lý Admin
-                                    </h6>
-                                    <div class="admin-buttons">
-                                        <a asp-action="Edit" asp-route-id="@Model.MaPhim" class="btn btn-warning btn-lg admin-btn">
-                                            <i class="fas fa-edit"></i>
-                                            Chỉnh Sửa
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-lg admin-btn" 
-                                                onclick="confirmDelete('@Model.MaPhim', '@Model.TenPhim')">
-                                            <i class="fas fa-trash-alt"></i>
-                                            Xóa Phim
-                                        </button>
-                                    </div>
-                                </div>
-                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+                            }
+                            @if (Model.QuocGia != null)
+                            {
+                                <span class="meta-tag country">
+                                    <i class="fas fa-globe"></i> @Model.QuocGia.TenQG
+                                </span>
+                            }
+                        </div>
 
-    <!-- Details Section -->
-    <section class="movie-details-content">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="details-card">
-                        <h3><i class="fas fa-info-circle"></i> Thông Tin Phim</h3>
-                        
                         @if (!string.IsNullOrEmpty(Model.MoTaPhim))
                         {
-                            <div class="detail-section">
-                                <h4>Nội dung phim</h4>
-                                <p>@Model.MoTaPhim</p>
+                            <div class="movie-synopsis">
+                                <p class="lead">@Model.MoTaPhim</p>
                             </div>
                         }
 
-                        @if (!string.IsNullOrEmpty(Model.DaoDien))
-                        {
-                            <div class="detail-section">
-                                <h4>Đạo diễn</h4>
-                                <p>@Model.DaoDien</p>
-                            </div>
-                        }
-
-                        @if (!string.IsNullOrEmpty(Model.DienVien))
-                        {
-                            <div class="detail-section">
-                                <h4>Diễn viên</h4>
-                                <p>@Model.DienVien</p>
-                            </div>
-                        }
+                        <div class="action-buttons-hero">
+                            <button class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-play me-2"></i>Xem phim
+                            </button>
+                            <button class="btn btn-outline-light btn-lg me-3">
+                                <i class="fas fa-bookmark me-2"></i>Lưu lại
+                            </button>
+                            <button class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-share me-2"></i>Chia sẻ
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="col-lg-4">
-                    <div class="details-sidebar">
-                        <div class="details-card">
-                            <h4><i class="fas fa-list"></i> Chi Tiết</h4>
-                            <div class="detail-list">
+    <!-- Movie Information Tabs -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-pills nav-justified movie-tabs mb-4" id="movieTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview" type="button" role="tab">
+                            <i class="fas fa-info-circle me-2"></i>Tổng quan
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cast-tab" data-bs-toggle="pill" data-bs-target="#cast" type="button" role="tab">
+                            <i class="fas fa-users me-2"></i>Diễn viên
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="pill" data-bs-target="#reviews" type="button" role="tab">
+                            <i class="fas fa-star me-2"></i>Đánh giá
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="details-tab" data-bs-toggle="pill" data-bs-target="#details" type="button" role="tab">
+                            <i class="fas fa-list me-2"></i>Chi tiết
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="movieTabsContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="content-card">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-align-left text-primary me-2"></i>Tóm tắt nội dung
+                                    </h3>
+                                    @if (!string.IsNullOrEmpty(Model.MoTaPhim))
+                                    {
+                                        <p class="content-text">@Model.MoTaPhim</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">Chưa có thông tin mô tả phim.</p>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.DaoDien) || !string.IsNullOrEmpty(Model.DienVien))
+                                {
+                                    <div class="content-card">
+                                        <h3 class="section-title">
+                                            <i class="fas fa-video text-primary me-2"></i>Thông tin sản xuất
+                                        </h3>
+                                        <div class="row">
+                                            @if (!string.IsNullOrEmpty(Model.DaoDien))
+                                            {
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="info-item">
+                                                        <strong class="info-label">Đạo diễn:</strong>
+                                                        <span class="info-value">@Model.DaoDien</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.DienVien))
+                                            {
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="info-item">
+                                                        <strong class="info-label">Diễn viên:</strong>
+                                                        <span class="info-value">@Model.DienVien</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                            <div class="col-lg-4">
+                                <!-- Rating Card -->
+                                @if (Model.DiemImdb.HasValue || Model.DiemMetascore.HasValue)
+                                {
+                                    <div class="content-card rating-card">
+                                        <h4 class="section-title">
+                                            <i class="fas fa-star text-warning me-2"></i>Đánh giá
+                                        </h4>
+                                        
+                                        @if (Model.DiemImdb.HasValue)
+                                        {
+                                            <div class="rating-item">
+                                                <div class="rating-source">
+                                                    <i class="fab fa-imdb text-warning"></i>
+                                                    <span>IMDb</span>
+                                                </div>
+                                                <div class="rating-score">
+                                                    <span class="score">@Model.DiemImdb.Value.ToString("F1")</span>
+                                                    <span class="max">/10</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        @if (Model.DiemMetascore.HasValue)
+                                        {
+                                            <div class="rating-item">
+                                                <div class="rating-source">
+                                                    <span>Metascore</span>
+                                                </div>
+                                                <div class="rating-score">
+                                                    <span class="score">@Model.DiemMetascore</span>
+                                                    <span class="max">/100</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        @if (Model.LuotVoteImdb.HasValue)
+                                        {
+                                            <div class="rating-votes">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users me-1"></i>
+                                                    @Model.LuotVoteImdb.Value.ToString("N0") lượt đánh giá
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- Quick Info Card -->
+                                <div class="content-card">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-info text-primary me-2"></i>Thông tin nhanh
+                                    </h4>
+                                    <div class="quick-info-list">
+                                        @if (Model.QuocGia != null)
+                                        {
+                                            <div class="quick-info-item">
+                                                <i class="fas fa-globe text-muted"></i>
+                                                <span>@Model.QuocGia.TenQG</span>
+                                            </div>
+                                        }
+                                        @if (Model.TheLoaiPhim != null)
+                                        {
+                                            <div class="quick-info-item">
+                                                <i class="fas fa-theater-masks text-muted"></i>
+                                                <span>@Model.TheLoaiPhim.TenTL</span>
+                                            </div>
+                                        }
+                                        @if (Model.DanhMuc != null)
+                                        {
+                                            <div class="quick-info-item">
+                                                <i class="fas fa-folder text-muted"></i>
+                                                <span>@Model.DanhMuc.TenDM</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.NgonNgu))
+                                        {
+                                            <div class="quick-info-item">
+                                                <i class="fas fa-language text-muted"></i>
+                                                <span>@Model.NgonNgu</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cast Tab -->
+                    <div class="tab-pane fade" id="cast" role="tabpanel">
+                        <div class="content-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-users text-primary me-2"></i>Diễn viên và ekip
+                            </h3>
+                            <div class="row">
+                                @if (!string.IsNullOrEmpty(Model.DaoDien))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="cast-item">
+                                            <h5 class="cast-role">Đạo diễn</h5>
+                                            <p class="cast-name">@Model.DaoDien</p>
+                                        </div>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.DienVien))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="cast-item">
+                                            <h5 class="cast-role">Diễn viên</h5>
+                                            <p class="cast-name">@Model.DienVien</p>
+                                        </div>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.BienKich))
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="cast-item">
+                                            <h5 class="cast-role">Biên kịch</h5>
+                                            <p class="cast-name">@Model.BienKich</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reviews Tab -->
+                    <div class="tab-pane fade" id="reviews" role="tabpanel">
+                        <div class="content-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-star text-primary me-2"></i>Đánh giá từ người xem
+                            </h3>
+                            <div class="reviews-placeholder">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Chưa có đánh giá nào</h5>
+                                    <p class="text-muted">Hãy là người đầu tiên đánh giá bộ phim này</p>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Viết đánh giá
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade" id="details" role="tabpanel">
+                        <div class="content-card">
+                            <h3 class="section-title">
+                                <i class="fas fa-list text-primary me-2"></i>Thông tin chi tiết
+                            </h3>
+                            <div class="details-grid">
+                                <div class="detail-row">
+                                    <span class="detail-label">Mã phim:</span>
+                                    <span class="detail-value">@Model.MaPhim</span>
+                                </div>
                                 @if (Model.NamPhatHanh.HasValue)
                                 {
-                                    <div class="detail-item">
-                                        <span class="label">Năm phát hành:</span>
-                                        <span class="value">@Model.NamPhatHanh</span>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Năm phát hành:</span>
+                                        <span class="detail-value">@Model.NamPhatHanh</span>
                                     </div>
                                 }
                                 @if (Model.ThoiLuongPhim.HasValue)
                                 {
-                                    <div class="detail-item">
-                                        <span class="label">Thời lượng:</span>
-                                        <span class="value">@Model.ThoiLuongPhim phút</span>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Thời lượng:</span>
+                                        <span class="detail-value">@Model.ThoiLuongPhim phút</span>
                                     </div>
                                 }
-                                @if (Model.TheLoaiPhim != null)
+                                @if (!string.IsNullOrEmpty(Model.LoaiPhim))
                                 {
-                                    <div class="detail-item">
-                                        <span class="label">Thể loại:</span>
-                                        <span class="value">@Model.TheLoaiPhim.TenTL</span>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Loại phim:</span>
+                                        <span class="detail-value">@Model.LoaiPhim</span>
                                     </div>
                                 }
-                                @if (Model.QuocGia != null)
+                                @if (!string.IsNullOrEmpty(Model.QuocGiaSanXuat))
                                 {
-                                    <div class="detail-item">
-                                        <span class="label">Quốc gia:</span>
-                                        <span class="value">@Model.QuocGia.TenQG</span>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Quốc gia sản xuất:</span>
+                                        <span class="detail-value">@Model.QuocGiaSanXuat</span>
                                     </div>
                                 }
-                                @if (Model.DiemImdb.HasValue)
+                                @if (!string.IsNullOrEmpty(Model.XepHang))
                                 {
-                                    <div class="detail-item">
-                                        <span class="label">Điểm IMDb:</span>
-                                        <span class="value">@Model.DiemImdb.Value.ToString("F1")/10</span>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Xếp hạng:</span>
+                                        <span class="detail-value">@Model.XepHang</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.TinhTrang))
+                                {
+                                    <div class="detail-row">
+                                        <span class="detail-label">Tình trạng:</span>
+                                        <span class="detail-value">
+                                            <span class="badge bg-success">@Model.TinhTrang</span>
+                                        </span>
                                     </div>
                                 }
                             </div>
@@ -207,446 +549,989 @@
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Back to List Button -->
+    <div class="container mb-5">
+        <div class="text-center">
+            <a asp-action="Index" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+            </a>
+        </div>
+    </div>
 </div>
 
 <style>
-/* Movie Details Page Styles */
-.movie-details-page {
-    color: var(--text-primary, #E0E0E0);
+/* ========================================
+   MODERN MOVIE DETAILS 2025 STYLES
+   ======================================== */
+
+:root {
+    --primary-bg: #0A0A0B;
+    --secondary-bg: #1A1A1C;
+    --tertiary-bg: #2A2A2C;
+    --accent-blue: #004D61;
+    --accent-purple: #822659;
+    --accent-gold: #FFB800;
+    --text-primary: #E0E0E0;
+    --text-secondary: #B0B0B0;
+    --text-muted: #808080;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+    --gradient-primary: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    --gradient-secondary: linear-gradient(135deg, var(--accent-purple), var(--accent-gold));
+    --gradient-text: linear-gradient(135deg, #00D4FF, #FF6B9D);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+    --radius-lg: 20px;
+    --radius-xl: 30px;
+}
+
+.movie-details-container {
+    background: var(--primary-bg);
     min-height: 100vh;
 }
 
-/* Hero Section */
-.movie-hero {
+/* Modern Hero Section */
+.movie-hero-modern {
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    min-height: 70vh;
     position: relative;
-    display: flex;
-    align-items: center;
+    padding: 80px 0 60px 0;
+    overflow: hidden;
 }
 
-/* Floating Poster */
-.floating-poster-container {
+.movie-hero-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(10, 10, 11, 0.95) 0%, 
+        rgba(26, 26, 28, 0.9) 50%, 
+        rgba(10, 10, 11, 0.95) 100%);
+    z-index: 1;
+}
+
+.movie-hero-modern .container-fluid {
+    position: relative;
+    z-index: 2;
+}
+
+.min-vh-70 {
+    min-height: 70vh;
+}
+
+/* Main Poster Styling */
+.main-poster-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.poster-frame-modern {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    transform: perspective(1000px) rotateY(-5deg);
+    transition: all 0.4s ease;
+}
+
+.poster-frame-modern:hover {
+    transform: perspective(1000px) rotateY(0deg) scale(1.05);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.main-poster-modern {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+    transition: all 0.4s ease;
+}
+
+.poster-shine-modern {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+        transparent 30%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.poster-frame-modern:hover .poster-shine-modern {
+    transform: translateX(100%);
+}
+
+/* Rating Section */
+.rating-section-modern {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
 }
 
-.floating-poster {
+.rating-circle-modern {
+    width: 100px;
+    height: 100px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    border: 3px solid var(--glass-border);
     position: relative;
-    animation: float 3s ease-in-out infinite;
+    overflow: hidden;
 }
 
-.floating-poster-img {
-    width: 140px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+.rating-circle-modern::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, 
+        transparent 0deg, 
+        rgba(255, 255, 255, 0.1) 180deg, 
+        transparent 360deg);
+    animation: rotate 3s linear infinite;
+}
+
+.rating-value-modern {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    z-index: 1;
+}
+
+.rating-label-modern {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 1;
+}
+
+.rating-stars-modern {
+    display: flex;
+    gap: 0.2rem;
+}
+
+.rating-stars-modern .fa-star {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.rating-stars-modern .fa-star.active {
+    color: var(--accent-gold);
+    text-shadow: 0 0 10px rgba(255, 184, 0, 0.5);
+}
+
+/* Movie Information */
+.movie-info-modern {
+    color: var(--text-primary);
+    padding: 2rem 0;
+}
+
+.title-section-modern {
+    margin-bottom: 2rem;
+}
+
+.movie-title-modern {
+    font-size: 4rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.movie-meta-modern {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.meta-item-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    font-weight: 500;
     transition: all 0.3s ease;
 }
 
-.floating-poster:hover .floating-poster-img {
-    transform: scale(1.05);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+.meta-item-modern:hover {
+    background: var(--glass-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.meta-item-modern i {
+    color: var(--accent-blue);
+    font-size: 1.1rem;
+}
+
+/* Synopsis */
+.synopsis-modern {
+    margin-bottom: 2rem;
+}
+
+.section-title-modern {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.section-title-modern i {
+    color: var(--accent-purple);
+    font-size: 1.2rem;
+}
+
+.synopsis-text-modern {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+}
+
+/* Additional Info */
+.additional-info-modern {
+    margin-bottom: 2rem;
+}
+
+.info-row-modern {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.info-row-modern:hover {
+    background: var(--glass-hover);
+    transform: translateX(10px);
+}
+
+.info-label-modern {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-label-modern i {
+    color: var(--accent-blue);
+}
+
+.info-value-modern {
+    color: var(--text-secondary);
+    text-align: right;
+    max-width: 60%;
+}
+
+/* Action Buttons */
+.action-buttons-modern {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary-modern {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
+    color: white;
+}
+
+.btn-secondary-modern {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary-modern:hover {
+    background: var(--glass-hover);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.btn-ghost-modern {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+.btn-ghost-modern:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+/* Decorative Poster */
+.decorative-poster-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem 0;
+}
+
+.floating-poster-modern {
+    position: relative;
+    transform: translateY(-20px);
+    animation: floatAnimation 4s ease-in-out infinite;
+}
+
+.decorative-poster-modern {
+    width: 200px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    border: 2px solid var(--glass-border);
+    transition: all 0.4s ease;
+}
+
+.decorative-poster-modern:hover {
+    transform: scale(1.05) rotateY(10deg);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+}
+
+.poster-glow-modern {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: var(--gradient-secondary);
+    border-radius: calc(var(--radius-lg) + 10px);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    filter: blur(20px);
+}
+
+.floating-poster-modern:hover .poster-glow-modern {
+    opacity: 0.6;
+}
+
+.quality-badges-modern {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.quality-badge-modern {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.quality-badge-modern.hd {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.quality-badge-modern.subtitle {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+}
+
+/* Animations */
+@@keyframes floatAnimation {
+    0%, 100% {
+        transform: translateY(-20px);
+    }
+    50% {
+        transform: translateY(-30px);
+    }
+}
+
+@@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .movie-title-modern {
+        font-size: 2.5rem;
+    }
+    
+    .movie-hero-modern {
+        padding: 60px 0 40px 0;
+    }
+    
+    .movie-meta-modern {
+        justify-content: center;
+    }
+    
+    .action-buttons-modern {
+        justify-content: center;
+    }
+    
+    .decorative-poster-container {
+        display: none;
+    }
+    
+    .poster-frame-modern {
+        transform: none;
+    }
+    
+    .main-poster-modern {
+        max-width: 280px;
+    }
+}
+
+@@media (max-width: 576px) {
+    .movie-title-modern {
+        font-size: 2rem;
+    }
+    
+    .btn-modern {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .rating-circle-modern {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .rating-value-modern {
+        font-size: 1.4rem;
+    }
+    
+    .info-row-modern {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .info-value-modern {
+        max-width: 100%;
+        text-align: left;
+    }
+}
+
+.movie-meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 2rem;
+}
+
+.meta-tag {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.movie-synopsis {
+    margin-bottom: 2rem;
+}
+
+.movie-synopsis .lead {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.action-buttons-hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.action-buttons-hero .btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border-width: 2px;
+}
+
+.action-buttons-hero .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.action-buttons-hero .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.movie-tabs {
+    background: white;
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.movie-tabs .nav-link {
+    border-radius: 10px;
+    font-weight: 600;
+    color: #6c757d;
+    transition: all 0.3s ease;
+    border: none;
+    margin: 0 5px;
+}
+
+.movie-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.movie-tabs .nav-link:hover:not(.active) {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.content-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.content-card:hover {
+    transform: translateY(-5px);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+}
+
+.content-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #4a5568;
+    text-align: justify;
+}
+
+.info-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.info-label {
+    color: #2d3748;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    color: #4a5568;
+    font-size: 1rem;
+}
+
+.rating-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.rating-card .section-title {
+    color: white;
+}
+
+.rating-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.rating-item:last-child {
+    border-bottom: none;
+}
+
+.rating-source {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.rating-score .score {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.rating-score .max {
+    opacity: 0.7;
+}
+
+.rating-votes {
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.quick-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quick-info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.quick-info-item:last-child {
+    border-bottom: none;
+}
+
+.cast-item {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.cast-role {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.cast-name {
+    color: #2d3748;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.details-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #2d3748;
+    flex: 1;
+}
+
+.detail-value {
+    color: #4a5568;
+    text-align: right;
+    flex: 1;
+}
+
+.reviews-placeholder {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+}
+
+/* Additional Poster Styling */
+.additional-poster-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.floating-poster {
+    position: relative;
+    transform: translateY(-20px);
+    animation: floatAnimation 3s ease-in-out infinite;
+}
+
+.additional-poster {
+    width: 220px;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s ease;
+}
+
+.additional-poster:hover {
+    transform: scale(1.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .poster-glow {
     position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-    border-radius: 15px;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    border-radius: 20px;
     z-index: -1;
     opacity: 0;
     transition: opacity 0.3s ease;
-    filter: blur(10px);
+    filter: blur(15px);
+    animation: glowRotate 4s linear infinite;
 }
 
 .floating-poster:hover .poster-glow {
     opacity: 0.7;
 }
 
-/* Rating Badge */
-.rating-badge {
+.rating-circle {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 50%;
-    width: 80px;
-    height: 80px;
+    width: 110px;
+    height: 110px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    border: 4px solid rgba(255, 255, 255, 0.25);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-.rating-score {
-    font-size: 1.5rem;
-    font-weight: 700;
+.rating-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
+
+.rating-value {
+    font-size: 2rem;
+    font-weight: 900;
     color: white;
     line-height: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .rating-label {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.9);
     text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Main Poster */
-.main-poster-container {
-    text-align: center;
-}
-
-.main-poster {
-    width: 100%;
-    max-width: 280px;
-    height: auto;
-    border-radius: 15px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
-}
-
-.main-poster:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-}
-
-/* Movie Info */
-.movie-info {
-    padding-left: 2rem;
-}
-
-.movie-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--text-primary, #E0E0E0);
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.movie-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-secondary, #B0B0B0);
-}
-
-.meta-item i {
-    color: var(--accent-blue, #004D61);
-}
-
-.movie-description {
-    margin-bottom: 2rem;
-}
-
-.movie-description p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--text-secondary, #B0B0B0);
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    text-decoration: none;
+    letter-spacing: 1.5px;
     font-weight: 600;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--accent-blue, #004D61), var(--accent-purple, #822659));
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 77, 97, 0.3);
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary, #E0E0E0);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-outline-light {
-    background: transparent;
-    color: var(--text-primary, #E0E0E0);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-.btn-outline-light:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Admin Controls */
-.admin-controls {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.admin-divider {
-    border-color: rgba(255, 255, 255, 0.1);
-    margin: 1rem 0;
-}
-
-.admin-controls-title {
-    color: var(--accent-orange, #FFB800);
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.admin-controls-title i {
-    color: var(--accent-orange, #FFB800);
-}
-
-.admin-buttons {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.admin-btn {
-    min-width: 150px;
-    justify-content: center;
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, var(--accent-orange, #FFB800), #ff9500);
-    color: white;
-    border: none;
-}
-
-.btn-warning:hover {
-    background: linear-gradient(135deg, #ff9500, #e6850e);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(255, 184, 0, 0.3);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #dc3545, #c82333);
-    color: white;
-    border: none;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(135deg, #c82333, #bd2130);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(220, 53, 69, 0.3);
-}
-
-/* Details Content */
-.movie-details-content {
-    padding: 4rem 0;
-    background: var(--secondary-bg, #1A1A1C);
-}
-
-.details-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    backdrop-filter: blur(20px);
-}
-
-.details-card h3,
-.details-card h4 {
-    color: var(--text-primary, #E0E0E0);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.details-card h3 i,
-.details-card h4 i {
-    color: var(--accent-blue, #004D61);
-}
-
-.detail-section {
-    margin-bottom: 2rem;
-}
-
-.detail-section h4 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-}
-
-.detail-section p {
-    color: var(--text-secondary, #B0B0B0);
-    line-height: 1.6;
-}
-
-/* Details List */
-.detail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.detail-item:last-child {
-    border-bottom: none;
-}
-
-.detail-item .label {
-    font-weight: 600;
-    color: var(--text-primary, #E0E0E0);
-}
-
-.detail-item .value {
-    color: var(--text-secondary, #B0B0B0);
-}
-
-/* Animations */
-@@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
+@@keyframes glowRotate {
+    0% {
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    }
+    25% {
+        background: linear-gradient(45deg, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b);
     }
     50% {
-        transform: translateY(-10px);
+        background: linear-gradient(45deg, #45b7d1, #96ceb4, #feca57, #ff6b6b, #4ecdc4);
+    }
+    75% {
+        background: linear-gradient(45deg, #96ceb4, #feca57, #ff6b6b, #4ecdc4, #45b7d1);
+    }
+    100% {
+        background: linear-gradient(45deg, #feca57, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
     }
 }
 
-/* Responsive */
+@@keyframes floatAnimation {
+    0%, 100% {
+        transform: translateY(-20px);
+    }
+    50% {
+        transform: translateY(-30px);
+    }
+}
+
+/* Responsive Design */
 @@media (max-width: 768px) {
     .movie-title {
-        font-size: 2rem;
+        font-size: 2.5rem;
     }
     
-    .movie-info {
+    .movie-hero-content {
         padding-left: 0;
-        text-align: center;
         margin-top: 2rem;
+        text-align: center;
     }
     
-    .movie-meta {
+    .movie-meta-tags {
         justify-content: center;
     }
     
-    .action-buttons {
+    .action-buttons-hero {
         justify-content: center;
     }
     
-    .floating-poster-container {
+    .movie-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
+    
+    .content-card {
+        padding: 1.5rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .additional-poster-container {
         display: none;
+    }
+}
+    
+    .detail-value {
+        text-align: left;
     }
 }
 
 @@media (max-width: 576px) {
     .movie-title {
-        font-size: 1.5rem;
+        font-size: 2rem;
     }
     
-    .action-buttons {
-        flex-direction: column;
-        align-items: center;
+    .movie-tabs {
+        padding: 5px;
     }
     
-    .admin-buttons {
-        flex-direction: column;
-        width: 100%;
+    .movie-tabs .nav-link {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+        margin: 0 2px;
     }
     
-    .admin-btn {
-        width: 100%;
-        max-width: 300px;
+    .content-card {
+        padding: 1rem;
     }
-    
-    .btn {
-        width: 100%;
-        max-width: 300px;
+}
+
+/* Animation for loading */
+@@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.content-card:nth-child(even) {
+    animation-delay: 0.1s;
+}
+
+.content-card:nth-child(odd) {
+    animation-delay: 0.2s;
 }
 </style>
-
-<script>
-// Confirm delete function
-function confirmDelete(phimId, tenPhim) {
-    if (confirm(`Bạn có chắc chắn muốn xóa phim "${tenPhim}"?\n\nHành động này không thể hoàn tác!`)) {
-        // Create form and submit to delete action
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '@Url.Action("Delete", "Phim")/' + phimId;
-        
-        // Add CSRF token
-        const token = document.querySelector('input[name="__RequestVerificationToken"]');
-        if (token) {
-            const hiddenToken = document.createElement('input');
-            hiddenToken.type = 'hidden';
-            hiddenToken.name = '__RequestVerificationToken';
-            hiddenToken.value = token.value;
-            form.appendChild(hiddenToken);
-        }
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-// Add smooth scroll for admin section
-document.addEventListener('DOMContentLoaded', function() {
-    const adminControls = document.querySelector('.admin-controls');
-    if (adminControls) {
-        adminControls.style.opacity = '0';
-        adminControls.style.transform = 'translateY(20px)';
-        adminControls.style.transition = 'all 0.5s ease';
-        
-        setTimeout(() => {
-            adminControls.style.opacity = '1';
-            adminControls.style.transform = 'translateY(0)';
-        }, 300);
-    }
-});
-</script>

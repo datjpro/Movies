@@ -774,22 +774,6 @@ body {
         flex-direction: column;
         animation: none;
     }
-      .recommendation-badge {
-        font-size: 0.55rem;
-        padding: 2px 4px;
-        border-radius: 6px;
-        top: 4px;
-        left: 4px;
-        max-width: calc(100% - 8px);
-    }
-    
-    .recommendation-badge span {
-        max-width: 60px;
-    }
-    
-    .recommendation-badge i {
-        font-size: 0.5rem;
-    }
 }
 
 /* Scrollbar Styling */
@@ -956,40 +940,30 @@ class CCFilmApp {
         `;
         
         carousel.innerHTML = html;
-    }    // Load recommended movies with AI-like personalization
+    }
+
+    // Load recommended movies with AI-like personalization
     async loadRecommendedMovies() {
         try {
-            // Use the new recommended endpoint for better suggestions
-            const response = await fetch(`${this.apiBase}/recommended?pageSize=8`);
+            const response = await fetch(`${this.apiBase}?pageSize=8`);
             const data = await response.json();
             this.renderRecommendedGrid(data);
         } catch (error) {
             console.error('Error loading recommended movies:', error);
-            // Fallback to regular movies if recommendation fails
-            try {
-                const fallbackResponse = await fetch(`${this.apiBase}?pageSize=8`);
-                const fallbackData = await fallbackResponse.json();
-                this.renderRecommendedGrid(fallbackData, true);
-            } catch (fallbackError) {
-                this.showError('recommendedMovies', 'Không thể tải đề xuất phim');
-            }
+            this.showError('recommendedMovies', 'Không thể tải đề xuất phim');
         }
-    }    // Render recommended movies grid
-    renderRecommendedGrid(movies, isFallback = false) {
+    }
+
+    // Render recommended movies grid
+    renderRecommendedGrid(movies) {
         const grid = document.getElementById('recommendedMovies');
         if (!movies.length) return;
 
         const html = `
             <div class="movies-grid">
                 ${movies.map(movie => `
-                    <div class="movie-card recommended-card" onclick="ccFilmApp.viewMovie('${movie.maPhim}')">
+                    <div class="movie-card" onclick="ccFilmApp.viewMovie('${movie.maPhim}')">
                         <div class="movie-poster-container">
-                            ${movie.recommendationReason && !isFallback ? `
-                                <div class="recommendation-badge">
-                                    <i class="fas fa-sparkles"></i>
-                                    <span>${movie.recommendationReason}</span>
-                                </div>
-                            ` : ''}
                             <img src="${movie.anhPhim || '/images/no-image.jpg'}" 
                                  alt="${movie.tenPhim}" 
                                  class="movie-poster"
@@ -1017,7 +991,6 @@ class CCFilmApp {
                                     </span>
                                 ` : ''}
                                 ${movie.namPhatHanh ? `<span class="movie-year">${movie.namPhatHanh}</span>` : ''}
-                                ${movie.theLoai ? `<span class="movie-genre">${movie.theLoai}</span>` : ''}
                             </div>
                             <p class="movie-description">${this.truncateText(movie.moTaPhim || 'Chưa có mô tả', 60)}</p>
                         </div>
@@ -1399,76 +1372,11 @@ class CCFilmApp {
                 gap: 1rem;
                 color: var(--text-secondary);
             }
-              .movie-poster-container {
+            
+            .movie-poster-container {
                 position: relative;
                 overflow: hidden;
                 border-radius: 15px 15px 0 0;
-            }
-              /* Recommendation Badge */
-            .recommendation-badge {
-                position: absolute;
-                top: 6px;
-                left: 6px;
-                background: linear-gradient(135deg, var(--accent-orange, #FFB800), #ff9500);
-                color: white;
-                padding: 3px 6px;
-                border-radius: 8px;
-                font-size: 0.65rem;
-                font-weight: 600;
-                display: flex;
-                align-items: center;
-                gap: 3px;
-                z-index: 3;
-                backdrop-filter: blur(10px);
-                box-shadow: 0 2px 8px rgba(255, 184, 0, 0.4);
-                max-width: calc(100% - 12px);
-                overflow: hidden;
-                white-space: nowrap;
-            }
-            
-            .recommendation-badge i {
-                font-size: 0.6rem;
-                animation: sparkle 2s ease-in-out infinite;
-                flex-shrink: 0;
-            }
-            
-            .recommendation-badge span {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                max-width: 120px;
-            }
-            
-            @@keyframes sparkle {
-                0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
-                50% { transform: scale(1.1) rotate(10deg); opacity: 0.8; }
-            }
-            
-            .recommended-card {
-                position: relative;
-                overflow: hidden;
-            }
-            
-            .recommended-card::before {
-                content: '';
-                position: absolute;
-                top: -1px;
-                left: -1px;
-                right: -1px;
-                bottom: -1px;
-                background: linear-gradient(135deg, var(--accent-orange, #FFB800), var(--accent-purple, #822659));
-                border-radius: 16px;
-                z-index: -1;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-            
-            .recommended-card:hover::before {
-                opacity: 0.2;
-            }
-            
-            .recommended-card .movie-poster-container {
-                position: relative;
-                z-index: 1;
             }
             
             .movie-overlay {

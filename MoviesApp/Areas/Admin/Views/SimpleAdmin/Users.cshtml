@@ -95,71 +95,41 @@
                             }
                         </tbody>
                     </table>
-                </div>                <!-- Pagination -->
+                </div>
+
+                <!-- Pagination -->
                 @if (ViewBag.TotalPages > 1)
-                {                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div class="text-muted">
-                            Hiển thị @((ViewBag.CurrentPage - 1) * 10 + 1) - @(Math.Min(ViewBag.CurrentPage * 10, (int)ViewBag.TotalUsers)) 
-                            trong tổng số @ViewBag.TotalUsers người dùng
-                        </div>
-                        <nav aria-label="Phân trang người dùng">
-                            <ul class="pagination mb-0">
-                                @if (ViewBag.CurrentPage > 1)
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" href="@Url.Action("Users", new { page = 1 })" 
-                                           title="Trang đầu">
-                                            <i class="fas fa-angle-double-left"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.CurrentPage - 1 })" 
-                                           title="Trang trước">
-                                            <i class="fas fa-angle-left"></i>
-                                        </a>
-                                    </li>
-                                }
+                {
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.CurrentPage - 1 })">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            }
 
-                                @{
-                                    int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
-                                    int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
-                                    
-                                    if (endPage - startPage < 4 && ViewBag.TotalPages > 4)
-                                    {
-                                        if (startPage == 1)
-                                            endPage = Math.Min(ViewBag.TotalPages, startPage + 4);
-                                        else if (endPage == ViewBag.TotalPages)
-                                            startPage = Math.Max(1, endPage - 4);
-                                    }
-                                }
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Users", new { page = i })">
+                                        @i
+                                    </a>
+                                </li>
+                            }
 
-                                @for (int i = startPage; i <= endPage; i++)
-                                {
-                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                                        <a class="page-link" href="@Url.Action("Users", new { page = i })">
-                                            @i
-                                        </a>
-                                    </li>
-                                }
-
-                                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                                {
-                                    <li class="page-item">
-                                        <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.CurrentPage + 1 })" 
-                                           title="Trang sau">
-                                            <i class="fas fa-angle-right"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.TotalPages })" 
-                                           title="Trang cuối">
-                                            <i class="fas fa-angle-double-right"></i>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </nav>
-                    </div>
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Users", new { page = ViewBag.CurrentPage + 1 })">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
                 }
             }
             else
