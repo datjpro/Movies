@@ -1,0 +1,272 @@
+@model IEnumerable<MoviesApp.Models.TapPhim>
+
+@{
+    ViewData["Title"] = "Quản lý Tập Phim - " + ViewBag.Phim.TenPhim;
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="admin-page-title">
+                <i class="fas fa-play-circle"></i>
+                Quản lý Tập Phim
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Movies" asp-action="Index">Quản lý Phim</a>
+                    </li>
+                    <li class="breadcrumb-item active">@ViewBag.Phim.TenPhim</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a asp-action="Create" asp-route-phimId="@ViewBag.PhimId" class="btn btn-admin-primary">
+                <i class="fas fa-plus me-2"></i>Thêm Tập Mới
+            </a>
+            <a asp-controller="Movies" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Movie Info Card -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-film me-2"></i>
+                Thông tin phim: @ViewBag.Phim.TenPhim
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-2">
+                    <img src="@(ViewBag.Phim.AnhPhim ?? "/images/no-image.jpg")" 
+                         alt="@ViewBag.Phim.TenPhim" 
+                         class="img-fluid rounded">
+                </div>
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Năm phát hành:</strong> @ViewBag.Phim.NamPhatHanh</p>
+                            <p><strong>Thời lượng:</strong> @ViewBag.Phim.ThoiLuongPhim phút</p>
+                            <p><strong>Số tập hiện tại:</strong> @ViewBag.TotalItems tập</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Đạo diễn:</strong> @ViewBag.Phim.DaoDien</p>
+                            <p><strong>Điểm IMDb:</strong> @ViewBag.Phim.DiemImdb</p>
+                            <p><strong>Loại phim:</strong> @ViewBag.Phim.LoaiPhim</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Episodes List -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>
+                Danh sách tập phim (@ViewBag.TotalItems tập)
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="10%">Tập</th>
+                                <th width="25%">Tên tập</th>
+                                <th width="15%">Thời lượng</th>
+                                <th width="15%">Ngày phát hành</th>
+                                <th width="15%">Video URL</th>
+                                <th width="20%">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary fs-6">
+                                            Tập @item.SoTapThuTu
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>@(item.TenTap ?? "Chưa có tên")</strong>
+                                        @if (!string.IsNullOrEmpty(item.ChiTiet))
+                                        {
+                                            <br><small class="text-muted">@(item.ChiTiet.Length > 100 ? item.ChiTiet.Substring(0, 100) + "..." : item.ChiTiet)</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.ThoiLuongTap.HasValue)
+                                        {
+                                            <span>@item.ThoiLuongTap phút</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa cập nhật</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.NgayPhatHanh.HasValue)
+                                        {
+                                            <span>@item.NgayPhatHanh.Value.ToString("dd/MM/yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa cập nhật</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.VideoUrl))
+                                        {
+                                            <a href="@item.VideoUrl" target="_blank" class="btn btn-sm btn-outline-info" title="Xem video">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có link</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@item.MaTap" 
+                                               class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="confirmDelete('@item.MaTap', 'Tập @item.SoTapThuTu: @item.TenTap')" 
+                                                    title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            Hiển thị @((ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1) - @(Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalItems)) 
+                            trong tổng số @ViewBag.TotalItems tập
+                        </div>
+                        <nav aria-label="Phân trang tập phim">
+                            <ul class="pagination mb-0">
+                                @if (ViewBag.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { phimId = ViewBag.PhimId, page = 1, pageSize = ViewBag.PageSize })" 
+                                           title="Trang đầu">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { phimId = ViewBag.PhimId, page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize })" 
+                                           title="Trang trước">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                }
+
+                                @{
+                                    int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                                    int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+                                    
+                                    if (endPage - startPage < 4 && ViewBag.TotalPages > 4)
+                                    {
+                                        if (startPage == 1)
+                                            endPage = Math.Min(ViewBag.TotalPages, startPage + 4);
+                                        else if (endPage == ViewBag.TotalPages)
+                                            startPage = Math.Max(1, endPage - 4);
+                                    }
+                                }
+
+                                @for (int i = startPage; i <= endPage; i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { phimId = ViewBag.PhimId, page = i, pageSize = ViewBag.PageSize })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { phimId = ViewBag.PhimId, page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize })" 
+                                           title="Trang sau">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { phimId = ViewBag.PhimId, page = ViewBag.TotalPages, pageSize = ViewBag.PageSize })" 
+                                           title="Trang cuối">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-play-circle fa-3x text-muted mb-3"></i>
+                    <h5>Chưa có tập phim nào</h5>
+                    <p class="text-muted">Thêm tập phim đầu tiên cho bộ phim này</p>
+                    <a asp-action="Create" asp-route-phimId="@ViewBag.PhimId" class="btn btn-admin-primary">
+                        <i class="fas fa-plus me-2"></i>Thêm tập đầu tiên
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Form -->
+<form id="deleteForm" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+function confirmDelete(tapId, tapName) {
+    if (confirm(`Bạn có chắc chắn muốn xóa "${tapName}"?\n\nHành động này không thể hoàn tác!`)) {
+        const form = document.getElementById('deleteForm');
+        form.action = '@Url.Action("Delete", "TapPhim", new { Area = "Admin" })/' + tapId;
+        form.submit();
+    }
+}
+
+// Success/Error messages
+document.addEventListener('DOMContentLoaded', function() {
+    @if (TempData["Success"] != null)
+    {
+        <text>
+        // Show success message (you can use toast notification here)
+        alert('@TempData["Success"]');
+        </text>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <text>
+        // Show error message
+        alert('@TempData["Error"]');
+        </text>
+    }
+});
+</script>

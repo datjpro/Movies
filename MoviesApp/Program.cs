@@ -202,6 +202,16 @@ app.MapControllerRoute(
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
+    name: "phim-episode",
+    pattern: "Phim/{id}/tap{episode:int}",
+    defaults: new { controller = "Phim", action = "Details" });
+
+app.MapControllerRoute(
+    name: "phim-watch",
+    pattern: "xem/{id}/tap{episode:int}",
+    defaults: new { controller = "Phim", action = "Watch" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();

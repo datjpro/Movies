@@ -1,0 +1,386 @@
+@model MoviesApp.Models.TapPhim
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Tập " + Model.SoTapThuTu + " - " + ViewBag.Phim.TenPhim;
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="admin-page-title">
+                <i class="fas fa-edit"></i>
+                Chỉnh sửa Tập @Model.SoTapThuTu
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Movies" asp-action="Index">Quản lý Phim</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-route-maPhim="@Model.MaPhim">@ViewBag.Phim.TenPhim</a>
+                    </li>
+                    <li class="breadcrumb-item active">Tập @Model.SoTapThuTu</li>
+                </ol>
+            </nav>
+        </div>        <div>
+            <a asp-action="Index" asp-route-maPhim="@Model.MaPhim" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Movie Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-film me-2"></i>
+                        Thông tin phim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img src="@(ViewBag.Phim.AnhPhim ?? "/images/no-image.jpg")" 
+                             alt="@ViewBag.Phim.TenPhim" 
+                             class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                    <h6 class="card-title">@ViewBag.Phim.TenPhim</h6>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            @ViewBag.Phim.NamPhatHanh • @ViewBag.Phim.LoaiPhim
+                        </small>
+                    </p>
+                    <div class="mt-3">
+                        <span class="badge bg-info">Mã tập: @Model.MaTap</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="col-lg-8">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Chỉnh sửa thông tin tập phim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <input asp-for="MaTap" type="hidden" />
+                        <input asp-for="MaPhim" type="hidden" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="SoTapThuTu" class="form-label">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    Số tập thứ tự <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="SoTapThuTu" class="form-control" placeholder="Nhập số tập" />
+                                <span asp-validation-for="SoTapThuTu" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ThoiLuongTap" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Thời lượng (phút)
+                                </label>
+                                <input asp-for="ThoiLuongTap" class="form-control" placeholder="Nhập thời lượng" />
+                                <span asp-validation-for="ThoiLuongTap" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TenTap" class="form-label">
+                                <i class="fas fa-tag me-1"></i>
+                                Tên tập
+                            </label>
+                            <input asp-for="TenTap" class="form-control" placeholder="Nhập tên tập phim" />
+                            <span asp-validation-for="TenTap" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ChiTiet" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>
+                                Mô tả chi tiết
+                            </label>
+                            <textarea asp-for="ChiTiet" class="form-control" rows="4" 
+                                      placeholder="Nhập mô tả nội dung của tập phim..."></textarea>
+                            <span asp-validation-for="ChiTiet" class="text-danger"></span>
+                        </div>                        <div class="mb-3">
+                            <label asp-for="VideoUrl" class="form-label">
+                                <i class="fas fa-link me-1"></i>
+                                URL Video
+                            </label>
+                            <input asp-for="VideoUrl" class="form-control" placeholder="https://..." id="VideoUrl" />
+                            <span asp-validation-for="VideoUrl" class="text-danger"></span>
+                            <div class="form-text">
+                                <div class="alert alert-info mt-2">
+                                    <h6><i class="fas fa-info-circle me-1"></i> Hỗ trợ các loại video:</h6>
+                                    <ul class="mb-0">
+                                        <li><strong>YouTube:</strong> 
+                                            <code>https://www.youtube.com/watch?v=VIDEO_ID</code><br>
+                                            <code>https://youtu.be/VIDEO_ID</code>
+                                        </li>
+                                        <li><strong>Vimeo:</strong> 
+                                            <code>https://vimeo.com/VIDEO_ID</code>
+                                        </li>
+                                        <li><strong>File trực tiếp:</strong> 
+                                            <code>https://example.com/video.mp4</code><br>
+                                            <code>https://cc.animeheaven.me/video.mp4?cb031d16e20fa6ec8597feaad965bff4</code>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                            {
+                                <div class="mt-2">
+                                    <a href="@Model.VideoUrl" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        Xem video hiện tại
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Preview Video -->
+                        <div class="mb-3" id="videoPreview" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-eye me-1"></i>
+                                Xem trước video
+                            </label>
+                            <div class="video-preview-container">
+                                <div id="videoPreviewContent"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NgayPhatHanh" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>
+                                Ngày phát hành
+                            </label>
+                            <input asp-for="NgayPhatHanh" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="NgayPhatHanh" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-admin-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Cập nhật Tập Phim
+                            </button>
+                            <a asp-action="Index" asp-route-maPhim="@Model.MaPhim" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                Hủy
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" 
+                                    onclick="confirmDelete('@Model.MaTap', 'Tập @Model.SoTapThuTu: @Model.TenTap')">
+                                <i class="fas fa-trash me-2"></i>
+                                Xóa tập này
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Form -->
+<form id="deleteForm" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Format datetime-local input
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('NgayPhatHanh');
+            if (dateInput.value) {
+                // Convert to local datetime format
+                const date = new Date(dateInput.value);
+                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+                dateInput.value = date.toISOString().slice(0, 16);
+            }
+
+            // Video preview functionality
+            const videoUrlInput = document.getElementById('VideoUrl');
+            const videoPreview = document.getElementById('videoPreview');
+            const videoPreviewContent = document.getElementById('videoPreviewContent');
+
+            // Check initial video URL
+            if (videoUrlInput.value.trim()) {
+                validateAndPreviewVideo(videoUrlInput.value.trim());
+            }
+
+            videoUrlInput.addEventListener('input', function() {
+                const url = this.value.trim();
+                if (url) {
+                    validateAndPreviewVideo(url);
+                } else {
+                    hideVideoPreview();
+                }
+            });
+
+            function validateAndPreviewVideo(url) {
+                const embedUrl = convertVideoUrl(url);
+                const videoType = getVideoType(url);
+                
+                if (embedUrl && (videoType === 'youtube' || videoType === 'vimeo')) {
+                    showVideoPreview(embedUrl, videoType);
+                    videoUrlInput.classList.remove('is-invalid');
+                    videoUrlInput.classList.add('is-valid');
+                } else if (isDirectVideoUrl(url)) {
+                    showVideoPreview(url, 'direct');
+                    videoUrlInput.classList.remove('is-invalid');
+                    videoUrlInput.classList.add('is-valid');
+                } else {
+                    hideVideoPreview();
+                    videoUrlInput.classList.remove('is-valid');
+                    videoUrlInput.classList.add('is-invalid');
+                }
+            }
+
+            function isDirectVideoUrl(url) {
+                if (!url) return false;
+                
+                // Check for video file extensions in the URL (supporting query strings)
+                const videoExtensions = /\.(mp4|webm|ogg|avi|mov|mkv|flv|wmv|m4v)(\?.*)?$/i;
+                if (videoExtensions.test(url)) return true;
+                
+                // Check if URL contains video extensions anywhere (for complex URLs with query strings)
+                const videoFormats = /\.(mp4|webm|ogg|avi|mov|mkv|flv|wmv|m4v)/i;
+                if (videoFormats.test(url)) return true;
+                
+                // Check for common streaming patterns
+                if (url.includes('/video/') || url.includes('/stream/') || url.includes('/play/')) {
+                    return true;
+                }
+                
+                return false;
+            }
+
+            function showVideoPreview(url, type) {
+                let previewHtml = '';
+                
+                if (type === 'youtube' || type === 'vimeo') {
+                    previewHtml = `
+                        <div class="ratio ratio-16x9">
+                            <iframe src="${url}" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else if (type === 'direct') {
+                    previewHtml = `
+                        <div class="ratio ratio-16x9">
+                            <video controls crossorigin="anonymous">
+                                <source src="${url}" type="video/mp4">
+                                <source src="${url}" type="video/webm">
+                                <source src="${url}" type="video/ogg">
+                                Trình duyệt không hỗ trợ video này.
+                            </video>
+                        </div>
+                    `;
+                }
+                
+                videoPreviewContent.innerHTML = previewHtml;
+                videoPreview.style.display = 'block';
+            }
+
+            function hideVideoPreview() {
+                videoPreview.style.display = 'none';
+                videoPreviewContent.innerHTML = '';
+            }
+
+            function convertVideoUrl(url) {
+                if (!url) return '';
+                
+                // YouTube watch URL to embed URL
+                if (url.includes('youtube.com/watch?v=')) {
+                    const videoId = url.split('v=')[1].split('&')[0];
+                    return `https://www.youtube.com/embed/${videoId}`;
+                }
+                
+                // YouTube short URL to embed URL
+                if (url.includes('youtu.be/')) {
+                    const videoId = url.split('youtu.be/')[1].split('?')[0];
+                    return `https://www.youtube.com/embed/${videoId}`;
+                }
+                
+                // YouTube embed URL (already correct)
+                if (url.includes('youtube.com/embed/')) {
+                    return url;
+                }
+                
+                // Vimeo URL conversion
+                if (url.includes('vimeo.com/')) {
+                    const videoId = url.split('vimeo.com/')[1].split('?')[0];
+                    return `https://player.vimeo.com/video/${videoId}`;
+                }
+                
+                return url;
+            }
+
+            function getVideoType(url) {
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    return 'youtube';
+                }
+                if (url.includes('vimeo.com')) {
+                    return 'vimeo';
+                }
+                return 'direct';
+            }
+        });
+
+        function confirmDelete(tapId, tapName) {
+            if (confirm(`Bạn có chắc chắn muốn xóa "${tapName}"?\n\nHành động này không thể hoàn tác!`)) {
+                const form = document.getElementById('deleteForm');
+                form.action = '@Url.Action("Delete", "TapPhim", new { Area = "Admin" })/' + tapId;
+                form.submit();
+            }
+        }
+    </script>
+
+    <style>
+        .video-preview-container {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .video-preview-container iframe,
+        .video-preview-container video {
+            border-radius: 8px;
+        }
+
+        #VideoUrl.is-valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+
+        #VideoUrl.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .alert-info {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            color: #0d47a1;
+        }
+
+        .alert-info code {
+            background-color: #bbdefb;
+            color: #0d47a1;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.875em;
+        }
+    </style>
+}

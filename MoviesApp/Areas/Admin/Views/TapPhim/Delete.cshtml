@@ -1,0 +1,156 @@
+@model MoviesApp.Models.TapPhim
+
+@{
+    ViewData["Title"] = "Xóa Tập " + Model.SoTapThuTu + " - " + Model.Phim.TenPhim;
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="admin-page-title text-danger">
+                <i class="fas fa-trash-alt"></i>
+                Xóa Tập Phim
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Movies" asp-action="Index">Quản lý Phim</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-route-maPhim="@Model.MaPhim">@Model.Phim.TenPhim</a>
+                    </li>
+                    <li class="breadcrumb-item active">Xóa Tập @Model.SoTapThuTu</li>
+                </ol>
+            </nav>
+        </div>
+        <div>            <a asp-action="Index" asp-route-maPhim="@Model.MaPhim" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Warning Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Xác nhận xóa tập phim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-warning me-2"></i>
+                            Cảnh báo!
+                        </h6>
+                        <p class="mb-0">
+                            Bạn đang thực hiện xóa tập phim. Hành động này không thể hoàn tác và sẽ xóa vĩnh viễn:
+                        </p>
+                        <ul class="mt-2 mb-0">
+                            <li>Thông tin tập phim</li>
+                            <li>Tất cả bình luận liên quan</li>
+                            <li>Lịch sử xem của người dùng</li>
+                            <li>Đánh giá của người dùng</li>
+                        </ul>
+                    </div>
+
+                    <!-- Episode Info -->
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img src="@(Model.Phim.AnhPhim ?? "/images/no-image.jpg")" 
+                                 alt="@Model.Phim.TenPhim" 
+                                 class="img-fluid rounded" style="max-height: 200px;">
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Phim:</strong></td>
+                                        <td>@Model.Phim.TenPhim</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Mã tập:</strong></td>
+                                        <td><span class="badge bg-info">@Model.MaTap</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Số tập:</strong></td>
+                                        <td><span class="badge bg-primary fs-6">Tập @Model.SoTapThuTu</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tên tập:</strong></td>
+                                        <td>@(Model.TenTap ?? "Chưa có tên")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Thời lượng:</strong></td>
+                                        <td>
+                                            @if (Model.ThoiLuongTap.HasValue)
+                                            {
+                                                <span>@Model.ThoiLuongTap phút</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa cập nhật</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Ngày phát hành:</strong></td>
+                                        <td>
+                                            @if (Model.NgayPhatHanh.HasValue)
+                                            {
+                                                <span>@Model.NgayPhatHanh.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa cập nhật</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                                    {
+                                        <tr>
+                                            <td><strong>Video URL:</strong></td>
+                                            <td>
+                                                <a href="@Model.VideoUrl" target="_blank" class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-external-link-alt me-1"></i>
+                                                    Xem video
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            @if (!string.IsNullOrEmpty(Model.ChiTiet))
+                            {
+                                <div class="mt-3">
+                                    <strong>Mô tả:</strong>
+                                    <p class="text-muted">@Model.ChiTiet</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="text-center mt-4 pt-3 border-top">
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="MaTap" />
+                            <button type="submit" class="btn btn-danger me-3" onclick="return confirm('Bạn có CHẮC CHẮN muốn xóa tập phim này không?')">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                Xóa Tập Phim
+                            </button>
+                        </form>
+                        <a asp-action="Index" asp-route-maPhim="@Model.MaPhim" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

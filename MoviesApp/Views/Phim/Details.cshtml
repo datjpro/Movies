@@ -5,6 +5,16 @@
     Layout = "_Layout";
 }
 
+<!-- Success message -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 @section Scripts {
     <script>
         // Load movie details from API
@@ -44,13 +54,302 @@
                         });
                     }
                 });
-            });
-
-            // Add loading animation
+            });            // Add loading animation
             document.querySelector('.movie-poster').addEventListener('load', function() {
                 this.classList.add('loaded');
             });
+
+            // Initialize video player
+            initializeVideoPlayer();
         });
+
+        // Video Player Functions
+        function initializeVideoPlayer() {
+            // Create video player modal if it doesn't exist
+            if (!document.querySelector('.video-player-modal')) {
+                const modalHTML = `
+                    <div class="video-player-modal" id="videoPlayerModal">
+                        <div class="video-player-container">
+                            <div class="video-player-header">
+                                <h5 class="text-white mb-0" id="videoPlayerTitle">Đang phát</h5>
+                                <button class="video-player-close" onclick="closeVideoPlayer()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <video id="videoPlayer" controls controlsList="nodownload">
+                                Trình duyệt của bạn không hỗ trợ video HTML5.
+                            </video>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+        }
+
+        function playEpisode(videoUrl, episodeTitle = 'Tập phim') {
+            const modal = document.getElementById('videoPlayerModal');
+            const video = document.getElementById('videoPlayer');
+            const title = document.getElementById('videoPlayerTitle');
+            
+            if (modal && video) {
+                video.src = videoUrl;
+                title.textContent = episodeTitle;
+                modal.style.display = 'flex';
+                
+                // Pause video when modal is closed
+                video.play().catch(console.error);
+            }
+        }
+
+        function closeVideoPlayer() {
+            const modal = document.getElementById('videoPlayerModal');
+            const video = document.getElementById('videoPlayer');
+            
+            if (modal && video) {
+                video.pause();
+                video.src = '';
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close video player when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('videoPlayerModal');
+            if (e.target === modal) {
+                closeVideoPlayer();
+            }
+        });        // Close video player with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideoPlayer();
+            }
+        });
+
+        // Convert YouTube/video URLs to appropriate format
+        function convertVideoUrl(url) {
+            if (!url) return '';
+            
+            // YouTube watch URL to embed URL
+            if (url.includes('youtube.com/watch?v=')) {
+                const videoId = url.split('v=')[1].split('&')[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+            }
+            
+            // YouTube short URL to embed URL
+            if (url.includes('youtu.be/')) {
+                const videoId = url.split('youtu.be/')[1].split('?')[0];
+                return `https://www.youtube.com/embed/${videoId}`;
+            }
+            
+            // YouTube embed URL (already correct)
+            if (url.includes('youtube.com/embed/')) {
+                return url;
+            }
+            
+            // Vimeo URL conversion
+            if (url.includes('vimeo.com/')) {
+                const videoId = url.split('vimeo.com/')[1].split('?')[0];
+                return `https://player.vimeo.com/video/${videoId}`;
+            }
+            
+            // Direct video files (mp4, webm, etc.)
+            if (url.match(/\.(mp4|webm|ogg|avi|mov)(\?|$)/i)) {
+                return url;
+            }
+            
+            // Default: assume it's a direct video URL
+            return url;
+        }
+
+        function getVideoType(url) {
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                return 'youtube';
+            }
+            if (url.includes('vimeo.com')) {
+                return 'vimeo';
+            }
+            return 'direct';
+        }
+
+        // Fullscreen functionality for embedded video
+        function toggleFullscreen() {
+            const video = document.getElementById('mainVideoPlayer');
+            if (video) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            }
+        }
+
+        // Video player keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            const video = document.getElementById('mainVideoPlayer');
+            if (video && document.activeElement !== video) return;
+            
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    video.currentTime -= 10;
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    video.currentTime += 10;
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    break;
+                case 'KeyM':
+                    e.preventDefault();
+                    video.muted = !video.muted;
+                    break;
+                case 'KeyF':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+            }        });
+
+        // Auto-scroll to video player when episode is selected
+        @{
+            if (ViewBag.SelectedEpisode != null)
+            {
+                <text>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const videoSection = document.querySelector('.video-player-section');
+                    if (videoSection) {
+                        videoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+                </text>
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced Video Player Support
+            const videoPlayer = document.getElementById('mainVideoPlayer');
+            
+            if (videoPlayer) {
+                // Handle video loading errors
+                if (videoPlayer.tagName === 'VIDEO') {
+                    videoPlayer.addEventListener('error', function(e) {
+                        console.log('Video error:', e);
+                        handleVideoError(videoPlayer, e);
+                    });
+                    
+                    videoPlayer.addEventListener('loadstart', function() {
+                        videoPlayer.parentElement.classList.add('video-loading');
+                    });
+                    
+                    videoPlayer.addEventListener('loadeddata', function() {
+                        videoPlayer.parentElement.classList.remove('video-loading');
+                    });
+                    
+                    // Handle video can't play due to CORS or other issues
+                    videoPlayer.addEventListener('canplay', function() {
+                        videoPlayer.parentElement.classList.remove('video-loading');
+                    });
+                    
+                    // Try to load video with different approaches if initial fails
+                    const sources = videoPlayer.querySelectorAll('source');
+                    sources.forEach((source, index) => {
+                        source.addEventListener('error', function() {
+                            console.log(`Source ${index} failed:`, source.src);
+                            if (index === sources.length - 1) {
+                                // Last source failed, try alternative approaches
+                                tryAlternativeVideoLoad(videoPlayer, source.src);
+                            }
+                        });
+                    });
+                }
+                
+                // Handle iframe loading errors
+                if (videoPlayer.tagName === 'IFRAME') {
+                    videoPlayer.addEventListener('error', function() {
+                        console.log('Iframe error');
+                        handleIframeError(videoPlayer);
+                    });
+                }
+            }
+            
+            function handleVideoError(video, error) {
+                const container = video.parentElement;
+                const videoUrl = video.querySelector('source') ? video.querySelector('source').src : video.src;
+                
+                // Create error fallback
+                const fallback = document.createElement('div');
+                fallback.className = 'video-error-fallback';
+                fallback.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h5>Không thể phát video</h5>
+                    <p>Video có thể bị hạn chế truy cập hoặc định dạng không được hỗ trợ.</p>
+                    <a href="${videoUrl}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        Mở video trong tab mới
+                    </a>
+                `;
+                
+                container.replaceChild(fallback, video);
+            }
+            
+            function handleIframeError(iframe) {
+                const container = iframe.parentElement;
+                const iframeSrc = iframe.src;
+                
+                const fallback = document.createElement('div');
+                fallback.className = 'video-error-fallback';
+                fallback.innerHTML = `
+                    <i class="fas fa-video-slash"></i>
+                    <h5>Không thể tải video</h5>
+                    <p>Video có thể bị hạn chế nhúng hoặc liên kết không còn hoạt động.</p>
+                    <a href="${iframeSrc}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        Xem video gốc
+                    </a>
+                `;
+                
+                container.replaceChild(fallback, iframe);
+            }
+            
+            function tryAlternativeVideoLoad(video, originalUrl) {
+                // Try different approaches for complex URLs
+                console.log('Trying alternative video load for:', originalUrl);
+                
+                // Method 1: Try with different headers via fetch
+                if (originalUrl.includes('.mp4') && originalUrl.includes('?')) {
+                    tryFetchVideo(video, originalUrl);
+                }
+            }
+            
+            function tryFetchVideo(video, url) {
+                // This is a fallback method - just show error message for now
+                // In production, you might want to use a proxy server or different approach
+                console.log('Complex URL detected:', url);
+                
+                // For now, let the browser handle it as-is
+                // The crossorigin="anonymous" attribute should help with CORS
+                video.setAttribute('crossorigin', 'anonymous');
+                
+                // Try to reload
+                video.load();
+            }
+        });
+
     </script>
 }
 
@@ -145,13 +444,32 @@
                                     <span class="info-value-modern">@Model.DienVien</span>
                                 </div>
                             }
-                        </div>
-
-                        <div class="action-buttons-modern">
-                            <button class="btn-modern btn-primary-modern">
-                                <i class="fas fa-play"></i>
-                                <span>Xem ngay</span>
-                            </button>
+                        </div>                        <div class="action-buttons-modern">
+                            @if (ViewBag.SelectedEpisode != null)
+                            {
+                                <a href="@Url.Action("Details", new { id = Model.MaPhim })" class="btn-modern btn-secondary-modern">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <span>Quay lại thông tin phim</span>
+                                </a>
+                            }
+                            else
+                            {
+                                @if (Model.TapPhims.Any())
+                                {
+                                    var firstEpisode = Model.TapPhims.OrderBy(t => t.SoTapThuTu).First();
+                                    <a href="@Url.Action("Details", new { id = Model.MaPhim, episode = firstEpisode.SoTapThuTu })" class="btn-modern btn-primary-modern">
+                                        <i class="fas fa-play"></i>
+                                        <span>Xem tập @firstEpisode.SoTapThuTu</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn-modern btn-primary-modern" onclick="alert('Phim chưa có tập nào để xem')">
+                                        <i class="fas fa-play"></i>
+                                        <span>Xem ngay</span>
+                                    </button>
+                                }
+                            }
                             <button class="btn-modern btn-secondary-modern">
                                 <i class="fas fa-heart"></i>
                                 <span>Yêu thích</span>
@@ -180,92 +498,178 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-                        
-                        <div class="movie-meta-tags">
-                            @if (Model.NamPhatHanh.HasValue)
+            </div>        </div>
+    </div>    <!-- Video Player Section -->
+    @if (ViewBag.SelectedEpisode != null)
+    {
+        var selectedEpisode = ViewBag.SelectedEpisode as MoviesApp.Models.TapPhim;
+        if (selectedEpisode != null)
+        {
+            <div class="video-player-section">
+                <div class="container-fluid px-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="video-player-container-embed">
+                                <div class="video-player-header-embed">                                <h4 class="video-title">
+                                        <i class="fas fa-play-circle me-2"></i>
+                                        @if (selectedEpisode.SoTapThuTu == 0)
+                                        {
+                                            <span>Trailer</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Tập @selectedEpisode.SoTapThuTu</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(selectedEpisode.TenTap))
+                                        {
+                                            <span class="text-muted"> - @selectedEpisode.TenTap</span>
+                                        }
+                                    </h4><div class="video-controls">
+                                    @if (Model.TapPhims.Count > 1)
+                                    {
+                                        var currentEpisode = ViewBag.EpisodeNumber as int?;
+                                        var prevEpisode = Model.TapPhims.Where(t => t.SoTapThuTu < currentEpisode).OrderByDescending(t => t.SoTapThuTu).FirstOrDefault();
+                                        var nextEpisode = Model.TapPhims.Where(t => t.SoTapThuTu > currentEpisode).OrderBy(t => t.SoTapThuTu).FirstOrDefault();
+                                        
+                                        <div class="episode-navigation me-3">
+                                            @if (prevEpisode != null)
+                                            {
+                                                <a href="@Url.Action("Details", new { id = Model.MaPhim, episode = prevEpisode.SoTapThuTu })" 
+                                                   class="btn btn-outline-light btn-sm me-2" title="Tập trước">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </a>
+                                            }                                            <span class="episode-info text-light">
+                                                @if (currentEpisode == 0)
+                                                {
+                                                    <span>Trailer</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Tập @currentEpisode / @Model.TapPhims.Where(t => t.SoTapThuTu > 0).Count()</span>
+                                                }
+                                            </span>
+                                            @if (nextEpisode != null)
+                                            {
+                                                <a href="@Url.Action("Details", new { id = Model.MaPhim, episode = nextEpisode.SoTapThuTu })" 
+                                                   class="btn btn-outline-light btn-sm ms-2" title="Tập tiếp theo">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    }
+                                    <button class="btn btn-outline-light btn-sm" onclick="toggleFullscreen()">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>                            <div class="video-player-wrapper">
+                                @if (!string.IsNullOrEmpty(selectedEpisode.VideoUrl))
+                                {
+                                    var videoUrl = selectedEpisode.VideoUrl.Trim();
+                                    var isYouTube = videoUrl.Contains("youtube.com") || videoUrl.Contains("youtu.be");
+                                    var isVimeo = videoUrl.Contains("vimeo.com");
+                                    // Cải thiện logic nhận dạng video trực tiếp
+                                    var isDirectVideo = !isYouTube && !isVimeo && (
+                                        videoUrl.Contains(".mp4") || 
+                                        videoUrl.Contains(".webm") || 
+                                        videoUrl.Contains(".ogg") || 
+                                        videoUrl.Contains(".avi") || 
+                                        videoUrl.Contains(".mov") || 
+                                        videoUrl.Contains(".mkv") ||
+                                        videoUrl.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                                        videoUrl.EndsWith(".webm", StringComparison.OrdinalIgnoreCase) ||
+                                        videoUrl.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase) ||
+                                        videoUrl.EndsWith(".avi", StringComparison.OrdinalIgnoreCase) ||
+                                        videoUrl.EndsWith(".mov", StringComparison.OrdinalIgnoreCase) ||
+                                        videoUrl.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) ||
+                                        // Xử lý URL có query parameters
+                                        System.Text.RegularExpressions.Regex.IsMatch(videoUrl, @"\.(mp4|webm|ogg|avi|mov|mkv)(\?.*)?$", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                                    );
+                                    
+                                    if (isYouTube)
+                                    {
+                                        var embedUrl = videoUrl;
+                                        if (videoUrl.Contains("watch?v="))
+                                        {
+                                            var videoId = videoUrl.Split("v=")[1].Split("&")[0];
+                                            embedUrl = $"https://www.youtube.com/embed/{videoId}?rel=0&modestbranding=1&fs=1";
+                                        }
+                                        else if (videoUrl.Contains("youtu.be/"))
+                                        {
+                                            var videoId = videoUrl.Split("youtu.be/")[1].Split("?")[0];
+                                            embedUrl = $"https://www.youtube.com/embed/{videoId}?rel=0&modestbranding=1&fs=1";
+                                        }
+                                        <iframe id="mainVideoPlayer" 
+                                                src="@embedUrl" 
+                                                frameborder="0" 
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                                allowfullscreen>
+                                        </iframe>
+                                    }
+                                    else if (isVimeo)
+                                    {
+                                        var videoId = videoUrl.Split("vimeo.com/")[1].Split("?")[0];
+                                        var embedUrl = $"https://player.vimeo.com/video/{videoId}";
+                                        <iframe id="mainVideoPlayer" 
+                                                src="@embedUrl" 
+                                                frameborder="0" 
+                                                allow="autoplay; fullscreen; picture-in-picture" 
+                                                allowfullscreen>
+                                        </iframe>
+                                    }
+                                    else if (isDirectVideo)
+                                    {
+                                        <video id="mainVideoPlayer" controls controlsList="nodownload" preload="metadata" crossorigin="anonymous">
+                                            <source src="@videoUrl" type="video/mp4">
+                                            <source src="@videoUrl" type="video/webm">
+                                            <source src="@videoUrl" type="video/ogg">
+                                            Trình duyệt của bạn không hỗ trợ video HTML5.
+                                        </video>
+                                    }
+                                    else
+                                    {
+                                        <!-- Fallback for other embed types or streaming services -->
+                                        <div class="custom-embed-container">
+                                            <iframe id="mainVideoPlayer" 
+                                                    src="@videoUrl" 
+                                                    frameborder="0" 
+                                                    allow="autoplay; fullscreen; picture-in-picture" 
+                                                    allowfullscreen
+                                                    sandbox="allow-scripts allow-same-origin allow-presentation">
+                                            </iframe>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="no-video-message">
+                                        <i class="fas fa-video-slash fa-3x mb-3"></i>
+                                        <h5>Video chưa sẵn sàng</h5>
+                                        <p class="text-muted">
+                                            @if (selectedEpisode.SoTapThuTu == 0)
+                                            {
+                                                <span>Trailer chưa có video để phát.</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Tập phim này chưa có video để phát.</span>
+                                            }
+                                        </p>
+                                    </div>
+                                }
+                            </div>                            @if (!string.IsNullOrEmpty(selectedEpisode.ChiTiet))
                             {
-                                <span class="meta-tag year">
-                                    <i class="fas fa-calendar"></i> @Model.NamPhatHanh
-                                </span>
+                                <div class="episode-description">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Mô tả tập phim:</h6>
+                                    <p>@selectedEpisode.ChiTiet</p>
+                                </div>
                             }
-                            @if (Model.ThoiLuongPhim.HasValue)
-                            {
-                                <span class="meta-tag duration">
-                                    <i class="fas fa-clock"></i> @Model.ThoiLuongPhim phút
-                                </span>
-                            }
-                            @if (Model.TheLoaiPhim != null)
-                            {
-                                <span class="meta-tag genre">
-                                    <i class="fas fa-theater-masks"></i> @Model.TheLoaiPhim.TenTL
-                                </span>
-                            }
-                            @if (Model.QuocGia != null)
-                            {
-                                <span class="meta-tag country">
-                                    <i class="fas fa-globe"></i> @Model.QuocGia.TenQG
-                                </span>
-                            }
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.MoTaPhim))
-                        {
-                            <div class="movie-synopsis">
-                                <p class="lead">@Model.MoTaPhim</p>
-                            </div>
-                        }
-
-                        <div class="action-buttons-hero">
-                            <button class="btn btn-primary btn-lg me-3">
-                                <i class="fas fa-play me-2"></i>Xem phim
-                            </button>
-                            <button class="btn btn-outline-light btn-lg me-3">
-                                <i class="fas fa-bookmark me-2"></i>Lưu lại
-                            </button>
-                            <button class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-share me-2"></i>Chia sẻ
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-                            }
-                            @if (Model.QuocGia != null)
-                            {
-                                <span class="meta-tag country">
-                                    <i class="fas fa-globe"></i> @Model.QuocGia.TenQG
-                                </span>
-                            }
-                        </div>
-
-                        @if (!string.IsNullOrEmpty(Model.MoTaPhim))
-                        {
-                            <div class="movie-synopsis">
-                                <p class="lead">@Model.MoTaPhim</p>
-                            </div>
-                        }
-
-                        <div class="action-buttons-hero">
-                            <button class="btn btn-primary btn-lg me-3">
-                                <i class="fas fa-play me-2"></i>Xem phim
-                            </button>
-                            <button class="btn btn-outline-light btn-lg me-3">
-                                <i class="fas fa-bookmark me-2"></i>Lưu lại
-                            </button>
-                            <button class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-share me-2"></i>Chia sẻ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        }
+    }
 
     <!-- Movie Information Tabs -->
     <div class="container mt-5">
@@ -285,6 +689,10 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="reviews-tab" data-bs-toggle="pill" data-bs-target="#reviews" type="button" role="tab">
                             <i class="fas fa-star me-2"></i>Đánh giá
+                        </button>
+                    </li>                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="episodes-tab" data-bs-toggle="pill" data-bs-target="#episodes" type="button" role="tab">
+                            <i class="fas fa-play-circle me-2"></i>Tập phim <span class="badge bg-primary ms-1">@Model.TapPhims.Count</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -485,6 +893,110 @@
                                     </button>
                                 </div>
                             </div>
+                        </div>                    </div>
+
+                    <!-- Episodes Tab -->
+                    <div class="tab-pane fade" id="episodes" role="tabpanel">
+                        <div class="content-card">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="section-title">
+                                    <i class="fas fa-play-circle text-primary me-2"></i>Danh sách tập phim
+                                </h3>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a href="@Url.Action("Index", "TapPhim", new { area = "Admin", maPhim = Model.MaPhim })" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-cog me-1"></i>Quản lý tập phim
+                                    </a>
+                                }
+                            </div>
+                            
+                            @if (Model.TapPhims.Any())
+                            {
+                                <div class="episodes-grid">
+                                    @foreach (var tapPhim in Model.TapPhims.OrderBy(t => t.SoTapThuTu))
+                                    {                                        <div class="episode-card">                                            <div class="episode-header">
+                                                <div class="episode-number">
+                                                    @if (tapPhim.SoTapThuTu == 0)
+                                                    {
+                                                        <span class="episode-badge bg-warning">Trailer</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="episode-badge">Tập @tapPhim.SoTapThuTu</span>
+                                                    }
+                                                    @if (ViewBag.EpisodeNumber != null && ViewBag.EpisodeNumber == tapPhim.SoTapThuTu)
+                                                    {
+                                                        <span class="badge bg-success ms-2">Đang xem</span>
+                                                    }
+                                                </div>
+                                                <div class="episode-actions">
+                                                    <a href="@Url.Action("Details", new { id = Model.MaPhim, episode = tapPhim.SoTapThuTu })" 
+                                                       class="btn btn-primary btn-sm" 
+                                                       title="@(tapPhim.SoTapThuTu == 0 ? "Xem trailer" : $"Xem tập {tapPhim.SoTapThuTu}")">
+                                                        <i class="fas fa-play"></i>
+                                                    </a>
+                                                    @if (User.IsInRole("Admin"))
+                                                    {
+                                                        <a href="@Url.Action("Edit", "TapPhim", new { area = "Admin", id = tapPhim.MaTap })" 
+                                                           class="btn btn-outline-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="episode-content">
+                                                @if (!string.IsNullOrEmpty(tapPhim.TenTap))
+                                                {
+                                                    <h5 class="episode-title">@tapPhim.TenTap</h5>
+                                                }
+                                                @if (!string.IsNullOrEmpty(tapPhim.ChiTiet))
+                                                {
+                                                    <p class="episode-description">@tapPhim.ChiTiet</p>
+                                                }
+                                                <div class="episode-meta">
+                                                    @if (tapPhim.ThoiLuongTap.HasValue)
+                                                    {
+                                                        <span class="meta-item">
+                                                            <i class="fas fa-clock"></i> @tapPhim.ThoiLuongTap phút
+                                                        </span>
+                                                    }
+                                                    @if (tapPhim.NgayPhatHanh.HasValue)
+                                                    {
+                                                        <span class="meta-item">
+                                                            <i class="fas fa-calendar"></i> @tapPhim.NgayPhatHanh.Value.ToString("dd/MM/yyyy")
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <i class="fas fa-film fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Chưa có tập phim nào</h5>
+                                    <p class="text-muted">
+                                        @if (Model.SoTap > 1)
+                                        {
+                                            <span>Phim này có @Model.SoTap tập nhưng chưa được cập nhật.</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Đây là phim lẻ (1 tập).</span>
+                                        }
+                                    </p>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a href="@Url.Action("Create", "TapPhim", new { area = "Admin", maPhim = Model.MaPhim })" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Thêm tập phim đầu tiên
+                                        </a>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
 
@@ -1141,84 +1653,184 @@
 }
 
 .movie-tabs {
-    background: white;
-    border-radius: 15px;
-    padding: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2rem;
 }
 
 .movie-tabs .nav-link {
-    border-radius: 10px;
-    font-weight: 600;
-    color: #6c757d;
-    transition: all 0.3s ease;
     border: none;
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 12px 20px;
     margin: 0 5px;
+    transition: all 0.3s ease;
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.movie-tabs .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: left 0.3s ease;
+    z-index: -1;
 }
 
 .movie-tabs .nav-link.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-primary);
     color: white;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.movie-tabs .nav-link.active::before {
+    left: 0;
 }
 
 .movie-tabs .nav-link:hover:not(.active) {
-    background: #e9ecef;
-    color: #495057;
+    background: var(--glass-hover);
+    color: var(--text-primary);
+    transform: translateY(-2px);
 }
 
 .content-card {
-    background: white;
-    border-radius: 20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
     padding: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    border: 1px solid rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.content-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .content-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    background: var(--glass-hover);
+    box-shadow: var(--shadow-lg);
+}
+
+.content-card:hover::before {
+    opacity: 1;
 }
 
 .section-title {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    color: #2d3748;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .content-text {
     font-size: 1.1rem;
     line-height: 1.8;
-    color: #4a5568;
+    color: var(--text-secondary);
     text-align: justify;
 }
 
 .info-item {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 10px;
-    border-left: 4px solid #667eea;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1.2rem;
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.info-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+}
+
+.info-item:hover {
+    background: var(--glass-hover);
+    transform: translateX(5px);
+}
+
+.info-item:hover::before {
+    width: 8px;
 }
 
 .info-label {
-    color: #2d3748;
+    color: var(--text-primary);
     font-weight: 600;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .info-value {
-    color: #4a5568;
+    color: var(--text-secondary);
     font-size: 1rem;
+    line-height: 1.6;
 }
 
 .rating-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-primary);
     color: white;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.rating-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        transparent 50%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.rating-card:hover::before {
+    opacity: 1;
+}
 }
 
 .rating-card .section-title {
@@ -1270,32 +1882,94 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.quick-info-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--gradient-primary);
+    transition: height 0.3s ease;
+}
+
+.quick-info-item:hover::before {
+    height: 70%;
+}
+
+.quick-info-item:hover {
+    padding-left: 15px;
+    color: var(--text-primary);
 }
 
 .quick-info-item:last-child {
     border-bottom: none;
 }
 
+.quick-info-item i {
+    color: var(--accent-blue);
+    transition: all 0.3s ease;
+}
+
+.quick-info-item:hover i {
+    transform: scale(1.2);
+    color: var(--accent-purple);
+}
+
 .cast-item {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 15px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1.8rem;
+    border-radius: var(--radius-lg);
     text-align: center;
-    border: 1px solid #e9ecef;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cast-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.cast-item:hover::before {
+    transform: scaleX(1);
+}
+
+.cast-item:hover {
+    transform: translateY(-5px);
+    background: var(--glass-hover);
 }
 
 .cast-role {
-    color: #667eea;
+    color: var(--accent-blue);
     font-weight: 600;
     margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
 }
 
 .cast-name {
-    color: #2d3748;
+    color: var(--text-primary);
     font-size: 1.1rem;
     margin: 0;
+    font-weight: 500;
 }
 
 .details-grid {
@@ -1307,30 +1981,107 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.detail-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+}
+
+.detail-row:hover::before {
+    width: 100%;
 }
 
 .detail-row:last-child {
     border-bottom: none;
 }
 
+.detail-row:hover {
+    padding-left: 10px;
+    background: var(--glass-hover);
+    border-radius: var(--radius-lg);
+}
+
 .detail-label {
     font-weight: 600;
-    color: #2d3748;
+    color: var(--text-primary);
     flex: 1;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .detail-value {
-    color: #4a5568;
+    color: var(--text-secondary);
     text-align: right;
     flex: 1;
+    font-weight: 500;
 }
 
 .reviews-placeholder {
     min-height: 300px;
     display: flex;
     align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.reviews-placeholder:hover {
+    border-color: var(--accent-blue);
+    background: var(--glass-hover);
+}
+
+.reviews-placeholder .text-center {
+    padding: 2rem;
+}
+
+.reviews-placeholder i {
+    color: var(--accent-blue);
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.reviews-placeholder:hover i {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.reviews-placeholder h5 {
+    color: var(--text-primary);
+    margin: 1rem 0 0.5rem 0;
+}
+
+.reviews-placeholder p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.reviews-placeholder .btn {
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.reviews-placeholder .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Additional Poster Styling */
@@ -1533,5 +2284,302 @@
 
 .content-card:nth-child(odd) {
     animation-delay: 0.2s;
+}
+
+/* Episodes Styles */
+.video-player-section {
+    background: var(--primary-bg);
+    padding: 30px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.video-player-container-embed {
+    background: var(--dark-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--glass-border);
+}
+
+.video-player-header-embed {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background: var(--glass-bg);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.video-player-header-embed .video-title {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.video-controls {
+    display: flex;
+    align-items: center;
+}
+
+.episode-navigation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.episode-info {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.video-player-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+}
+
+.video-player-wrapper video,
+.video-player-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border: none;
+}
+
+.no-video-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.episode-description {
+    padding: 20px 25px;
+    background: var(--glass-bg);
+    border-top: 1px solid var(--glass-border);
+}
+
+.episode-description h6 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.episode-description p {
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.episode-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.episode-card:hover {
+    transform: translateY(-5px);
+    background: var(--glass-hover);
+    box-shadow: var(--shadow-lg);
+}
+
+.episode-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color: white;
+}
+
+.episode-badge {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.episode-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.episode-actions .btn {
+    padding: 5px 10px;
+    border-radius: var(--radius-lg);
+}
+
+.episode-content {
+    padding: 20px;
+}
+
+.episode-title {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.episode-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.episode-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.episode-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.episode-meta .meta-item i {
+    color: var(--accent-blue);
+}
+
+/* Video Player Modal */
+.video-player-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-player-container {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    background: var(--dark-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.video-player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--glass-bg);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.video-player-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.video-player-close:hover {
+    color: var(--accent-blue);
+}
+
+.video-player video {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+}
+
+/* Responsive Episodes */
+@@media (max-width: 768px) {
+    .video-player-section {
+        padding: 20px 0;
+    }
+    
+    .video-player-header-embed {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .video-player-header-embed .video-title {
+        font-size: 1.1rem;
+    }
+    
+    .video-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .episode-navigation {
+        flex: 1;
+    }
+    
+    .episode-description {
+        padding: 15px 20px;
+    }
+    
+    .episodes-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .episode-header {
+        padding: 12px 15px;
+    }
+    
+    .episode-content {
+        padding: 15px;
+    }
+    
+    .episode-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@@media (max-width: 576px) {
+    .video-player-header-embed .video-title {
+        font-size: 1rem;
+    }
+    
+    .episode-navigation .episode-info {
+        font-size: 0.8rem;
+    }
+    
+    .episode-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .episode-actions .btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
 }
 </style>

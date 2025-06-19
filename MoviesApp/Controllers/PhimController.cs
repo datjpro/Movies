@@ -96,10 +96,8 @@ namespace MoviesApp.Controllers
             ViewBag.DanhMuc = danhMuc;
 
             return View(phims);
-        }
-
-        // GET: Phim/Details/5
-        public async Task<IActionResult> Details(string id)
+        }        // GET: Phim/Details/5 hoặc Phim/Details/5/episode/1
+        public async Task<IActionResult> Details(string id, int? episode)
         {
             if (id == null)
             {
@@ -111,16 +109,49 @@ namespace MoviesApp.Controllers
                 .Include(p => p.TheLoaiPhim)
                 .Include(p => p.DanhMuc)
                 .Include(p => p.ThongKePhim)
-                .Include(p => p.TapPhims)
+                .Include(p => p.TapPhims.OrderBy(t => t.SoTapThuTu))
                 .FirstOrDefaultAsync(m => m.MaPhim == id);
 
             if (phim == null)
             {
                 return NotFound();
+            }            // Tìm tập phim được chọn
+            TapPhim? selectedEpisode = null;
+            if (episode.HasValue)
+            {
+                // Cho phép xem cả tập 0 (trailer) và các tập khác
+                selectedEpisode = phim.TapPhims.FirstOrDefault(t => t.SoTapThuTu == episode.Value);
+                if (selectedEpisode == null)
+                {
+                    // Log để debug
+                    Console.WriteLine($"Không tìm thấy tập {episode.Value} cho phim {id}");
+                    Console.WriteLine($"Các tập có sẵn: {string.Join(", ", phim.TapPhims.Select(t => t.SoTapThuTu))}");
+                    
+                    // Nếu không tìm thấy tập được yêu cầu, redirect về trang chính
+                    return RedirectToAction("Details", new { id });
+                }
+                else
+                {
+                    Console.WriteLine($"Tìm thấy tập {selectedEpisode.SoTapThuTu} với VideoUrl: {selectedEpisode.VideoUrl}");
+                }
+            }
+            else if (phim.TapPhims.Any())
+            {
+                // Nếu không chỉ định tập nào, ưu tiên hiển thị tập 1, nếu không có thì tập đầu tiên
+                selectedEpisode = phim.TapPhims.FirstOrDefault(t => t.SoTapThuTu == 1) 
+                                ?? phim.TapPhims.OrderBy(t => t.SoTapThuTu).FirstOrDefault();
+                if (selectedEpisode != null)
+                {
+                    episode = selectedEpisode.SoTapThuTu;
+                    Console.WriteLine($"Tự động chọn tập {selectedEpisode.SoTapThuTu}");
+                }
             }
 
+            ViewBag.SelectedEpisode = selectedEpisode;
+            ViewBag.EpisodeNumber = episode;
+            
             return View(phim);
-        }        // GET: Phim/Create - Chỉ cho phép Admin
+        }// GET: Phim/Create - Chỉ cho phép Admin
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
@@ -254,13 +285,34 @@ namespace MoviesApp.Controllers
             ModelState.Remove("QuocGia");
             ModelState.Remove("TheLoaiPhim");
             ModelState.Remove("DanhMuc");
+            ModelState.Remove("ThongKePhim");
+            ModelState.Remove("TapPhims");
+            ModelState.Remove("BinhLuans");
+            ModelState.Remove("LichSuXems");
+            ModelState.Remove("PhimYeuThichs");
+            ModelState.Remove("DanhGias");
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Lấy phim gốc từ database để giữ lại các thông tin không thay đổi
+                    var existingPhim = await _context.Phims.AsNoTracking().FirstOrDefaultAsync(p => p.MaPhim == id);
+                    if (existingPhim == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Giữ lại NgayTao gốc nếu không được truyền vào
+                    if (phim.NgayTao == DateTime.MinValue || phim.NgayTao == default(DateTime))
+                    {
+                        phim.NgayTao = existingPhim.NgayTao;
+                    }
+
                     _context.Update(phim);
                     await _context.SaveChangesAsync();
+                    
+                    TempData["Success"] = "Cập nhật phim thành công!";
                     return RedirectToAction(nameof(Details), new { id = phim.MaPhim });
                 }
                 catch (Exception ex)
@@ -322,7 +374,85 @@ namespace MoviesApp.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));        }
+
+        // GET: Phim/Watch/movieId/episodeNumber - Alternative clean URL
+        public async Task<IActionResult> Watch(string id, int episode = 1)
+        {
+            return await Details(id, episode);
+        }
+        
+        // Test action để thêm tập 0 (trailer) - chỉ dùng để test
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddTrailer(string phimId, string trailerUrl, string trailerTitle = "Trailer")
+        {
+            try
+            {
+                var phim = await _context.Phims.FirstOrDefaultAsync(p => p.MaPhim == phimId);
+                if (phim == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phim" });
+                }
+
+                // Kiểm tra xem đã có trailer (tập 0) chưa
+                var existingTrailer = await _context.TapPhims.FirstOrDefaultAsync(t => t.MaPhim == phimId && t.SoTapThuTu == 0);
+                if (existingTrailer != null)
+                {
+                    // Cập nhật trailer hiện có
+                    existingTrailer.VideoUrl = trailerUrl;
+                    existingTrailer.TenTap = trailerTitle;
+                    _context.Update(existingTrailer);
+                }
+                else
+                {
+                    // Tạo trailer mới
+                    var trailer = new TapPhim
+                    {
+                        MaTap = $"T{phimId}_00", // Tạo mã tập duy nhất cho trailer
+                        MaPhim = phimId,
+                        SoTapThuTu = 0,
+                        TenTap = trailerTitle,
+                        VideoUrl = trailerUrl,
+                        NgayPhatHanh = DateTime.Now
+                    };
+                    _context.TapPhims.Add(trailer);
+                }
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, message = "Thêm/cập nhật trailer thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        // GET: Test page for adding trailer
+        [Authorize(Roles = "Admin")]
+        public IActionResult TestTrailer()
+        {
+            return View();
+        }
+
+        // API để lấy danh sách phim cho test
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetMoviesForTest()
+        {
+            var phims = await _context.Phims
+                .Include(p => p.TapPhims)
+                .Select(p => new
+                {
+                    p.MaPhim,
+                    p.TenPhim,
+                    SoTapPhim = p.TapPhims.Count,
+                    CoTrailer = p.TapPhims.Any(t => t.SoTapThuTu == 0)
+                })
+                .Take(10)
+                .ToListAsync();
+
+            return Json(phims);
         }
     }
 }
