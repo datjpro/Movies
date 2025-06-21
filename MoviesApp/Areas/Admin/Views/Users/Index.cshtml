@@ -4,6 +4,25 @@
     ViewData["Breadcrumb"] = "<li class='breadcrumb-item'><a href='/Admin'>Dashboard</a></li><li class='breadcrumb-item active'>Quản lý User</li>";
 }
 
+<!-- Error/Success Messages -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <!-- Search and Filter -->
 <div class="admin-card mb-4">
     <div class="card-body">
@@ -12,23 +31,28 @@
                 <label class="form-label">Tìm kiếm</label>
                 <input type="text" class="form-control" name="search" value="@Model.SearchTerm" 
                        placeholder="Tên, email hoặc username...">
-            </div>
-            <div class="col-md-3">
+            </div>            <div class="col-md-3">
                 <label class="form-label">Lọc theo Role</label>
-                <select class="form-select" name="filterRole">
-                    <option value="">Tất cả</option>
-                    <option value="@UserRoles.Admin" selected="@(Model.FilterRole == UserRoles.Admin)">Admin</option>
-                    <option value="@UserRoles.PremiumUser" selected="@(Model.FilterRole == UserRoles.PremiumUser)">Premium User</option>
-                    <option value="@UserRoles.FreeUser" selected="@(Model.FilterRole == UserRoles.FreeUser)">Free User</option>
-                </select>
+                @Html.DropDownList("filterRole", 
+                    new List<SelectListItem>
+                    {
+                        new SelectListItem { Text = "Tất cả", Value = "", Selected = string.IsNullOrEmpty(Model.FilterRole) },
+                        new SelectListItem { Text = "Admin", Value = UserRoles.Admin, Selected = Model.FilterRole == UserRoles.Admin },
+                        new SelectListItem { Text = "Premium User", Value = UserRoles.PremiumUser, Selected = Model.FilterRole == UserRoles.PremiumUser },
+                        new SelectListItem { Text = "Free User", Value = UserRoles.FreeUser, Selected = Model.FilterRole == UserRoles.FreeUser }
+                    }, 
+                    new { @class = "form-select" })
             </div>
             <div class="col-md-2">
                 <label class="form-label">Số lượng</label>
-                <select class="form-select" name="pageSize">
-                    <option value="10" selected="@(Model.PageSize == 10)">10</option>
-                    <option value="25" selected="@(Model.PageSize == 25)">25</option>
-                    <option value="50" selected="@(Model.PageSize == 50)">50</option>
-                </select>
+                @Html.DropDownList("pageSize", 
+                    new List<SelectListItem>
+                    {
+                        new SelectListItem { Text = "10", Value = "10", Selected = Model.PageSize == 10 },
+                        new SelectListItem { Text = "25", Value = "25", Selected = Model.PageSize == 25 },
+                        new SelectListItem { Text = "50", Value = "50", Selected = Model.PageSize == 50 }
+                    }, 
+                    new { @class = "form-select" })
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" class="btn btn-admin-primary me-2">

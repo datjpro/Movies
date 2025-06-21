@@ -27,28 +27,54 @@ namespace MoviesApp.Areas.Admin.Controllers
             _roleManager = roleManager;
             _userActivityService = userActivityService;
             _logger = logger;
-        }
-
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? search = null, string? filterRole = null)
+        }        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? search = null, string? filterRole = null)
         {
             try
             {
+                _logger.LogInformation($"Users Index called with: page={page}, pageSize={pageSize}, search={search}, filterRole={filterRole}");
+                
                 var query = _userManager.Users.AsQueryable();
 
                 // Search filter
                 if (!string.IsNullOrEmpty(search))
                 {
+                    search = search.Trim();
                     query = query.Where(u => u.FullName.Contains(search) || 
                                            u.Email.Contains(search) || 
-                                           u.UserName!.Contains(search));
+                                           (u.UserName != null && u.UserName.Contains(search)));
+                    _logger.LogInformation($"Applied search filter: {search}");
                 }
 
-                var totalUsers = await query.CountAsync();
-                var users = await query
+                // Lấy tất cả users để có thể filter theo role
+                var allUsers = await query.ToListAsync();
+                _logger.LogInformation($"Found {allUsers.Count} users after search filter");
+
+                // Filter by role if specified
+                var filteredUsers = allUsers;
+                if (!string.IsNullOrEmpty(filterRole))
+                {
+                    var usersWithRole = new List<ApplicationUser>();
+                    foreach (var user in allUsers)
+                    {
+                        var roles = await _userManager.GetRolesAsync(user);
+                        if (roles.Contains(filterRole))
+                        {
+                            usersWithRole.Add(user);
+                        }
+                    }
+                    filteredUsers = usersWithRole;
+                    _logger.LogInformation($"Found {filteredUsers.Count} users with role: {filterRole}");
+                }
+
+                // Tính toán phân trang sau khi filter
+                var totalUsers = filteredUsers.Count;
+                var users = filteredUsers
                     .OrderByDescending(u => u.CreatedAt)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .ToListAsync();
+                    .ToList();
+
+                _logger.LogInformation($"Final result: {users.Count} users on page {page}");
 
                 // Get roles for each user
                 var userRoles = new Dictionary<string, List<string>>();
@@ -56,20 +82,6 @@ namespace MoviesApp.Areas.Admin.Controllers
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     userRoles[user.Id] = roles.ToList();
-                }
-
-                // Filter by role if specified
-                if (!string.IsNullOrEmpty(filterRole))
-                {
-                    var filteredUsers = new List<ApplicationUser>();
-                    foreach (var user in users)
-                    {
-                        if (userRoles[user.Id].Contains(filterRole))
-                        {
-                            filteredUsers.Add(user);
-                        }
-                    }
-                    users = filteredUsers;
                 }
 
                 var viewModel = new UserManagementViewModel
@@ -87,7 +99,7 @@ namespace MoviesApp.Areas.Admin.Controllers
                 await _userActivityService.LogActivityAsync(
                     User.Identity!.Name!, 
                     "Viewed Users Management", 
-                    $"Page {page}, Search: {search ?? "None"}"
+                    $"Page {page}, Search: {search ?? "None"}, Filter: {filterRole ?? "None"}"
                 );
 
                 return View(viewModel);
@@ -95,7 +107,7 @@ namespace MoviesApp.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading users management");
-                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách người dùng.";
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách người dùng: " + ex.Message;
                 return View(new UserManagementViewModel());
             }
         }
