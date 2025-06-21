@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MoviesApp.Data;
 
@@ -11,9 +12,11 @@ using MoviesApp.Data;
 namespace MoviesApp.Migrations
 {
     [DbContext(typeof(WebMoviesDbContext))]
-    partial class WebMoviesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250621200809_AddLinkPhimToPhim")]
+    partial class AddLinkPhimToPhim
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

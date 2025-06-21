@@ -1,0 +1,156 @@
+@model VideoPlayerViewModel
+
+@{
+    var playerId = "videoPlayer_" + Guid.NewGuid().ToString("N")[..8];
+    var playerOptions = new {
+        src = Model.VideoUrl,
+        src720 = Model.VideoUrl720,
+        src480 = Model.VideoUrl480,
+        src360 = Model.VideoUrl360,
+        autoplay = Model.Autoplay,
+        muted = Model.Muted,
+        poster = Model.PosterUrl,
+        subtitles = Model.Subtitles?.Select(s => new { label = s.Label, src = s.Url }).ToArray() ?? new object[0]
+    };
+    var optionsJson = System.Text.Json.JsonSerializer.Serialize(playerOptions);
+}
+
+<!-- Video Player CSS -->
+<link rel="stylesheet" href="~/css/video-player.css" asp-append-version="true" />
+
+<!-- Video Player Container -->
+<div class="video-player-wrapper">
+    @if (!string.IsNullOrEmpty(Model.Title))
+    {
+        <div class="video-header">
+            <h3 class="video-title">@Model.Title</h3>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="video-description">@Model.Description</p>
+            }
+        </div>
+    }
+    
+    <div id="@playerId" class="video-player-container" data-video-player='@Html.Raw(optionsJson)'>
+        <!-- Video player will be initialized here by JavaScript -->
+    </div>
+    
+    @if (Model.ShowDownloadOptions && Model.DownloadLinks?.Any() == true)
+    {
+        <div class="video-download-section">
+            <h5><i class="fas fa-download me-2"></i>Tải xuống</h5>
+            <div class="download-options">
+                @foreach (var download in Model.DownloadLinks)
+                {
+                    <a href="@download.Url" class="btn btn-outline-primary btn-sm me-2 mb-2" 
+                       download="@download.Filename" target="_blank">
+                        <i class="fas fa-download me-1"></i>
+                        @download.Quality - @download.Size
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Video Player JavaScript -->
+<script src="~/js/video-player.js" asp-append-version="true"></script>
+
+<style>
+.video-player-wrapper {
+    margin-bottom: 2rem;
+}
+
+.video-header {
+    margin-bottom: 1rem;
+}
+
+.video-title {
+    color: var(--text-primary, #e0e0e0);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.video-description {
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.video-player-container {
+    margin-bottom: 1rem;
+}
+
+.video-download-section {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.video-download-section h5 {
+    color: var(--text-primary, #e0e0e0);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.download-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.download-options .btn {
+    transition: all 0.3s ease;
+}
+
+.download-options .btn:hover {
+    transform: translateY(-2px);    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+@@media (max-width: 768px) {
+    .video-title {
+        font-size: 1.25rem;
+    }
+    
+    .video-description {
+        font-size: 0.9rem;
+    }
+    
+    .download-options {
+        flex-direction: column;
+    }
+    
+    .download-options .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the specific video player
+    const container = document.getElementById('@playerId');
+    if (container) {
+        const options = JSON.parse(container.dataset.videoPlayer);
+        const player = new CCFilmVideoPlayer(container, options);
+        
+        // Store player instance for external access
+        window['@playerId'] = player;
+        
+        // Custom event listeners
+        container.addEventListener('playerReady', function() {
+            console.log('Video player ready');
+        });
+        
+        // Auto-focus on player when initialized
+        setTimeout(() => {
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
+    }
+});
+</script>

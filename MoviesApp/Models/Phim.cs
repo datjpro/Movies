@@ -76,7 +76,12 @@ namespace MoviesApp.Models
         public int? TongSoMua { get; set; }
 
         [StringLength(20)]
-        public string? XepHang { get; set; }        // Compatibility properties
+        public string? XepHang { get; set; }
+
+        [StringLength(500)]
+        public string? LinkPhim { get; set; }
+
+        // Compatibility properties
         [NotMapped]
         public string PhimId => MaPhim;
         
@@ -84,7 +89,11 @@ namespace MoviesApp.Models
         public string? PosterUrl => AnhPhim;
         
         [NotMapped]
-        public string? MoTa => MoTaPhim;
+        public string? MoTa 
+        { 
+            get => MoTaPhim; 
+            set => MoTaPhim = value; 
+        }
         
         [NotMapped]
         public int? NamSanXuat => NamPhatHanh;

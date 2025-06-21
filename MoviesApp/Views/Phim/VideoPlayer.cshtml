@@ -1,0 +1,260 @@
+@model MoviesApp.Models.Phim
+
+@{
+    ViewData["Title"] = "Video Player Demo";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="movie-player-section">
+                <h2 class="section-title mb-4">
+                    <i class="fas fa-play-circle me-2"></i>
+                    Xem Phim: @(Model?.TenPhim ?? "Demo Video")
+                </h2>
+                
+                <!-- Video Player -->
+                @{
+                    var videoModel = new VideoPlayerViewModel
+                    {
+                        Title = Model?.TenPhim ?? "Demo Video Player",
+                        Description = Model?.MoTa ?? "Trải nghiệm video player hiện đại với đầy đủ tính năng điều khiển",
+                        VideoUrl = Model?.LinkPhim ?? "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                        VideoUrl720 = "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                        VideoUrl480 = "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4",
+                        VideoUrl360 = "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4",
+                        PosterUrl = Model?.AnhPhim,
+                        Autoplay = false,
+                        Muted = false,
+                        ShowDownloadOptions = true,
+                        Subtitles = new List<SubtitleTrack>
+                        {
+                            new SubtitleTrack { Label = "Tiếng Việt", Url = "/subtitles/vi.vtt", Language = "vi" },
+                            new SubtitleTrack { Label = "English", Url = "/subtitles/en.vtt", Language = "en" }
+                        },
+                        DownloadLinks = new List<DownloadLink>
+                        {
+                            new DownloadLink { Quality = "1080p", Url = "#", Size = "2.5GB", Filename = "movie_1080p.mp4" },
+                            new DownloadLink { Quality = "720p", Url = "#", Size = "1.2GB", Filename = "movie_720p.mp4" },
+                            new DownloadLink { Quality = "480p", Url = "#", Size = "600MB", Filename = "movie_480p.mp4" }
+                        }
+                    };
+                }
+                
+                @await Html.PartialAsync("_VideoPlayer", videoModel)
+                
+                <!-- Video Controls Info -->
+                <div class="video-controls-info mt-4">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-keyboard me-2"></i>Phím tắt</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><kbd>Space</kbd> - Phát/Dừng</li>
+                                    <li><kbd>←</kbd> - Tua lại 10s</li>
+                                    <li><kbd>→</kbd> - Tua tới 10s</li>
+                                    <li><kbd>↑</kbd> - Tăng âm lượng</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><kbd>↓</kbd> - Giảm âm lượng</li>
+                                    <li><kbd>M</kbd> - Tắt/Bật âm thanh</li>
+                                    <li><kbd>F</kbd> - Toàn màn hình</li>
+                                    <li><strong>Click</strong> - Phát/Dừng</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="movie-sidebar">
+                <!-- Movie Info -->
+                @if (Model != null)
+                {
+                    <div class="movie-info-card">
+                        <h4>Thông tin phim</h4>
+                        <div class="info-item">
+                            <strong>Tên phim:</strong> @Model.TenPhim
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.DaoDien))
+                        {
+                            <div class="info-item">
+                                <strong>Đạo diễn:</strong> @Model.DaoDien
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.DienVien))
+                        {
+                            <div class="info-item">
+                                <strong>Diễn viên:</strong> @Model.DienVien
+                            </div>
+                        }
+                        @if (Model.NamPhatHanh.HasValue)
+                        {
+                            <div class="info-item">
+                                <strong>Năm:</strong> @Model.NamPhatHanh
+                            </div>
+                        }
+                        @if (Model.ThoiLuongPhim.HasValue)
+                        {
+                            <div class="info-item">
+                                <strong>Thời lượng:</strong> @Model.ThoiLuongPhim phút
+                            </div>
+                        }
+                        @if (Model.DiemImdb.HasValue)
+                        {
+                            <div class="info-item">
+                                <strong>Điểm IMDb:</strong> 
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-star"></i> @Model.DiemImdb.Value.ToString("F1")
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+                
+                <!-- Player Features -->
+                <div class="player-features-card">
+                    <h4>Tính năng Player</h4>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-play text-success"></i> Phát/Dừng video</li>
+                        <li><i class="fas fa-volume-up text-primary"></i> Điều chỉnh âm lượng</li>
+                        <li><i class="fas fa-expand text-info"></i> Chế độ toàn màn hình</li>
+                        <li><i class="fas fa-cog text-warning"></i> Thay đổi chất lượng video</li>
+                        <li><i class="fas fa-tachometer-alt text-danger"></i> Điều chỉnh tốc độ phát</li>
+                        <li><i class="fas fa-external-link-alt text-purple"></i> Picture-in-Picture</li>
+                        <li><i class="fas fa-closed-captioning text-secondary"></i> Phụ đề</li>
+                        <li><i class="fas fa-keyboard text-dark"></i> Phím tắt</li>
+                    </ul>
+                </div>
+                
+                <!-- Related Videos -->
+                <div class="related-videos-card">
+                    <h4>Video liên quan</h4>
+                    <div class="related-video-item">
+                        <img src="https://via.placeholder.com/100x60" alt="Related" class="related-thumb">
+                        <div class="related-info">
+                            <h6>Video Demo 1</h6>
+                            <small>10:30</small>
+                        </div>
+                    </div>
+                    <div class="related-video-item">
+                        <img src="https://via.placeholder.com/100x60" alt="Related" class="related-thumb">
+                        <div class="related-info">
+                            <h6>Video Demo 2</h6>
+                            <small>15:45</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-title {
+    color: var(--text-primary, #e0e0e0);
+    font-weight: 600;
+}
+
+.movie-info-card,
+.player-features-card,
+.related-videos-card {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.movie-info-card h4,
+.player-features-card h4,
+.related-videos-card h4 {
+    color: var(--text-primary, #e0e0e0);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--accent-blue, #004d61);
+    padding-bottom: 0.5rem;
+}
+
+.info-item {
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 0.9rem;
+}
+
+.info-item strong {
+    color: var(--text-primary, #e0e0e0);
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-list li {
+    padding: 0.5rem 0;
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+
+.feature-list i {
+    width: 20px;
+    margin-right: 0.5rem;
+}
+
+.related-video-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+}
+
+.related-video-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.related-thumb {
+    width: 100px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.related-info h6 {
+    color: var(--text-primary, #e0e0e0);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.related-info small {
+    color: var(--text-muted, #808080);
+}
+
+.video-controls-info kbd {
+    background: var(--accent-blue, #004d61);
+    color: white;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;    font-size: 0.8rem;
+}
+
+@@media (max-width: 991px) {
+    .movie-sidebar {
+        margin-top: 2rem;
+    }
+}
+</style>

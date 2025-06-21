@@ -1,0 +1,305 @@
+@{
+    ViewData["Title"] = "Video Player Demo - CCFilm";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="demo-header text-center py-5">
+                <h1 class="display-4 gradient-text">
+                    <i class="fas fa-play-circle me-3"></i>
+                    CCFilm Video Player
+                </h1>
+                <p class="lead text-secondary">
+                    Trải nghiệm video player hiện đại với đầy đủ tính năng điều khiển
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Video Player Demo -->
+            @{
+                var demoVideo = new VideoPlayerViewModel
+                {
+                    Title = "CCFilm Video Player - Demo",
+                    Description = "Video player tùy chỉnh với các tính năng: điều chỉnh chất lượng, tốc độ phát, âm lượng, toàn màn hình, Picture-in-Picture và nhiều hơn nữa.",
+                    VideoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                    VideoUrl720 = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                    VideoUrl480 = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+                    VideoUrl360 = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+                    PosterUrl = "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+                    Autoplay = false,
+                    Muted = false,
+                    ShowDownloadOptions = true,
+                    Subtitles = new List<SubtitleTrack>
+                    {
+                        new SubtitleTrack { Label = "Tiếng Việt", Url = "/subtitles/vi.vtt", Language = "vi" },
+                        new SubtitleTrack { Label = "English", Url = "/subtitles/en.vtt", Language = "en" }
+                    },
+                    DownloadLinks = new List<DownloadLink>
+                    {
+                        new DownloadLink { Quality = "1080p", Url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", Size = "158MB", Filename = "BigBuckBunny_1080p.mp4" },
+                        new DownloadLink { Quality = "720p", Url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", Size = "95MB", Filename = "BigBuckBunny_720p.mp4" },
+                        new DownloadLink { Quality = "480p", Url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4", Size = "45MB", Filename = "BigBuckBunny_480p.mp4" }
+                    }
+                };
+            }
+            
+            @await Html.PartialAsync("_VideoPlayer", demoVideo)
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="features-section">
+                <h2 class="text-center mb-5">
+                    <i class="fas fa-star me-2"></i>
+                    Tính Năng Nổi Bật
+                </h2>
+                
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-hd-video"></i>
+                            </div>
+                            <h4>Đa Chất Lượng</h4>
+                            <p>Hỗ trợ từ 360p đến 1080p, tự động chuyển đổi theo băng thông</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <h4>Tốc Độ Phát</h4>
+                            <p>Điều chỉnh tốc độ từ 0.25x đến 2x theo nhu cầu</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </div>
+                            <h4>Toàn Màn Hình</h4>
+                            <p>Chế độ toàn màn hình và Picture-in-Picture</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="feature-card text-center">
+                            <div class="feature-icon">
+                                <i class="fas fa-keyboard"></i>
+                            </div>
+                            <h4>Phím Tắt</h4>
+                            <p>Hỗ trợ đầy đủ phím tắt cho trải nghiệm nhanh chóng</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Control Guide -->
+    <div class="row mt-5">
+        <div class="col-lg-6">
+            <div class="control-guide">
+                <h3><i class="fas fa-keyboard me-2"></i>Hướng Dẫn Điều Khiển</h3>
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped">
+                        <thead>
+                            <tr>
+                                <th>Phím</th>
+                                <th>Chức năng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><kbd>Space</kbd></td>
+                                <td>Phát/Dừng video</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>←</kbd></td>
+                                <td>Tua lại 10 giây</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>→</kbd></td>
+                                <td>Tua tới 10 giây</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>↑</kbd></td>
+                                <td>Tăng âm lượng</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>↓</kbd></td>
+                                <td>Giảm âm lượng</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>M</kbd></td>
+                                <td>Tắt/Bật âm thanh</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>F</kbd></td>
+                                <td>Toàn màn hình</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="mouse-guide">
+                <h3><i class="fas fa-mouse-pointer me-2"></i>Điều Khiển Chuột</h3>
+                <div class="guide-list">
+                    <div class="guide-item">
+                        <i class="fas fa-hand-pointer text-primary"></i>
+                        <span><strong>Click video:</strong> Phát/Dừng</span>
+                    </div>
+                    <div class="guide-item">
+                        <i class="fas fa-arrows-alt-h text-success"></i>
+                        <span><strong>Kéo thanh tiến độ:</strong> Tua đến vị trí</span>
+                    </div>
+                    <div class="guide-item">
+                        <i class="fas fa-volume-up text-warning"></i>
+                        <span><strong>Kéo thanh âm lượng:</strong> Điều chỉnh âm thanh</span>
+                    </div>
+                    <div class="guide-item">
+                        <i class="fas fa-cog text-info"></i>
+                        <span><strong>Click settings:</strong> Chất lượng, tốc độ</span>
+                    </div>
+                    <div class="guide-item">
+                        <i class="fas fa-expand text-danger"></i>
+                        <span><strong>Click fullscreen:</strong> Toàn màn hình</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.demo-header {
+    background: linear-gradient(135deg, var(--accent-blue, #004d61), var(--accent-purple, #822659));
+    margin: -2rem -15px 2rem -15px;
+    border-radius: 0 0 20px 20px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #00d4ff, #ff6b9d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.features-section {
+    padding: 3rem 0;
+}
+
+.feature-card {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 15px;
+    padding: 2rem 1.5rem;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--accent-blue, #004d61), var(--accent-purple, #822659));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+
+.feature-card h4 {
+    color: var(--text-primary, #e0e0e0);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.feature-card p {
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.control-guide, .mouse-guide {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 15px;
+    padding: 2rem;
+    height: 100%;
+}
+
+.control-guide h3, .mouse-guide h3 {
+    color: var(--text-primary, #e0e0e0);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.table-dark {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.table-dark kbd {
+    background: var(--accent-blue, #004d61);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.guide-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 0.95rem;
+}
+
+.guide-item i {
+    width: 24px;
+    font-size: 1.2rem;
+}
+
+.guide-item strong {    color: var(--text-primary, #e0e0e0);
+}
+
+@@media (max-width: 768px) {
+    .demo-header {
+        margin: -1rem -15px 1rem -15px;
+        padding: 2rem 1rem !important;
+    }
+    
+    .feature-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .control-guide, .mouse-guide {
+        margin-bottom: 2rem;
+    }
+}
+</style>

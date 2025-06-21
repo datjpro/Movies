@@ -453,6 +453,32 @@ namespace MoviesApp.Controllers
                 .ToListAsync();
 
             return Json(phims);
+        }        // GET: Phim/VideoPlayer/5 - Test video player
+        public async Task<IActionResult> VideoPlayer(string? id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                // Return demo video if no ID provided
+                return View(new Phim 
+                { 
+                    TenPhim = "Demo Video Player",
+                    MoTa = "Trải nghiệm video player hiện đại với đầy đủ tính năng điều khiển",
+                    LinkPhim = "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+                });
+            }
+
+            var phim = await _context.Phims
+                .Include(p => p.QuocGia)
+                .Include(p => p.TheLoaiPhim)
+                .Include(p => p.DanhMuc)
+                .FirstOrDefaultAsync(m => m.MaPhim == id);
+
+            if (phim == null)
+            {
+                return NotFound();
+            }
+
+            return View(phim);
         }
     }
 }
