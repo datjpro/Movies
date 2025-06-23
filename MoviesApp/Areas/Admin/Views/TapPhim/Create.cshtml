@@ -69,6 +69,8 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                         
                         <input asp-for="MaPhim" type="hidden" />
+                        <input asp-for="VideoId" type="hidden" id="VideoId" />
+                        <input asp-for="VideoUrl" type="hidden" id="VideoUrl" />
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -108,32 +110,91 @@
                                       placeholder="Nhập mô tả nội dung của tập phim..."></textarea>
                             <span asp-validation-for="ChiTiet" class="text-danger"></span>
                         </div>                        <div class="mb-3">
-                            <label asp-for="VideoUrl" class="form-label">
-                                <i class="fas fa-link me-1"></i>
-                                URL Video <span class="text-danger">*</span>
+                            <label class="form-label">
+                                <i class="fas fa-cloud-upload-alt me-1"></i>
+                                Video <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="VideoUrl" class="form-control" 
-                                   placeholder="Ví dụ: https://www.youtube.com/watch?v=d0c0W69JZt4" 
-                                   id="videoUrlInput" />
-                            <span asp-validation-for="VideoUrl" class="text-danger"></span>
-                            <div class="form-text">
-                                <div class="alert alert-info mt-2">
-                                    <h6><i class="fas fa-info-circle me-1"></i> Hỗ trợ các loại video:</h6>
-                                    <ul class="mb-0">
-                                        <li><strong>YouTube:</strong> 
-                                            <code>https://www.youtube.com/watch?v=VIDEO_ID</code><br>
-                                            <code>https://youtu.be/VIDEO_ID</code>
-                                        </li>
-                                        <li><strong>Vimeo:</strong> 
-                                            <code>https://vimeo.com/VIDEO_ID</code>
-                                        </li>
-                                        <li><strong>File trực tiếp:</strong> 
-                                            <code>https://example.com/video.mp4</code>
-                                        </li>
-                                    </ul>
-                                    <small class="text-muted mt-1 d-block">
-                                        <strong>Ví dụ YouTube:</strong> https://www.youtube.com/watch?v=d0c0W69JZt4
-                                    </small>
+                            
+                            <!-- Tab Navigation -->
+                            <ul class="nav nav-tabs mb-3" id="videoTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#upload-panel" type="button" role="tab">
+                                        <i class="fas fa-upload me-1"></i>Upload File
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="url-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#url-panel" type="button" role="tab">
+                                        <i class="fas fa-link me-1"></i>URL Video
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content" id="videoTabsContent">
+                                <!-- Upload Panel -->
+                                <div class="tab-pane fade show active" id="upload-panel" role="tabpanel">
+                                    <div class="upload-area border-2 border-dashed border-primary rounded p-4 text-center">
+                                        <input type="file" id="videoFileInput" accept="video/*" style="display: none;">
+                                        <div id="upload-initial">
+                                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                            <h5>Kéo thả file video hoặc click để chọn</h5>
+                                            <p class="text-muted">
+                                                Hỗ trợ: MP4, AVI, MKV, MOV, WMV, FLV<br>
+                                                Kích thước tối đa: 2GB
+                                            </p>
+                                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('videoFileInput').click()">
+                                                <i class="fas fa-folder-open me-2"></i>Chọn File
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Upload Progress -->
+                                        <div id="upload-progress" style="display: none;">
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar" role="progressbar" style="width: 0%" id="uploadProgressBar"></div>
+                                            </div>
+                                            <p id="upload-status">Đang upload...</p>
+                                        </div>
+                                        
+                                        <!-- Upload Success -->
+                                        <div id="upload-success" style="display: none;">
+                                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                            <h5 class="text-success">Upload thành công!</h5>
+                                            <p id="uploaded-file-name"></p>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" id="remove-uploaded-video">
+                                                <i class="fas fa-trash me-1"></i>Xóa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- URL Panel -->
+                                <div class="tab-pane fade" id="url-panel" role="tabpanel">
+                                    <input asp-for="VideoUrl" class="form-control" 
+                                           placeholder="Ví dụ: https://www.youtube.com/watch?v=d0c0W69JZt4" 
+                                           id="videoUrlInput" />
+                                    <span asp-validation-for="VideoUrl" class="text-danger"></span>
+                                    <div class="form-text">
+                                        <div class="alert alert-info mt-2">
+                                            <h6><i class="fas fa-info-circle me-1"></i> Hỗ trợ các loại video:</h6>
+                                            <ul class="mb-0">
+                                                <li><strong>YouTube:</strong> 
+                                                    <code>https://www.youtube.com/watch?v=VIDEO_ID</code><br>
+                                                    <code>https://youtu.be/VIDEO_ID</code>
+                                                </li>
+                                                <li><strong>Vimeo:</strong> 
+                                                    <code>https://vimeo.com/VIDEO_ID</code>
+                                                </li>
+                                                <li><strong>File trực tiếp:</strong> 
+                                                    <code>https://example.com/video.mp4</code>
+                                                </li>
+                                            </ul>
+                                            <small class="text-muted mt-1 d-block">
+                                                <strong>Ví dụ YouTube:</strong> https://www.youtube.com/watch?v=d0c0W69JZt4
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -177,8 +238,11 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
-    <script>
+      <script>
+        let uploadedVideoUrl = '';
+        let uploadedVideoId = '';
+        let isVideoUploaded = false;
+
         // Set default release date to today if empty
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.getElementById('NgayPhatHanh');
@@ -188,7 +252,170 @@
                 dateInput.value = now.toISOString().slice(0, 16);
             }
 
-            // Video URL preview and validation
+            setupVideoUpload();
+            setupVideoUrlPreview();
+        });
+
+        function setupVideoUpload() {
+            const videoFileInput = document.getElementById('videoFileInput');
+            const uploadArea = document.querySelector('.upload-area');
+            const uploadInitial = document.getElementById('upload-initial');
+            const uploadProgress = document.getElementById('upload-progress');
+            const uploadSuccess = document.getElementById('upload-success');
+            const uploadProgressBar = document.getElementById('uploadProgressBar');
+            const uploadStatus = document.getElementById('upload-status');
+            const uploadedFileName = document.getElementById('uploaded-file-name');
+            const removeVideoBtn = document.getElementById('remove-uploaded-video');
+
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('bg-light');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('bg-light');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('bg-light');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleVideoUpload(files[0]);
+                }
+            });
+
+            // File input change
+            videoFileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleVideoUpload(e.target.files[0]);
+                }
+            });
+
+            // Remove uploaded video
+            removeVideoBtn.addEventListener('click', function() {
+                if (uploadedVideoUrl) {
+                    deleteUploadedVideo(uploadedVideoUrl);
+                }
+                resetUploadArea();
+            });
+
+            function handleVideoUpload(file) {
+                // Validate file
+                const allowedTypes = ['video/mp4', 'video/avi', 'video/mkv', 'video/mov', 'video/wmv', 'video/x-flv'];
+                const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
+
+                if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp4|avi|mkv|mov|wmv|flv)$/i)) {
+                    alert('Định dạng file không được hỗ trợ. Vui lòng chọn file MP4, AVI, MKV, MOV, WMV hoặc FLV.');
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    alert('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 2GB.');
+                    return;
+                }
+
+                // Show progress
+                uploadInitial.style.display = 'none';
+                uploadProgress.style.display = 'block';
+                uploadSuccess.style.display = 'none';
+
+                // Create FormData
+                const formData = new FormData();
+                formData.append('videoFile', file);
+                formData.append('episodeId', generateEpisodeId());
+
+                // Upload with progress
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        uploadProgressBar.style.width = percentComplete + '%';
+                        uploadProgressBar.textContent = Math.round(percentComplete) + '%';
+                        uploadStatus.textContent = `Đang upload... ${Math.round(percentComplete)}%`;
+                    }
+                });                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            // Upload success
+                            uploadedVideoUrl = response.videoUrl;
+                            uploadedVideoId = response.videoId || '';
+                            isVideoUploaded = true;
+                            uploadedFileName.textContent = file.name;
+                            
+                            uploadProgress.style.display = 'none';
+                            uploadSuccess.style.display = 'block';
+
+                            // Set video URL and ID to hidden inputs
+                            document.getElementById('VideoUrl').value = uploadedVideoUrl;
+                            document.getElementById('VideoId').value = uploadedVideoId;
+                            
+                            showNotification('Upload video thành công!', 'success');
+                        } else {
+                            showNotification('Lỗi upload: ' + response.message, 'error');
+                            resetUploadArea();
+                        }
+                    } else {
+                        showNotification('Lỗi kết nối server', 'error');
+                        resetUploadArea();
+                    }
+                });
+
+                xhr.addEventListener('error', function() {
+                    showNotification('Lỗi upload video', 'error');
+                    resetUploadArea();
+                });
+
+                xhr.open('POST', '@Url.Action("UploadVideoToCDN", "TapPhim", new { area = "Admin" })');
+                xhr.send(formData);
+            }            function resetUploadArea() {
+                uploadInitial.style.display = 'block';
+                uploadProgress.style.display = 'none';
+                uploadSuccess.style.display = 'none';
+                uploadProgressBar.style.width = '0%';
+                uploadProgressBar.textContent = '';
+                uploadStatus.textContent = 'Đang upload...';
+                videoFileInput.value = '';
+                uploadedVideoUrl = '';
+                uploadedVideoId = '';
+                isVideoUploaded = false;
+                document.getElementById('VideoUrl').value = '';
+                document.getElementById('VideoId').value = '';
+            }
+
+            function generateEpisodeId() {
+                return 'episode_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            function deleteUploadedVideo(videoUrl) {
+                fetch('@Url.Action("DeleteVideoFromCDN", "TapPhim", new { area = "Admin" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ videoUrl: videoUrl })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Xóa video thành công', 'success');
+                    } else {
+                        showNotification('Lỗi xóa video: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function setupVideoUrlPreview() {
             const videoUrlInput = document.getElementById('videoUrlInput');
             const videoPreview = document.getElementById('videoPreview');
             const videoPreviewContent = document.getElementById('videoPreviewContent');
@@ -200,7 +427,180 @@
                 } else {
                     hideVideoPreview();
                 }
-            });            function validateAndPreviewVideo(url) {
+            });
+
+            function validateAndPreviewVideo(url) {
+                const embedUrl = convertVideoUrl(url);
+                const videoType = getVideoType(url);
+                
+                if (embedUrl && (videoType === 'youtube' || videoType === 'vimeo')) {
+                    showVideoPreview(embedUrl, videoType);
+                    videoUrlInput.classList.remove('is-invalid');
+                    videoUrlInput.classList.add('is-valid');
+                } else if (isDirectVideoUrl(url)) {
+                    showVideoPreview(url, 'direct');
+                    videoUrlInput.classList.remove('is-invalid');
+                    videoUrlInput.classList.add('is-valid');
+                } else {
+                    hideVideoPreview();
+                    videoUrlInput.classList.remove('is-valid');
+                    videoUrlInput.classList.add('is-invalid');
+                }
+            }
+
+            function isDirectVideoUrl(url) {
+                if (!url) return false;
+                
+                const videoExtensions = /\.(mp4|webm|ogg|avi|mov|mkv|flv|wmv|m4v)(\?.*)?$/i;
+                if (videoExtensions.test(url)) return true;
+                
+                const videoFormats = /\.(mp4|webm|ogg|avi|mov|mkv|flv|wmv|m4v)/i;
+                if (videoFormats.test(url)) return true;
+                
+                if (url.includes('/video/') || url.includes('/stream/') || url.includes('/play/')) {
+                    return true;
+                }
+                
+                return false;
+            }
+
+            function showVideoPreview(url, type) {
+                let previewHtml = '';
+                
+                if (type === 'youtube' || type === 'vimeo') {
+                    previewHtml = `
+                        <div class="ratio ratio-16x9">
+                            <iframe src="${url}" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else if (type === 'direct') {
+                    previewHtml = `
+                        <div class="ratio ratio-16x9">
+                            <video controls>
+                                <source src="${url}" type="video/mp4">
+                                Trình duyệt không hỗ trợ video này.
+                            </video>
+                        </div>
+                    `;
+                }
+                
+                videoPreviewContent.innerHTML = previewHtml;
+                videoPreview.style.display = 'block';
+            }
+
+            function hideVideoPreview() {
+                videoPreview.style.display = 'none';
+                videoPreviewContent.innerHTML = '';
+            }
+
+            function convertVideoUrl(url) {
+                if (!url) return '';
+                
+                if (url.includes('youtube.com/watch?v=')) {
+                    const videoId = url.split('v=')[1].split('&')[0];
+                    return `https://www.youtube.com/embed/${videoId}`;
+                }
+                
+                if (url.includes('youtu.be/')) {
+                    const videoId = url.split('youtu.be/')[1].split('?')[0];
+                    return `https://www.youtube.com/embed/${videoId}`;
+                }
+                
+                if (url.includes('youtube.com/embed/')) {
+                    return url;
+                }
+                
+                if (url.includes('vimeo.com/') && !url.includes('/embed/')) {
+                    const videoId = url.split('vimeo.com/')[1].split('/')[0];
+                    return `https://player.vimeo.com/video/${videoId}`;
+                }
+                
+                return url;
+            }
+
+            function getVideoType(url) {
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    return 'youtube';
+                } else if (url.includes('vimeo.com')) {
+                    return 'vimeo';
+                } else {
+                    return 'direct';
+                }
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        // Form submission validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const videoUrl = document.getElementById('VideoUrl').value.trim();
+            
+            if (!videoUrl) {
+                e.preventDefault();
+                showNotification('Vui lòng upload video hoặc nhập URL video', 'error');
+                return false;
+            }
+        });
+    </script>
+
+    <style>
+        .upload-area {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--bs-primary) !important;
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+        }
+
+        .upload-area.bg-light {
+            background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+            border-color: var(--bs-primary) !important;
+        }
+
+        .progress {
+            height: 20px;
+        }
+
+        .progress-bar {
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .video-preview-container {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--bs-primary);
+            font-weight: 600;
+        }
+    </style>
+}function validateAndPreviewVideo(url) {
                 const embedUrl = convertVideoUrl(url);
                 const videoType = getVideoType(url);
                 

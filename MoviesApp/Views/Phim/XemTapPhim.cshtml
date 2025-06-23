@@ -1,0 +1,296 @@
+@model MoviesApp.Models.TapPhim
+
+@{
+    ViewData["Title"] = $"{Model.TenTap} - {Model.Phim.TenPhim}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var danhSachTapPhim = ViewBag.DanhSachTapPhim as List<MoviesApp.Models.TapPhim>;
+    var tapPhimHienTai = ViewBag.TapPhimHienTai as MoviesApp.Models.TapPhim;
+}
+
+<style>
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+        background: #000;
+        border-radius: 8px;
+    }
+    
+    .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .episode-list {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .episode-item {
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .episode-item:hover {
+        background-color: #f8f9fa;
+        border-color: #007bff;
+    }
+    
+    .episode-item.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .loading-spinner {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .video-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Video Player Column -->
+        <div class="col-lg-8">
+            <!-- Thông tin phim -->
+            <div class="video-info">
+                <h2>@Model.Phim.TenPhim</h2>
+                <h4>@Model.TenTap</h4>
+                <p class="text-muted">
+                    Tập @Model.SoTapThuTu 
+                    @if(Model.NgayPhatHanh.HasValue)
+                    {
+                        <span>• Phát hành: @Model.NgayPhatHanh.Value.ToString("dd/MM/yyyy")</span>
+                    }
+                </p>
+                @if(!string.IsNullOrEmpty(Model.ChiTiet))
+                {
+                    <p>@Model.ChiTiet</p>
+                }
+            </div>
+            
+            <!-- Video Player -->
+            <div class="video-container">
+                <video id="videoPlayer" controls preload="metadata" poster="">
+                    <source id="videoSource" src="" type="application/x-mpegURL">
+                    Trình duyệt của bạn không hỗ trợ video HTML5.
+                </video>
+            </div>
+            
+            <!-- Error message container -->
+            <div id="errorContainer" style="display: none;" class="error-message mt-3">
+                <strong>Lỗi:</strong> <span id="errorMessage"></span>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div id="loadingContainer" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p>Đang tải video...</p>
+            </div>
+        </div>
+        
+        <!-- Episode List Column -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Danh sách tập phim</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="episode-list">
+                        @if(danhSachTapPhim != null && danhSachTapPhim.Any())
+                        {
+                            foreach(var tap in danhSachTapPhim)
+                            {
+                                <div class="episode-item @(tap.MaTap == Model.MaTap ? "active" : "")" 
+                                     data-episode-id="@tap.MaTap"
+                                     onclick="loadEpisode('@tap.MaTap')">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>
+                                                @if(tap.SoTapThuTu == 0)
+                                                {
+                                                    <span>Trailer</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Tập @tap.SoTapThuTu</span>
+                                                }
+                                            </strong>
+                                            @if(!string.IsNullOrEmpty(tap.TenTap))
+                                            {
+                                                <div class="small text-muted">@tap.TenTap</div>
+                                            }
+                                        </div>
+                                        @if(!string.IsNullOrEmpty(tap.VideoUrl))
+                                        {
+                                            <span class="badge bg-success">Có sẵn</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Chưa có</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center p-4">
+                                <p class="text-muted">Chưa có tập phim nào</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Thông tin phim -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Thông tin phim</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Quốc gia:</strong> @Model.Phim.QuocGia?.TenQG</p>
+                    <p><strong>Thể loại:</strong> @Model.Phim.TheLoaiPhim?.TenTL</p>
+                    <p><strong>Danh mục:</strong> @Model.Phim.DanhMuc?.TenDM</p>
+                    @if(Model.Phim.NamSanXuat.HasValue)
+                    {
+                        <p><strong>Năm sản xuất:</strong> @Model.Phim.NamSanXuat</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+    let currentEpisodeId = '@Model.MaTap';
+    let videoPlayer = document.getElementById('videoPlayer');
+    let videoSource = document.getElementById('videoSource');
+    let loadingContainer = document.getElementById('loadingContainer');
+    let errorContainer = document.getElementById('errorContainer');
+    let errorMessage = document.getElementById('errorMessage');
+    
+    // Load video for current episode
+    document.addEventListener('DOMContentLoaded', function() {
+        loadVideo(currentEpisodeId);
+    });
+    
+    function loadVideo(episodeId) {
+        showLoading();
+        hideError();
+        
+        // Get video URL from API
+        fetch(`/Phim/GetVideoUrl?tapPhimId=${episodeId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.videoUrl) {
+                    setupVideoPlayer(data.videoUrl);
+                } else {
+                    showError(data.message || 'Không thể tải video');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading video:', error);
+                showError('Lỗi kết nối khi tải video');
+            });
+    }
+    
+    function setupVideoPlayer(videoUrl) {
+        hideLoading();
+        
+        // Check if HLS is supported
+        if (Hls.isSupported()) {
+            let hls = new Hls({
+                enableWorker: false,
+                lowLatencyMode: true,
+                backBufferLength: 90
+            });
+            
+            hls.loadSource(videoUrl);
+            hls.attachMedia(videoPlayer);
+            
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                console.log('HLS manifest loaded successfully');
+            });
+            
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                console.error('HLS Error:', data);
+                if (data.fatal) {
+                    showError('Lỗi phát video: ' + data.details);
+                }
+            });
+        } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native HLS support (Safari)
+            videoSource.src = videoUrl;
+            videoPlayer.load();
+        } else {
+            showError('Trình duyệt không hỗ trợ định dạng video này');
+        }
+    }
+    
+    function loadEpisode(episodeId) {
+        if (episodeId === currentEpisodeId) return;
+        
+        // Update active episode in UI
+        document.querySelectorAll('.episode-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelector(`[data-episode-id="${episodeId}"]`).classList.add('active');
+        
+        // Load new episode
+        currentEpisodeId = episodeId;
+        loadVideo(episodeId);
+        
+        // Update URL without page reload
+        const newUrl = `/Phim/XemTapPhim/${episodeId}`;
+        window.history.pushState({}, '', newUrl);
+    }
+    
+    function showLoading() {
+        loadingContainer.style.display = 'block';
+        videoPlayer.style.display = 'none';
+    }
+    
+    function hideLoading() {
+        loadingContainer.style.display = 'none';
+        videoPlayer.style.display = 'block';
+    }
+    
+    function showError(message) {
+        hideLoading();
+        errorMessage.textContent = message;
+        errorContainer.style.display = 'block';
+    }
+    
+    function hideError() {
+        errorContainer.style.display = 'none';
+    }
+</script>
+}

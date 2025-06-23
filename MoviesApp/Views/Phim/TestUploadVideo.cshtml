@@ -1,0 +1,260 @@
+@{
+    ViewData["Title"] = "Test Upload Video";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var phims = ViewBag.Phims as List<MoviesApp.Models.Phim>;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-video"></i> Test Upload Video cho Tập Phim</h4>
+                </div>
+                <div class="card-body">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phimSelect" class="form-label">Chọn Phim</label>
+                                    <select class="form-select" id="phimSelect" name="phimId" required>
+                                        <option value="">-- Chọn phim --</option>
+                                        @if(phims != null)
+                                        {
+                                            @foreach(var phim in phims)
+                                            {
+                                                <option value="@phim.MaPhim">@phim.TenPhim</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="soTap" class="form-label">Số Tập</label>
+                                    <input type="number" class="form-control" id="soTap" name="soTap" min="0" value="1" required>
+                                    <small class="text-muted">Dùng 0 cho trailer</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="tenTap" class="form-label">Tên Tập</label>
+                                    <input type="text" class="form-control" id="tenTap" name="tenTap" placeholder="VD: Tập 1" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="videoFile" class="form-label">Chọn File Video</label>
+                            <input type="file" class="form-control" id="videoFile" name="videoFile" accept="video/*" required>
+                            <small class="text-muted">Hỗ trợ: MP4, MOV, AVI, MKV, WEBM (tối đa 500MB)</small>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Video
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="createTestEpisode()">
+                                <i class="fas fa-flask"></i> Tạo Tập Test (không upload)
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Progress bar -->
+                    <div id="uploadProgress" class="mt-3" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted">Đang upload...</small>
+                    </div>
+                    
+                    <!-- Result -->
+                    <div id="uploadResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Hướng dẫn</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Cách sử dụng:</h6>
+                    <ol>
+                        <li>Chọn phim từ dropdown</li>
+                        <li>Nhập số tập (0 = trailer, 1,2,3... = tập phim)</li>
+                        <li>Nhập tên tập</li>
+                        <li>Chọn file video hoặc tạo tập test</li>
+                        <li>Click Upload hoặc Tạo Test</li>
+                    </ol>
+                    
+                    <h6 class="mt-3">Lưu ý:</h6>
+                    <ul>
+                        <li>File tối đa 500MB</li>
+                        <li>Video sẽ được xử lý thành HLS</li>
+                        <li>Tập test sẽ có URL giả lập</li>
+                        <li>Sau khi upload, có thể xem tại Details phim</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- CDN Status -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="fas fa-server"></i> CDN Status</h6>
+                </div>
+                <div class="card-body">
+                    <div id="cdnStatus">
+                        <div class="text-center">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <span class="ms-2">Checking...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    checkCDNStatus();
+    
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        uploadVideo();
+    });
+    
+    // Auto generate episode name based on episode number
+    document.getElementById('soTap').addEventListener('change', function() {
+        const soTap = parseInt(this.value);
+        const tenTapInput = document.getElementById('tenTap');
+        if (soTap === 0) {
+            tenTapInput.value = 'Trailer';
+        } else {
+            tenTapInput.value = `Tập ${soTap}`;
+        }
+    });
+});
+
+async function checkCDNStatus() {
+    try {
+        const response = await fetch('http://localhost:5288/api/v1/videos/health');
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('cdnStatus').innerHTML = `
+                <div class="text-success">
+                    <i class="fas fa-check-circle"></i> CDN Online
+                    <div class="small text-muted">Service: ${data.service} v${data.version}</div>
+                </div>`;
+        } else {
+            throw new Error('CDN not responding');
+        }
+    } catch (error) {
+        document.getElementById('cdnStatus').innerHTML = `
+            <div class="text-danger">
+                <i class="fas fa-times-circle"></i> CDN Offline
+                <div class="small text-muted">Cannot connect to CDN service</div>
+            </div>`;
+    }
+}
+
+async function uploadVideo() {
+    const form = document.getElementById('uploadForm');
+    const formData = new FormData(form);
+    const progressDiv = document.getElementById('uploadProgress');
+    const resultDiv = document.getElementById('uploadResult');
+    
+    // Show progress
+    progressDiv.style.display = 'block';
+    resultDiv.innerHTML = '';
+    
+    try {
+        const response = await fetch('/Phim/UploadVideoForEpisode', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-check"></i> ${result.message}</h6>
+                    <p><strong>Video URL:</strong> <code>${result.videoUrl}</code></p>
+                    <p><strong>Tập phim ID:</strong> <code>${result.tapPhimId}</code></p>
+                    <a href="/Phim/XemTapPhim/${result.tapPhimId}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-play"></i> Xem ngay
+                    </a>
+                </div>`;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> ${result.message}
+                </div>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Lỗi upload: ${error.message}
+            </div>`;
+    }
+    
+    // Hide progress
+    progressDiv.style.display = 'none';
+}
+
+async function createTestEpisode() {
+    const phimId = document.getElementById('phimSelect').value;
+    const soTap = document.getElementById('soTap').value;
+    const tenTap = document.getElementById('tenTap').value;
+    
+    if (!phimId || !soTap || !tenTap) {
+        alert('Vui lòng điền đầy đủ thông tin phim, số tập và tên tập');
+        return;
+    }
+    
+    const resultDiv = document.getElementById('uploadResult');
+    resultDiv.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div> Đang tạo tập test...</div>';
+    
+    try {
+        const response = await fetch('/Phim/CreateTestEpisode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `phimId=${encodeURIComponent(phimId)}&soTap=${encodeURIComponent(soTap)}&tenTap=${encodeURIComponent(tenTap)}`
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-check"></i> ${result.message}</h6>
+                    <p><strong>Video URL:</strong> <code>${result.videoUrl}</code></p>
+                    <p><strong>Tập phim ID:</strong> <code>${result.tapPhimId}</code></p>
+                    <div class="alert alert-warning mt-2">
+                        <small><i class="fas fa-info-circle"></i> Đây là tập test với URL giả lập. Video sẽ không phát được nhưng có thể test giao diện.</small>
+                    </div>
+                    <a href="/Phim/XemTapPhim/${result.tapPhimId}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-play"></i> Test giao diện
+                    </a>
+                </div>`;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> ${result.message}
+                </div>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Lỗi tạo tập test: ${error.message}
+            </div>`;
+    }
+}
+</script>
+}

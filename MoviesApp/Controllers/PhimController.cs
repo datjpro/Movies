@@ -7,16 +7,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MoviesApp.Controllers
-{
-    public class PhimController : Controller
+{    public class PhimController : Controller
     {
         private readonly WebMoviesDbContext _context;
         private readonly OMDbService _omdbService;
+        private readonly ICDNVideoService _cdnVideoService;
 
-        public PhimController(WebMoviesDbContext context, OMDbService omdbService)
+        public PhimController(WebMoviesDbContext context, OMDbService omdbService, ICDNVideoService cdnVideoService)
         {
             _context = context;
             _omdbService = omdbService;
+            _cdnVideoService = cdnVideoService;
         }
 
         // GET: Phim - Công khai cho tất cả users
@@ -145,10 +146,25 @@ namespace MoviesApp.Controllers
                     episode = selectedEpisode.SoTapThuTu;
                     Console.WriteLine($"Tự động chọn tập {selectedEpisode.SoTapThuTu}");
                 }
-            }
-
-            ViewBag.SelectedEpisode = selectedEpisode;
+            }            ViewBag.SelectedEpisode = selectedEpisode;
             ViewBag.EpisodeNumber = episode;
+            
+            // Chỉ dùng MP4 URL đơn giản
+            if (selectedEpisode != null && !string.IsNullOrEmpty(selectedEpisode.VideoId))
+            {
+                ViewBag.MP4Url = $"http://localhost:5288/api/v1/videos/{selectedEpisode.VideoId}/mp4";
+                ViewBag.HasVideo = true;
+                
+                // Debug logging
+                Console.WriteLine($"DEBUG - Selected Episode: {selectedEpisode.TenTap}");
+                Console.WriteLine($"DEBUG - VideoId: {selectedEpisode.VideoId}");
+                Console.WriteLine($"DEBUG - MP4 URL: {ViewBag.MP4Url}");
+            }
+            else
+            {
+                ViewBag.HasVideo = false;
+                Console.WriteLine($"DEBUG - No video available. Episode: {selectedEpisode?.TenTap}, VideoId: {selectedEpisode?.VideoId}");
+            }
             
             return View(phim);
         }// GET: Phim/Create - Chỉ cho phép Admin
@@ -479,6 +495,223 @@ namespace MoviesApp.Controllers
             }
 
             return View(phim);
+        }
+
+        // GET: Phim/XemTapPhim/T001 - Xem tập phim cụ thể
+        public async Task<IActionResult> XemTapPhim(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound("Không tìm thấy tập phim");
+            }
+
+            var tapPhim = await _context.TapPhims
+                .Include(t => t.Phim)
+                    .ThenInclude(p => p.QuocGia)
+                .Include(t => t.Phim)
+                    .ThenInclude(p => p.TheLoaiPhim)
+                .Include(t => t.Phim)
+                    .ThenInclude(p => p.DanhMuc)
+                .FirstOrDefaultAsync(t => t.MaTap == id);
+
+            if (tapPhim == null)
+            {
+                return NotFound("Không tìm thấy tập phim");
+            }
+
+            // Lấy danh sách tất cả tập phim của phim này
+            var danhSachTapPhim = await _context.TapPhims
+                .Where(t => t.MaPhim == tapPhim.MaPhim)
+                .OrderBy(t => t.SoTapThuTu)
+                .ToListAsync();
+
+            ViewBag.DanhSachTapPhim = danhSachTapPhim;
+            ViewBag.TapPhimHienTai = tapPhim;
+
+            return View(tapPhim);
+        }        // API: Lấy URL video từ CDN cho tập phim
+        [HttpGet]
+        public async Task<IActionResult> GetVideoUrl(string tapPhimId)
+        {
+            try
+            {
+                var tapPhim = await _context.TapPhims
+                    .FirstOrDefaultAsync(t => t.MaTap == tapPhimId);
+
+                if (tapPhim == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tập phim" });
+                }
+
+                if (string.IsNullOrEmpty(tapPhim.VideoId))
+                {
+                    return Json(new { success = false, message = "Tập phim chưa có video" });
+                }
+
+                // Gọi CDN API để lấy streaming URL realtime
+                var cdnVideoService = HttpContext.RequestServices.GetRequiredService<ICDNVideoService>();
+                var streamingUrl = await cdnVideoService.GetStreamingUrlAsync(tapPhim.VideoId);
+                
+                if (string.IsNullOrEmpty(streamingUrl))
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = "Không thể lấy URL video từ CDN",
+                        videoId = tapPhim.VideoId
+                    });
+                }
+
+                return Json(new { 
+                    success = true, 
+                    videoUrl = streamingUrl,
+                    videoId = tapPhim.VideoId,
+                    tapPhimInfo = new {
+                        maTap = tapPhim.MaTap,
+                        tenTap = tapPhim.TenTap,
+                        soTapThuTu = tapPhim.SoTapThuTu
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi lấy video: " + ex.Message });
+            }
+        }
+
+        // Test action để upload video và tạo tập phim mới
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UploadVideoForEpisode(string phimId, int soTap, string tenTap, IFormFile videoFile)
+        {
+            try
+            {
+                if (videoFile == null || videoFile.Length == 0)
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn file video" });
+                }
+
+                var phim = await _context.Phims.FirstOrDefaultAsync(p => p.MaPhim == phimId);
+                if (phim == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phim" });
+                }                // Upload video lên CDN
+                var cdnVideoService = HttpContext.RequestServices.GetRequiredService<ICDNVideoService>();
+                var episodeId = $"episode_{phimId}_{soTap}_{DateTime.Now.Ticks}";
+                
+                var uploadResult = await cdnVideoService.UploadVideoAsync(videoFile, episodeId);
+                
+                if (!uploadResult.Success)
+                {
+                    return Json(new { success = false, message = "Lỗi upload video: " + uploadResult.Message });
+                }
+
+                // Tạo hoặc cập nhật tập phim
+                var maTap = $"{phimId}_T{soTap:D2}";
+                var existingTap = await _context.TapPhims.FirstOrDefaultAsync(t => t.MaTap == maTap);                if (existingTap != null)
+                {
+                    // Cập nhật tập phim hiện có - chỉ lưu VideoId
+                    existingTap.VideoId = uploadResult.VideoId; 
+                    existingTap.VideoStatus = "processing"; 
+                    existingTap.TenTap = tenTap;
+                    _context.Update(existingTap);
+                }
+                else
+                {
+                    // Tạo tập phim mới - chỉ lưu VideoId
+                    var tapPhim = new TapPhim
+                    {
+                        MaTap = maTap,
+                        MaPhim = phimId,
+                        SoTapThuTu = soTap,
+                        TenTap = tenTap,
+                        VideoId = uploadResult.VideoId, // Chỉ lưu VideoId
+                        VideoStatus = "processing",
+                        NgayPhatHanh = DateTime.Now
+                    };
+                    _context.TapPhims.Add(tapPhim);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Upload video thành công!", 
+                    videoUrl = uploadResult.VideoUrl,
+                    tapPhimId = maTap
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        // GET: Test page for uploading videos
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> TestUploadVideo()
+        {
+            var phims = await _context.Phims.Take(10).ToListAsync();
+            ViewBag.Phims = phims;
+            return View();
+        }        // API: Tạo tập phim test với VideoId giả lập
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateTestEpisode(string phimId, int soTap = 1, string tenTap = "Tập test")
+        {
+            try
+            {
+                var phim = await _context.Phims.FirstOrDefaultAsync(p => p.MaPhim == phimId);
+                if (phim == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phim" });
+                }
+
+                // Tạo VideoId giả lập cho test
+                var testVideoId = $"test_episode_{phimId}_{soTap}_{DateTime.Now.Ticks}";
+
+                // Tạo hoặc cập nhật tập phim
+                var maTap = $"{phimId}_T{soTap:D2}";
+                var existingTap = await _context.TapPhims.FirstOrDefaultAsync(t => t.MaTap == maTap);
+                
+                if (existingTap != null)
+                {
+                    // Cập nhật tập phim hiện có
+                    existingTap.VideoId = testVideoId;
+                    existingTap.VideoStatus = "ready";
+                    existingTap.TenTap = tenTap;
+                    _context.Update(existingTap);
+                }
+                else
+                {
+                    // Tạo tập phim mới
+                    var tapPhim = new TapPhim
+                    {
+                        MaTap = maTap,
+                        MaPhim = phimId,
+                        SoTapThuTu = soTap,
+                        TenTap = tenTap,
+                        VideoId = testVideoId, // Chỉ lưu VideoId
+                        VideoStatus = "ready",
+                        ThoiLuongTap = 45,
+                        NgayPhatHanh = DateTime.Now
+                    };
+                    _context.TapPhims.Add(tapPhim);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Tạo tập phim test thành công!", 
+                    videoId = testVideoId,
+                    tapPhimId = maTap,
+                    note = "Khi xem sẽ gọi CDN API để lấy streaming URL"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
     }
 }

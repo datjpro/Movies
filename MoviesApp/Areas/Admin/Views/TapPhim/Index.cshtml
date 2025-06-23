@@ -76,15 +76,15 @@
             @if (Model.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-hover">                        <thead>
                             <tr>
-                                <th width="10%">Tập</th>
-                                <th width="25%">Tên tập</th>
-                                <th width="15%">Thời lượng</th>
-                                <th width="15%">Ngày phát hành</th>
-                                <th width="15%">Video URL</th>
-                                <th width="20%">Thao tác</th>
+                                <th width="8%">Tập</th>
+                                <th width="20%">Tên tập</th>
+                                <th width="10%">Thời lượng</th>
+                                <th width="12%">Ngày phát hành</th>
+                                <th width="25%">Thông tin Video</th>
+                                <th width="15%">Trạng thái</th>
+                                <th width="10%">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -122,17 +122,84 @@
                                         {
                                             <span class="text-muted">Chưa cập nhật</span>
                                         }
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(item.VideoUrl))
+                                    </td>                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.VideoId) || !string.IsNullOrEmpty(item.VideoUrl))
                                         {
-                                            <a href="@item.VideoUrl" target="_blank" class="btn btn-sm btn-outline-info" title="Xem video">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
+                                            <div class="video-info">
+                                                @if (!string.IsNullOrEmpty(item.VideoId))
+                                                {
+                                                    <div><strong>Video ID:</strong> 
+                                                        <code class="small">@item.VideoId</code>
+                                                    </div>
+                                                }
+                                                @if (!string.IsNullOrEmpty(item.VideoUrl))
+                                                {
+                                                    <div><strong>URL:</strong> 
+                                                        <a href="@item.VideoUrl" target="_blank" class="btn btn-sm btn-outline-info ms-1" title="Xem video">
+                                                            <i class="fas fa-play"></i>
+                                                        </a>
+                                                    </div>
+                                                }
+                                                @if (!string.IsNullOrEmpty(item.VideoFormat))
+                                                {
+                                                    <div><strong>Format:</strong> 
+                                                        <span class="badge bg-secondary">@item.VideoFormat.ToUpper()</span>
+                                                    </div>
+                                                }
+                                                @if (item.VideoFileSize.HasValue && item.VideoFileSize > 0)
+                                                {
+                                                    <div><strong>Size:</strong> 
+                                                        <span class="text-muted">@((item.VideoFileSize.Value / (1024.0 * 1024.0)).ToString("F1")) MB</span>
+                                                    </div>
+                                                }
+                                            </div>
                                         }
                                         else
                                         {
-                                            <span class="text-muted">Chưa có link</span>
+                                            <span class="text-muted">
+                                                <i class="fas fa-video-slash"></i> Chưa có video
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.VideoStatus))
+                                        {
+                                            @switch (item.VideoStatus.ToLower())
+                                            {
+                                                case "ready":
+                                                case "completed":
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle"></i> Sẵn sàng
+                                                    </span>
+                                                    break;
+                                                case "processing":
+                                                case "uploading":
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-spinner fa-spin"></i> Đang xử lý
+                                                    </span>
+                                                    break;
+                                                case "failed":
+                                                case "error":
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-exclamation-triangle"></i> Lỗi
+                                                    </span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">@item.VideoStatus</span>
+                                                    break;
+                                            }
+                                        }
+                                        else if (!string.IsNullOrEmpty(item.VideoUrl))
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> Sẵn sàng
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark">
+                                                <i class="fas fa-minus"></i> Chưa có
+                                            </span>
                                         }
                                     </td>
                                     <td>
@@ -270,3 +337,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+.video-info {
+    font-size: 0.875rem;
+}
+
+.video-info > div {
+    margin-bottom: 0.25rem;
+}
+
+.video-info > div:last-child {
+    margin-bottom: 0;
+}
+
+.video-info code {
+    background-color: #f8f9fa;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    max-width: 150px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+</style>

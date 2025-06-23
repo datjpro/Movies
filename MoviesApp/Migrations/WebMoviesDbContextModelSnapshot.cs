@@ -701,6 +701,21 @@ namespace MoviesApp.Migrations
                     b.Property<int?>("ThoiLuongTap")
                         .HasColumnType("int");
 
+                    b.Property<long?>("VideoFileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("VideoFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("VideoId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("VideoStatus")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("VideoUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");

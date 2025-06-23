@@ -12,8 +12,8 @@ using MoviesApp.Data;
 namespace MoviesApp.Migrations
 {
     [DbContext(typeof(WebMoviesDbContext))]
-    [Migration("20250617010237_UpdatePhimFields")]
-    partial class UpdatePhimFields
+    [Migration("20250623165753_AddCDNVideoFields")]
+    partial class AddCDNVideoFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -534,6 +534,10 @@ namespace MoviesApp.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("LinkPhim")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("LoaiPhim")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -699,6 +703,21 @@ namespace MoviesApp.Migrations
 
                     b.Property<int?>("ThoiLuongTap")
                         .HasColumnType("int");
+
+                    b.Property<long?>("VideoFileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("VideoFormat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("VideoId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("VideoStatus")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("VideoUrl")
                         .HasMaxLength(500)

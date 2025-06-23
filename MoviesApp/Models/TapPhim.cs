@@ -21,10 +21,19 @@ namespace MoviesApp.Models
         public string? TenTap { get; set; }
 
         [Column(TypeName = "ntext")]
-        public string? ChiTiet { get; set; }
-
-        [StringLength(500)]
+        public string? ChiTiet { get; set; }        [StringLength(500)]
         public string? VideoUrl { get; set; }
+
+        [StringLength(100)]
+        public string? VideoId { get; set; } // ID của video trong CDN
+
+        [StringLength(20)]
+        public string? VideoStatus { get; set; } // processing, ready, failed
+
+        public long? VideoFileSize { get; set; } // Kích thước file (bytes)
+
+        [StringLength(50)]
+        public string? VideoFormat { get; set; } // mp4, hls, etc.
 
         public int? ThoiLuongTap { get; set; } // Tính bằng phút
 

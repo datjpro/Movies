@@ -27,8 +27,9 @@
       <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="@ViewData["Title"] - CCFilm">
     <meta property="og:description" content="Khám phá thế giới điện ảnh với CCFilm">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")">
+    <meta property="og:type" content="website">    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")">
+    
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="modern-2025-body">
     <!-- Modern Navigation -->

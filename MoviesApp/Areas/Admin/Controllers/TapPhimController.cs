@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MoviesApp.Data;
 using MoviesApp.Models;
+using MoviesApp.Services;
 
 namespace MoviesApp.Areas.Admin.Controllers
 {
@@ -12,11 +13,13 @@ namespace MoviesApp.Areas.Admin.Controllers
     public class TapPhimController : Controller
     {
         private readonly WebMoviesDbContext _context;
+        private readonly ICDNVideoService _cdnVideoService;
 
-        public TapPhimController(WebMoviesDbContext context)
+        public TapPhimController(WebMoviesDbContext context, ICDNVideoService cdnVideoService)
         {
             _context = context;
-        }        // GET: Admin/TapPhim
+            _cdnVideoService = cdnVideoService;
+        }// GET: Admin/TapPhim
         public async Task<IActionResult> Index(string phimId, string maPhim, int page = 1, int pageSize = 10)
         {
             // Support both phimId and maPhim parameters
@@ -92,7 +95,7 @@ namespace MoviesApp.Areas.Admin.Controllers
         }        // POST: Admin/TapPhim/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MaPhim,SoTapThuTu,TenTap,ChiTiet,VideoUrl,ThoiLuongTap,NgayPhatHanh")] TapPhim tapPhim)
+        public async Task<IActionResult> Create([Bind("MaPhim,SoTapThuTu,TenTap,ChiTiet,VideoUrl,VideoId,ThoiLuongTap,NgayPhatHanh")] TapPhim tapPhim)
         {
             // Remove navigation properties from ModelState validation
             ModelState.Remove("Phim");
@@ -129,8 +132,12 @@ namespace MoviesApp.Areas.Admin.Controllers
                     var phim = await _context.Phims.FindAsync(tapPhim.MaPhim);
                     ViewBag.Phim = phim;
                     return View(tapPhim);
-                }                _context.Add(tapPhim);
-                await _context.SaveChangesAsync();                TempData["Success"] = "Thêm tập phim thành công!";
+                }
+
+                _context.Add(tapPhim);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Thêm tập phim thành công!";
                 return RedirectToAction(nameof(Index), new { maPhim = tapPhim.MaPhim });
             }
 
@@ -255,11 +262,139 @@ namespace MoviesApp.Areas.Admin.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool TapPhimExists(string id)
+        }        private bool TapPhimExists(string id)
         {
             return _context.TapPhims.Any(e => e.MaTap == id);
+        }        // API endpoint để upload video lên CDN
+        [HttpPost]
+        public async Task<IActionResult> UploadVideoToCDN(IFormFile videoFile, string episodeId, string maTap = null)
+        {
+            try
+            {
+                if (videoFile == null || videoFile.Length == 0)
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn file video" });
+                }
+
+                // Kiểm tra định dạng file
+                var allowedExtensions = new[] { ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv" };
+                var fileExtension = Path.GetExtension(videoFile.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return Json(new { success = false, message = "Định dạng file không được hỗ trợ" });
+                }
+
+                // Kiểm tra kích thước file (tối đa 2GB)
+                if (videoFile.Length > 2L * 1024 * 1024 * 1024)
+                {
+                    return Json(new { success = false, message = "Kích thước file quá lớn (tối đa 2GB)" });
+                }
+
+                // Upload lên CDN
+                var result = await _cdnVideoService.UploadVideoAsync(videoFile, episodeId);
+
+                if (result.Success)
+                {
+                    // Nếu có maTap, cập nhật database ngay
+                    if (!string.IsNullOrEmpty(maTap))
+                    {
+                        var tapPhim = await _context.TapPhims.FindAsync(maTap);
+                        if (tapPhim != null)
+                        {
+                            tapPhim.VideoId = result.VideoId;
+                            tapPhim.VideoUrl = result.VideoUrl;
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
+                    return Json(new { 
+                        success = true, 
+                        videoUrl = result.VideoUrl,
+                        videoId = result.VideoId,
+                        message = "Upload video thành công"
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = result.Message });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi upload: {ex.Message}" });
+            }
+        }        // API endpoint để xóa video từ CDN
+        [HttpPost]
+        public async Task<IActionResult> DeleteVideoFromCDN(string videoUrl)
+        {
+            try
+            {
+                // Extract videoId from URL or use URL as videoId
+                string videoId = ExtractVideoIdFromUrl(videoUrl);
+                var result = await _cdnVideoService.DeleteVideoAsync(videoId);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Xóa video thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xóa video" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi xóa video: {ex.Message}" });
+            }
+        }
+
+        private string ExtractVideoIdFromUrl(string videoUrl)
+        {
+            if (string.IsNullOrEmpty(videoUrl))
+                return string.Empty;
+
+            try
+            {
+                // Extract from URL pattern like: http://localhost:5288/api/v1/videos/{videoId}/stream
+                var uri = new Uri(videoUrl);
+                var segments = uri.Segments;
+                
+                // Find "videos" segment and get the next one
+                for (int i = 0; i < segments.Length - 1; i++)
+                {
+                    if (segments[i].TrimEnd('/').Equals("videos", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return segments[i + 1].TrimEnd('/');
+                    }
+                }
+                
+                // Fallback: use filename without extension
+                return Path.GetFileNameWithoutExtension(videoUrl);
+            }
+            catch
+            {
+                // Fallback: use the URL as is
+                return videoUrl;
+            }
+        }// API endpoint để kiểm tra trạng thái video
+        [HttpGet]
+        public async Task<IActionResult> CheckVideoStatus(string videoId)
+        {
+            try
+            {
+                var result = await _cdnVideoService.CheckVideoStatusAsync(videoId);
+                return Json(new { 
+                    success = true, 
+                    status = result.Status,
+                    isReady = result.IsReady,
+                    processingProgress = result.ProcessingProgress
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi kiểm tra trạng thái: {ex.Message}" });
+            }
         }
     }
 }

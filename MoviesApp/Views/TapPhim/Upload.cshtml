@@ -1,0 +1,312 @@
+@model MoviesApp.Models.TapPhim
+@{
+    ViewData["Title"] = "Upload Tập Phim";
+    var phim = ViewBag.Phim as MoviesApp.Models.Phim;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-upload"></i> Upload Tập Phim</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="@(phim?.AnhPhim)" alt="@phim?.TenPhim" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-8">
+                            <h5>@phim?.TenPhim</h5>
+                            <p class="text-muted">@phim?.MoTa</p>
+                            <small class="text-info">
+                                <i class="fas fa-film"></i> Số tập hiện có: @(phim?.TapPhims?.Count ?? 0)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-video"></i> Thông Tin Tập Phim</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <input type="hidden" name="maPhim" value="@phim?.MaPhim" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="soTap" class="form-label">Số Tập <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="soTap" name="soTap" 
+                                           min="1" max="999" required 
+                                           placeholder="Nhập số tập (VD: 1, 2, 3...)">
+                                    <div class="form-text">Số tập phải là số nguyên dương</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="tenTap" class="form-label">Tên Tập</label>
+                                    <input type="text" class="form-control" id="tenTap" name="tenTap" 
+                                           placeholder="VD: Tập 1 - Khởi đầu">
+                                    <div class="form-text">Để trống sẽ tự động đặt tên "Tập X"</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="videoFile" class="form-label">File Video <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="videoFile" name="videoFile" 
+                                   accept="video/*" required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> 
+                                Hỗ trợ: MP4, AVI, MKV, MOV, WEBM. Tối đa 2GB.
+                            </div>
+                        </div>
+
+                        <!-- File Info Display -->
+                        <div id="fileInfo" class="alert alert-info" style="display: none;">
+                            <h6><i class="fas fa-file-video"></i> Thông tin file:</h6>
+                            <div id="fileDetails"></div>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div id="uploadProgress" class="mb-3" style="display: none;">
+                            <label class="form-label">Tiến độ upload:</label>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            <small id="uploadStatus" class="text-muted">Đang chuẩn bị...</small>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Details", "Phim", new { id = phim?.MaPhim })" 
+                               class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-upload"></i> Upload Tập Phim
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6><i class="fas fa-lightbulb"></i> Hướng dẫn</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Video sẽ được upload lên CDN và tự động chuyển đổi định dạng phù hợp</li>
+                        <li>Quá trình xử lý có thể mất vài phút tùy thuộc vào kích thước file</li>
+                        <li>Bạn có thể theo dõi tiến độ xử lý sau khi upload</li>
+                        <li>Video sẽ sẵn sàng phát khi trạng thái chuyển thành "Ready"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function() {
+    // File selection handler
+    $('#videoFile').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            displayFileInfo(file);
+        } else {
+            $('#fileInfo').hide();
+        }
+    });
+
+    // Form submission handler  
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const file = $('#videoFile')[0].files[0];
+        if (!file) {
+            alert('Vui lòng chọn file video');
+            return;
+        }
+
+        // Validate file size (2GB)
+        if (file.size > 2147483648) {
+            alert('File video không được vượt quá 2GB');
+            return;
+        }
+
+        uploadVideo();
+    });
+
+    function displayFileInfo(file) {
+        const fileSize = formatFileSize(file.size);
+        const fileType = file.type || 'Unknown';
+        
+        $('#fileDetails').html(`
+            <strong>Tên file:</strong> ${file.name}<br>
+            <strong>Kích thước:</strong> ${fileSize}<br>
+            <strong>Loại:</strong> ${fileType}
+        `);
+        $('#fileInfo').show();
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }    function uploadVideo() {
+        const formData = new FormData($('#uploadForm')[0]);
+        const file = $('#videoFile')[0].files[0];
+        
+        // Show progress
+        $('#uploadProgress').show();
+        $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang upload...');
+        
+        $.ajax({
+            url: '@Url.Action("Upload")',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            timeout: 1800000, // 30 minutes timeout for large files
+            xhr: function() {
+                const xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        const loadedMB = (e.loaded / 1024 / 1024).toFixed(2);
+                        const totalMB = (e.total / 1024 / 1024).toFixed(2);
+                        updateProgress(percentComplete, `Đã upload ${loadedMB}MB / ${totalMB}MB`);
+                    }
+                }, false);
+                return xhr;
+            },
+            success: function(result) {
+                updateProgress(100, 'Upload hoàn thành! Đang xử lý video...');
+                setTimeout(function() {
+                    // If it's a JSON response (AJAX), handle it
+                    if (typeof result === 'object') {
+                        if (result.success) {
+                            alert('Upload thành công! ' + result.message);
+                            window.location.href = '@Url.Action("Details", "Phim", new { id = phim?.MaPhim })';
+                        } else {
+                            alert('Lỗi: ' + result.message);
+                            resetForm();
+                        }
+                    } else {
+                        // HTML response - redirect happened
+                        window.location.href = '@Url.Action("Details", "Phim", new { id = phim?.MaPhim })';
+                    }
+                }, 2000);
+            },
+            error: function(xhr, status, error) {
+                console.error('Upload error:', error, 'Status:', status);
+                let errorMessage = 'Có lỗi xảy ra khi upload';
+                
+                if (status === 'timeout') {
+                    errorMessage = 'Upload timeout! File quá lớn hoặc kết nối chậm. Vui lòng thử lại.';
+                } else if (xhr.status === 413) {
+                    errorMessage = 'File quá lớn! Vui lòng chọn file nhỏ hơn 2GB.';
+                } else if (xhr.status === 500) {
+                    errorMessage = 'Lỗi server khi xử lý file. Vui lòng thử lại.';
+                } else if (xhr.responseText) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        errorMessage = response.message || errorMessage;
+                    } catch (e) {
+                        // Not JSON, use default message
+                    }
+                }
+                
+                updateProgress(0, errorMessage);
+                alert(errorMessage);
+                resetForm();
+                $('#uploadStatus').text('Lỗi upload: ' + error);
+                $('#submitBtn').prop('disabled', false);
+            }
+        });
+    }
+
+    function updateProgress(percent, message) {
+        const progressBar = $('.progress-bar');
+        progressBar.css('width', percent + '%');
+        progressBar.text(Math.round(percent) + '%');
+        
+        if (message) {
+            $('#uploadStatus').text(message);
+        } else {
+            $('#uploadStatus').text(`Đang upload... ${Math.round(percent)}%`);
+        }
+    }
+
+    function resetForm() {
+        $('#uploadProgress').hide();
+        $('#submitBtn').prop('disabled', false).html('<i class="fas fa-upload"></i> Upload Tập Phim');
+        $('.progress-bar').css('width', '0%').text('0%');
+        $('#uploadStatus').text('Chuẩn bị upload...');
+    }
+
+    // Warning for large files
+    $('#videoFile').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            displayFileInfo(file);
+            
+            // Warning for files larger than 500MB
+            if (file.size > 524288000) { // 500MB
+                const sizeInMB = (file.size / 1024 / 1024).toFixed(2);
+                $('#fileInfo').removeClass('alert-info').addClass('alert-warning');
+                $('#fileDetails').append(`
+                    <br><strong><i class="fas fa-exclamation-triangle"></i> Cảnh báo:</strong> 
+                    File rất lớn (${sizeInMB}MB). Quá trình upload có thể mất nhiều thời gian.
+                `);
+            } else {
+                $('#fileInfo').removeClass('alert-warning').addClass('alert-info');
+            }
+        } else {
+            $('#fileInfo').hide();
+        }
+    });
+});
+</script>
+}
+
+@section Styles {
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .progress {
+        height: 1.5rem;
+    }
+    
+    .file-drop-zone {
+        border: 2px dashed #dee2e6;
+        border-radius: 0.375rem;
+        padding: 3rem;
+        text-align: center;
+        transition: border-color 0.15s ease-in-out;
+    }
+    
+    .file-drop-zone:hover {
+        border-color: #007bff;
+    }
+    
+    .file-drop-zone.dragover {
+        border-color: #007bff;
+        background-color: #f8f9fa;
+    }
+</style>
+}

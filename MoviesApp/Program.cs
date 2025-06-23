@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http.Features;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services;
@@ -11,6 +12,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Configure file upload limits for large video files
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 2147483648; // 2GB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+    options.MultipartBoundaryLengthLimit = int.MaxValue;
+});
+
+// Configure Kestrel server limits
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 2147483648; // 2GB
+    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
+});
 
 // Add API support
 builder.Services.AddEndpointsApiExplorer();
@@ -162,6 +180,10 @@ builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 // Add HttpClient and OMDb service
 builder.Services.AddHttpClient<OMDbService>();
 builder.Services.Configure<OMDbSettings>(builder.Configuration.GetSection("OMDbSettings"));
+
+// Add CDN services with HttpClient
+builder.Services.AddHttpClient<CDNService>();
+builder.Services.AddHttpClient<ICDNVideoService, CDNVideoService>();
 
 var app = builder.Build();
 

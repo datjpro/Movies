@@ -1,0 +1,305 @@
+@model List<dynamic>
+
+@{
+    ViewData["Title"] = "Video Data Debug";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Database Error: @ViewBag.Error
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-video me-2"></i>
+                Video Data Debug
+            </h1>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-list me-2"></i>
+                                Tổng số tập
+                            </h5>
+                            <h2>@ViewBag.TotalEpisodes</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-play-circle me-2"></i>
+                                Có video
+                            </h5>
+                            <h2>@ViewBag.EpisodesWithVideo</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-video-slash me-2"></i>
+                                Không có video
+                            </h5>
+                            <h2>@ViewBag.EpisodesWithoutVideo</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Test Video Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Thêm Test Video
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("AddTestVideo")">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Mã Phim (để trống = auto)</label>
+                                <input type="text" class="form-control" name="maPhim" placeholder="P001">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Số tập</label>
+                                <input type="number" class="form-control" name="soTapThuTu" value="1" min="0" max="100">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Video URL</label>
+                                <select class="form-select" name="videoUrl" onchange="updateCustomUrl(this)">
+                                    <option value="">-- Chọn test video --</option>
+                                    <option value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">YouTube Test</option>
+                                    <option value="https://vimeo.com/148751763">Vimeo Test</option>
+                                    <option value="https://sample-videos.com/zip/10/mp4/SampleVideo_720x480_1mb.mp4">Direct MP4 Test</option>
+                                    <option value="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">Big Buck Bunny MP4</option>
+                                    <option value="custom">Custom URL...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2 d-none" id="customUrl" name="customVideoUrl" placeholder="Nhập URL tùy chỉnh...">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("WatchVideo")" class="btn btn-primary">
+                            <i class="fas fa-play me-1"></i>
+                            Xem video đầu tiên
+                        </a>
+                        <a href="@Url.Action("Index", "Phim")" class="btn btn-info">
+                            <i class="fas fa-film me-1"></i>
+                            Danh sách phim
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                            <i class="fas fa-home me-1"></i>
+                            Trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Episodes Data Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>
+                        Danh Sách Tập Phim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Mã Tập</th>
+                                        <th>Phim</th>
+                                        <th>Số Tập</th>
+                                        <th>Tên Tập</th>
+                                        <th>Video URL</th>
+                                        <th>Loại Video</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td><code>@item.MaTap</code></td>
+                                            <td>@item.PhimName</td>
+                                            <td>
+                                                @if (item.SoTapThuTu == 0)
+                                                {
+                                                    <span class="badge bg-info">Trailer</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-primary">Tập @item.SoTapThuTu</span>
+                                                }
+                                            </td>
+                                            <td>@(item.TenTap ?? "-")</td>
+                                            <td>
+                                                @if (item.HasVideo)
+                                                {
+                                                    <small class="text-truncate d-block" style="max-width: 200px;" title="@item.VideoUrl">
+                                                        @item.VideoUrl
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Không có</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var badgeClass = item.VideoType switch {
+                                                        "YouTube" => "bg-danger",
+                                                        "Vimeo" => "bg-primary", 
+                                                        "Direct" => "bg-success",
+                                                        "None" => "bg-secondary",
+                                                        _ => "bg-warning"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@item.VideoType</span>
+                                            </td>
+                                            <td>
+                                                @if (item.HasVideo)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Ready
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>No Video
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.HasVideo)
+                                                {
+                                                    <a href="@Url.Action("WatchVideo", new { phimId = item.MaPhim, episodeNumber = item.SoTapThuTu })" 
+                                                       class="btn btn-sm btn-primary" title="Xem video">
+                                                        <i class="fas fa-play"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-secondary" disabled title="Không có video">
+                                                        <i class="fas fa-video-slash"></i>
+                                                    </button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-database fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Không có dữ liệu tập phim</h5>
+                            <p class="text-muted">Hãy thêm một số tập phim test bằng form ở trên.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateCustomUrl(select) {
+    const customUrlInput = document.getElementById('customUrl');
+    const selectedValue = select.value;
+    
+    if (selectedValue === 'custom') {
+        customUrlInput.classList.remove('d-none');
+        customUrlInput.required = true;
+        customUrlInput.name = 'videoUrl';
+        select.name = '';
+    } else {
+        customUrlInput.classList.add('d-none');
+        customUrlInput.required = false;
+        customUrlInput.name = 'customVideoUrl';
+        select.name = 'videoUrl';
+    }
+}
+</script>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table th {
+    border-top: none;
+}
+
+.text-truncate {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+code {
+    background-color: #f8f9fa;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+</style>

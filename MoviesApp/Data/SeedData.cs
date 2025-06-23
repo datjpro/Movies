@@ -127,8 +127,98 @@ namespace MoviesApp.Data
                     QuocGiaSanXuat = "Japan",
                     XepHang = "TV-14"
                 }
+            };            context.Phims.AddRange(phims);
+            await context.SaveChangesAsync();
+
+            // Seed TapPhim với video test URLs
+            var tapPhims = new List<TapPhim>
+            {
+                // Phim 1 - Avengers Endgame (Movie) - Trailer
+                new TapPhim 
+                { 
+                    MaTap = "T001", 
+                    MaPhim = "PHIM001", 
+                    SoTapThuTu = 0, 
+                    TenTap = "Trailer", 
+                    ChiTiet = "Trailer chính thức của Avengers: Endgame",
+                    VideoUrl = "https://www.youtube.com/watch?v=TcMBFSGVi1c", // Avengers Endgame Trailer
+                    ThoiLuongTap = 3,
+                    NgayPhatHanh = new DateTime(2019, 3, 14)
+                },
+                // Phim 1 - Full Movie (Test with sample video)
+                new TapPhim 
+                { 
+                    MaTap = "T002", 
+                    MaPhim = "PHIM001", 
+                    SoTapThuTu = 1, 
+                    TenTap = "Phim đầy đủ", 
+                    ChiTiet = "Phim Avengers: Endgame full length",
+                    VideoUrl = "https://sample-videos.com/zip/10/mp4/SampleVideo_720x480_5mb.mp4", // Sample video for testing
+                    ThoiLuongTap = 181,
+                    NgayPhatHanh = new DateTime(2019, 4, 26)
+                },
+
+                // Phim 2 - Spider-Man (Movie) - Trailer
+                new TapPhim 
+                { 
+                    MaTap = "T003", 
+                    MaPhim = "PHIM002", 
+                    SoTapThuTu = 0, 
+                    TenTap = "Trailer", 
+                    ChiTiet = "Trailer chính thức của Spider-Man: No Way Home",
+                    VideoUrl = "https://www.youtube.com/watch?v=JfVOs4VSpmA", // Spider-Man Trailer
+                    ThoiLuongTap = 3,
+                    NgayPhatHanh = new DateTime(2021, 8, 24)
+                },
+                // Phim 2 - Full Movie
+                new TapPhim 
+                { 
+                    MaTap = "T004", 
+                    MaPhim = "PHIM002", 
+                    SoTapThuTu = 1, 
+                    TenTap = "Phim đầy đủ", 
+                    ChiTiet = "Phim Spider-Man: No Way Home full length",
+                    VideoUrl = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4", // Another sample video
+                    ThoiLuongTap = 148,
+                    NgayPhatHanh = new DateTime(2021, 12, 17)
+                },
+
+                // Phim 3 - Attack on Titan (Series) - Episodes
+                new TapPhim 
+                { 
+                    MaTap = "T005", 
+                    MaPhim = "PHIM003", 
+                    SoTapThuTu = 1, 
+                    TenTap = "To You, in 2000 Years", 
+                    ChiTiet = "Tập đầu tiên của Attack on Titan - Con người đối mặt với Titan",
+                    VideoUrl = "https://www.youtube.com/watch?v=MGRm4IzK1SQ", // Attack on Titan Episode 1 clip
+                    ThoiLuongTap = 24,
+                    NgayPhatHanh = new DateTime(2013, 4, 7)
+                },
+                new TapPhim 
+                { 
+                    MaTap = "T006", 
+                    MaPhim = "PHIM003", 
+                    SoTapThuTu = 2, 
+                    TenTap = "That Day", 
+                    ChiTiet = "Tập 2 - Hồi ức về ngày Titan phá vỡ tường Maria",
+                    VideoUrl = "https://file-examples.com/storage/fe68c0b3d4c80b9fc1906ac/2017/10/file_example_MP4_480_1_5MG.mp4", // Sample video
+                    ThoiLuongTap = 24,
+                    NgayPhatHanh = new DateTime(2013, 4, 14)
+                },
+                new TapPhim 
+                { 
+                    MaTap = "T007", 
+                    MaPhim = "PHIM003", 
+                    SoTapThuTu = 3, 
+                    TenTap = "A Dim Light Amid Despair", 
+                    ChiTiet = "Tập 3 - Ánh sáng mờ nhạt giữa tuyệt vọng",
+                    VideoUrl = "https://www.youtube.com/watch?v=w3UR7nsTLw4", // Another AOT clip
+                    ThoiLuongTap = 24,
+                    NgayPhatHanh = new DateTime(2013, 4, 21)
+                }
             };
-            context.Phims.AddRange(phims);
+            context.TapPhims.AddRange(tapPhims);
             await context.SaveChangesAsync();
 
             // Seed ThongKePhim
