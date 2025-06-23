@@ -171,12 +171,38 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-        }
-
-        .status-badge {
+        }        .status-badge {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
-        }        .sidebar-footer {
+        }
+
+        .nav-section {
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .nav-section-title {
+            display: block;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.5);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+        }
+
+        .nav-section:first-child {
+            margin-top: 0.5rem;
+        }
+
+        .nav-section:first-child .nav-section-title {
+            border-top: none;
+            padding-top: 0.5rem;
+        }
+
+        .sidebar-footer {
             position: absolute;
             bottom: 0;
             width: 100%;
@@ -191,8 +217,8 @@
         <div class="sidebar-brand">
             <h3><i class="fas fa-shield-alt me-2"></i>Admin Panel</h3>
         </div>
-        
-        <ul class="sidebar-nav">
+          <ul class="sidebar-nav">
+            <!-- Dashboard -->
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" && ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")" 
                    asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
@@ -200,18 +226,16 @@
                     Dashboard
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")" 
-                   asp-area="Admin" asp-controller="Users" asp-action="Index">
-                    <i class="fas fa-users"></i>
-                    Quản lý User
-                </a>
+            
+            <!-- Phim Management Section -->
+            <li class="nav-section">
+                <span class="nav-section-title">QUẢN LÝ PHIM</span>
             </li>
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Movies" ? "active" : "")" 
-                   asp-area="Admin" asp-controller="Movies" asp-action="Index">
-                    <i class="fas fa-film"></i>
-                    Quản lý Phim
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "SimpleAdmin" && ViewContext.RouteData.Values["Action"]?.ToString() == "Movies" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="SimpleAdmin" asp-action="Movies">
+                    <i class="fas fa-list"></i>
+                    Danh sách Phim
                 </a>
             </li>
             <li class="nav-item">
@@ -221,15 +245,50 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Movies" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Movies" asp-action="Index">
+                    <i class="fas fa-edit"></i>
+                    Chỉnh sửa Chi tiết
+                </a>
+            </li>
+            
+            <!-- User Management Section -->
+            <li class="nav-section">
+                <span class="nav-section-title">QUẢN LÝ NGƯỜI DÙNG</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")" 
+                   asp-area="Admin" asp-controller="Users" asp-action="Index">
+                    <i class="fas fa-users"></i>
+                    Danh sách User
+                </a>
+            </li>
+            
+            <!-- Analytics & Reports -->
+            <li class="nav-section">
+                <span class="nav-section-title">BÁO CÁO & THỐNG KÊ</span>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="fas fa-chart-bar"></i>
-                    Thống kê
+                    Thống kê Xem Phim
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#">
+                    <i class="fas fa-star"></i>
+                    Đánh giá & Bình luận
+                </a>
+            </li>
+            
+            <!-- System Settings -->
+            <li class="nav-section">
+                <span class="nav-section-title">HỆ THỐNG</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
                     <i class="fas fa-cog"></i>
-                    Cài đặt
+                    Cài đặt Hệ thống
                 </a>
             </li>
         </ul>

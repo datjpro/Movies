@@ -215,7 +215,9 @@
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 2rem;
         margin-bottom: 3rem;
-    }    .movie-card {
+    }
+
+    .movie-card {
         background: var(--glass-bg);
         backdrop-filter: blur(10px);
         border: 1px solid var(--glass-border);
@@ -224,31 +226,12 @@
         transition: all 0.3s ease;
         box-shadow: 0 8px 25px var(--shadow-medium);
         position: relative;
-        cursor: pointer;
     }
 
     .movie-card:hover {
         transform: translateY(-10px) scale(1.02);
         box-shadow: 0 20px 40px var(--shadow-medium);
         border-color: var(--primary-color);
-    }
-
-    .movie-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.03));
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-        z-index: 1;
-    }
-
-    .movie-card:hover::before {
-        opacity: 1;
     }
 
     .movie-poster {
@@ -285,7 +268,9 @@
 
     .movie-card:hover .movie-overlay {
         opacity: 1;
-    }    .play-button {
+    }
+
+    .play-button {
         background: var(--primary-color);
         color: white;
         border: none;
@@ -296,17 +281,15 @@
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px var(--shadow-light);
-        position: relative;
-        z-index: 2;
     }
 
     .play-button:hover {
         background: var(--primary-dark);
         transform: scale(1.1);
-    }    .movie-info {
+    }
+
+    .movie-info {
         padding: 1.5rem;
-        position: relative;
-        z-index: 2;
     }
 
     .movie-title {
@@ -350,11 +333,11 @@
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
-    }    .movie-actions {
+    }
+
+    .movie-actions {
         display: flex;
         gap: 0.5rem;
-        position: relative;
-        z-index: 2;
     }
 
     .btn-watch, .btn-details {
@@ -368,8 +351,6 @@
         text-decoration: none;
         text-align: center;
         display: inline-block;
-        position: relative;
-        z-index: 2;
     }
 
     .btn-watch {
@@ -496,11 +477,10 @@
             <div class="stat-card">
                 <div class="stat-number">@Model.Count()</div>
                 <div class="stat-label">Tổng số phim</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">@Model.Where(p => p.NamSanXuat >= DateTime.Now.Year - 1).Count()</div>
-                <div class="stat-label">Phim mới</div>
             </div>            <div class="stat-card">
+                <div class="stat-number">@Model.Where(p => p.NamPhatHanh >= DateTime.Now.Year - 1).Count()</div>
+                <div class="stat-label">Phim mới</div>
+            </div><div class="stat-card">
                 <div class="stat-number">@Model.Where(p => p.DiemImdb.HasValue && p.DiemImdb > 0).Count()</div>
                 <div class="stat-label">Phim có đánh giá</div>
             </div>
@@ -550,14 +530,13 @@
                     </div>
 
                     <div class="filter-group">
-                        <label for="namSanXuat">Năm sản xuất</label>
-                        <select name="namSanXuat" id="namSanXuat" class="filter-select">
-                            <option value="">Tất cả năm</option>
-                            @for(int year = DateTime.Now.Year; year >= 1980; year--)
-                            {
-                                <option value="@year" selected="@(ViewData["CurrentYear"]?.ToString() == year.ToString())">@year</option>
-                            }
-                        </select>
+                        <label for="namSanXuat">Năm sản xuất</label>                            <select name="namSanXuat" id="namSanXuat" class="filter-select">
+                                <option value="">Tất cả năm</option>
+                                @for(int year = DateTime.Now.Year; year >= 1980; year--)
+                                {
+                                    <option value="@year" selected="@(ViewData["CurrentYear"]?.ToString() == year.ToString())">@year</option>
+                                }
+                            </select>
                     </div>
 
                     <div class="filter-group">
@@ -582,20 +561,19 @@
 
         <!-- Movies Grid -->
         @if (Model != null && Model.Any())
-        {            <div class="movies-grid">
+        {
+            <div class="movies-grid">
                 @foreach (var phim in Model)
                 {
-                    <div class="movie-card" data-movie-id="@phim.MaPhim">
-                        <div class="movie-poster">
-                            <img src="@(!string.IsNullOrEmpty(phim.AnhPhim) ? phim.AnhPhim : "/images/no-image.jpg")" 
+                    <div class="movie-card">
+                        <div class="movie-poster">                            <img src="@(!string.IsNullOrEmpty(phim.AnhPhim) ? phim.AnhPhim : "/images/no-image.jpg")" 
                                  alt="@phim.TenPhim" 
                                  onerror="this.src='/images/no-image.jpg'">
-                            <div class="movie-overlay">
-                                @if (!string.IsNullOrEmpty(phim.LinkPhim))
+                            <div class="movie-overlay">                                @if (!string.IsNullOrEmpty(phim.LinkPhim))
                                 {
-                                    <button class="play-button" onclick="event.stopPropagation(); watchMovie('@phim.MaPhim', '@phim.LinkPhim');">
+                                    <a href="@Url.Action("VideoPlayer", "Phim", new { linkPhim = phim.LinkPhim })" class="play-button">
                                         <i class="fas fa-play"></i>
-                                    </button>
+                                    </a>
                                 }
                                 else
                                 {
@@ -608,36 +586,32 @@
 
                         <div class="movie-info">
                             <h3 class="movie-title">@phim.TenPhim</h3>
-                            
-                            <div class="movie-meta">
-                                <span class="movie-year">@phim.NamSanXuat</span>
+                              <div class="movie-meta">
+                                <span class="movie-year">@(phim.NamPhatHanh ?? 0)</span>
                                 <div class="movie-rating">
                                     <i class="fas fa-star" style="color: #fbbf24;"></i>
                                     <span>@(phim.DiemImdb?.ToString("F1") ?? "N/A")</span>
                                 </div>
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(phim.MoTa))
+                            </div>@if (!string.IsNullOrEmpty(phim.MoTaPhim))
                             {
-                                <p class="movie-description">@phim.MoTa</p>
+                                <p class="movie-description">@phim.MoTaPhim</p>
                             }
 
                             <div class="movie-actions">
                                 @if (!string.IsNullOrEmpty(phim.LinkPhim))
                                 {
-                                    <button class="btn-watch" onclick="event.stopPropagation(); watchMovie('@phim.MaPhim', '@phim.LinkPhim');">
+                                    <a href="@Url.Action("VideoPlayer", "Phim", new { linkPhim = phim.LinkPhim })" class="btn-watch">
                                         <i class="fas fa-play"></i> Xem phim
-                                    </button>
+                                    </a>
                                 }
                                 else
                                 {
                                     <button class="btn-watch" disabled style="opacity: 0.5;">
                                         <i class="fas fa-play"></i> Chưa có sẵn
                                     </button>
-                                }
-                                <button class="btn-details" onclick="event.stopPropagation(); viewMovie('@phim.MaPhim');">
+                                }                                <a href="@Url.Action("Details", "Phim", new { id = phim.MaPhim })" class="btn-details">
                                     <i class="fas fa-info-circle"></i> Chi tiết
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -708,31 +682,6 @@
 
 @section Scripts {
     <script>
-        // Movie navigation functions
-        function viewMovie(movieId) {
-            // Add smooth transition effect
-            document.body.style.transition = 'opacity 0.3s ease';
-            document.body.style.opacity = '0.8';
-            
-            setTimeout(() => {
-                window.location.href = `/Phim/Details/${movieId}`;
-            }, 150);
-        }
-
-        function watchMovie(movieId, linkPhim) {
-            // Add smooth transition effect
-            document.body.style.transition = 'opacity 0.3s ease';
-            document.body.style.opacity = '0.8';
-            
-            setTimeout(() => {
-                if (linkPhim && linkPhim.trim() !== '') {
-                    window.location.href = `/Phim/VideoPlayer/${movieId}`;
-                } else {
-                    alert('Phim này chưa có sẵn để xem');
-                }
-            }, 150);
-        }
-
         // Smooth scroll behavior
         document.addEventListener('DOMContentLoaded', function() {
             // Add loading animation for images
@@ -759,21 +708,6 @@
                 select.addEventListener('change', function() {
                     this.closest('form').submit();
                 });
-            });
-
-            // Add click handlers for movie cards
-            const movieCards = document.querySelectorAll('.movie-card');
-            movieCards.forEach(card => {
-                const movieId = card.getAttribute('data-movie-id');
-                if (movieId) {
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', function(e) {
-                        // Don't trigger if clicking on buttons
-                        if (!e.target.closest('.movie-actions') && !e.target.closest('.play-button')) {
-                            viewMovie(movieId);
-                        }
-                    });
-                }
             });
         });
     </script>

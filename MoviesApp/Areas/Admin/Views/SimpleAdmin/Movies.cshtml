@@ -1,0 +1,784 @@
+@model IEnumerable<MoviesApp.Models.Phim>
+@{
+    ViewData["Title"] = "Quản Lý Phim";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .admin-movies-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .movies-header {
+        background: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .movies-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .movies-subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #3498db;
+        transition: transform 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-card.success { border-left-color: #27ae60; }
+    .stat-card.warning { border-left-color: #f39c12; }
+    .stat-card.danger { border-left-color: #e74c3c; }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-icon.bg-primary { background: #3498db; }
+    .stat-icon.bg-success { background: #27ae60; }
+    .stat-icon.bg-warning { background: #f39c12; }
+    .stat-icon.bg-danger { background: #e74c3c; }
+
+    .stat-content h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: #2c3e50;
+    }
+
+    .stat-content p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .search-filter-section {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .movies-table-section {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: #2c3e50;
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .table-responsive {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .table th {
+        background: #34495e;
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .movie-poster-sm {
+        width: 60px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .movie-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .movie-year {
+        background: #3498db;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .movie-rating {
+        color: #f39c12;
+        font-weight: 600;
+    }
+
+    .status-available {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    .status-unavailable {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+
+    .btn-action {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        margin: 0.1rem;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-box .form-control {
+        padding-left: 2.5rem;
+    }
+
+    .search-box .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .pagination-container {
+        background: white;
+        border-radius: 0 0 10px 10px;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .btn-export {
+        background: #27ae60;
+        border-color: #27ae60;
+        color: white;
+    }
+
+    .btn-export:hover {
+        background: #219a52;
+        border-color: #219a52;
+        color: white;
+    }
+</style>
+
+<div class="admin-movies-container">
+    <!-- Header Section -->
+    <div class="movies-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="movies-title">
+                        <i class="fas fa-film text-primary"></i>
+                        Quản Lý Phim
+                    </h1>
+                    <p class="movies-subtitle">Quản lý toàn bộ bộ sưu tập phim của hệ thống</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="@Url.Action("Create", "Phim", new { area = "" })" class="btn btn-primary me-2">
+                        <i class="fas fa-plus"></i>
+                        Thêm Phim Mới
+                    </a>
+                    <button type="button" class="btn btn-export" onclick="exportData()">
+                        <i class="fas fa-download"></i>
+                        Xuất Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@ViewBag.TotalMovies</h3>
+                    <p>Tổng số phim</p>
+                </div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@Model.Count(m => !string.IsNullOrEmpty(m.LinkPhim))</h3>
+                    <p>Phim có sẵn</p>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@Model.Count(m => string.IsNullOrEmpty(m.LinkPhim))</h3>
+                    <p>Chưa có link</p>
+                </div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-icon bg-danger">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@Model.Count(m => m.DiemImdb.HasValue && m.DiemImdb > 8)</h3>
+                    <p>Phim đánh giá cao</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section">
+            <form method="get" class="movies-filter-form">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Tìm kiếm</label>
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="searchString" class="form-control" 
+                                   placeholder="Tìm theo tên phim, đạo diễn..." 
+                                   value="@ViewData["CurrentFilter"]">
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label fw-bold">Thể loại</label>
+                        <select name="danhMucId" class="form-select">
+                            <option value="">Tất cả</option>
+                            @if(ViewBag.DanhMucList != null)
+                            {
+                                @foreach(var item in ViewBag.DanhMucList)
+                                {
+                                    <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label fw-bold">Quốc gia</label>
+                        <select name="quocGiaId" class="form-select">
+                            <option value="">Tất cả</option>
+                            @if(ViewBag.QuocGiaList != null)
+                            {
+                                @foreach(var item in ViewBag.QuocGiaList)
+                                {
+                                    <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label fw-bold">Năm SX</label>
+                        <select name="namSanXuat" class="form-select">
+                            <option value="">Tất cả</option>
+                            @for(int year = DateTime.Now.Year; year >= 1980; year--)
+                            {
+                                <option value="@year" selected="@(ViewData["CurrentYear"]?.ToString() == year.ToString())">@year</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label fw-bold">Sắp xếp</label>
+                        <select name="sortOrder" class="form-select">
+                            <option value="">Mặc định</option>
+                            <option value="name_asc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_asc")">Tên A-Z</option>
+                            <option value="name_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "name_desc")">Tên Z-A</option>
+                            <option value="year_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "year_desc")">Năm mới nhất</option>
+                            <option value="year_asc" selected="@(ViewData["CurrentSort"]?.ToString() == "year_asc")">Năm cũ nhất</option>
+                            <option value="rating_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "rating_desc")">Đánh giá cao</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("Movies")" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-refresh"></i> Đặt lại
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-info" onclick="bulkAction('export')">
+                                <i class="fas fa-download"></i> Xuất Excel
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="bulkAction('backup')">
+                                <i class="fas fa-database"></i> Sao lưu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Movies Table Section -->
+        <div class="movies-table-section">
+            <div class="table-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i>
+                    Danh Sách Phim
+                </h5>
+                <div class="table-info">
+                    <span class="badge bg-light text-dark">
+                        Hiển thị @Model.Count() / @ViewBag.TotalMovies phim
+                    </span>
+                </div>
+            </div>
+            
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">
+                                    <input type="checkbox" class="form-check-input" id="selectAll">
+                                </th>
+                                <th style="width: 100px;">Ảnh</th>
+                                <th>Tên Phim</th>
+                                <th style="width: 100px;">Năm SX</th>
+                                <th style="width: 110px;">Đánh Giá</th>
+                                <th style="width: 120px;">Thể Loại</th>
+                                <th style="width: 120px;">Trạng Thái</th>
+                                <th style="width: 150px;">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var movie in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input movie-checkbox" value="@movie.MaPhim">
+                                    </td>
+                                    <td>
+                                        <img src="@(!string.IsNullOrEmpty(movie.AnhPhim) ? movie.AnhPhim : "/images/no-image.jpg")" 
+                                             alt="@movie.TenPhim" 
+                                             class="movie-poster-sm"
+                                             onerror="this.src='/images/no-image.jpg'">
+                                    </td>
+                                    <td>
+                                        <div class="movie-title">@movie.TenPhim</div>
+                                        @if (!string.IsNullOrEmpty(movie.DaoDien))
+                                        {
+                                            <small class="text-muted">Đạo diễn: @movie.DaoDien</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="movie-year">@(movie.NamPhatHanh ?? 0)</span>
+                                    </td>
+                                    <td>
+                                        @if (movie.DiemImdb.HasValue)
+                                        {
+                                            <div class="movie-rating">
+                                                <i class="fas fa-star"></i>
+                                                @movie.DiemImdb.Value.ToString("F1")
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (movie.DanhMuc != null)
+                                        {
+                                            <span class="badge bg-primary">@movie.DanhMuc.TenDanhMuc</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(movie.LinkPhim))
+                                        {
+                                            <span class="status-available">
+                                                <i class="fas fa-check-circle"></i>
+                                                Có sẵn
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-unavailable">
+                                                <i class="fas fa-times-circle"></i>
+                                                Chưa có
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @if (!string.IsNullOrEmpty(movie.LinkPhim))
+                                            {
+                                                <a href="@Url.Action("VideoPlayer", "Phim", new { area = "", linkPhim = movie.LinkPhim })" 
+                                                   class="btn btn-action btn-outline-success" title="Xem phim" target="_blank">
+                                                    <i class="fas fa-play"></i>
+                                                </a>
+                                            }
+                                            <a href="@Url.Action("Details", "Phim", new { area = "", id = movie.MaPhim })" 
+                                               class="btn btn-action btn-outline-info" title="Chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Edit", "Phim", new { area = "", id = movie.MaPhim })" 
+                                               class="btn btn-action btn-outline-primary" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-action btn-outline-danger delete-movie" 
+                                                    data-movie-id="@movie.MaPhim" 
+                                                    data-movie-title="@movie.TenPhim" 
+                                                    title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-film fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Không tìm thấy phim nào</h5>
+                    <p class="text-muted">Hãy thử điều chỉnh bộ lọc hoặc thêm phim mới</p>
+                    <a href="@Url.Action("Create", "Phim", new { area = "" })" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Thêm Phim Mới
+                    </a>
+                </div>
+            }
+            
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages != null && (int)ViewBag.TotalPages > 1)
+            {
+                <div class="pagination-container">
+                    <nav aria-label="Movie pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Movies", new { 
+                                        page = (int)ViewBag.CurrentPage - 1,
+                                        searchString = ViewData["CurrentFilter"],
+                                        danhMucId = ViewData["CurrentDanhMuc"],
+                                        quocGiaId = ViewData["CurrentQuocGia"],
+                                        namSanXuat = ViewData["CurrentYear"],
+                                        sortOrder = ViewData["CurrentSort"]
+                                    })">
+                                        <i class="fas fa-chevron-left"></i>
+                                        Trước
+                                    </a>
+                                </li>
+                            }
+
+                            @for (int i = Math.Max(1, (int)ViewBag.CurrentPage - 2); 
+                                  i <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.CurrentPage + 2); 
+                                  i++)
+                            {
+                                <li class="page-item @(i == (int)ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Movies", new { 
+                                        page = i,
+                                        searchString = ViewData["CurrentFilter"],
+                                        danhMucId = ViewData["CurrentDanhMuc"],
+                                        quocGiaId = ViewData["CurrentQuocGia"],
+                                        namSanXuat = ViewData["CurrentYear"],
+                                        sortOrder = ViewData["CurrentSort"]
+                                    })">@i</a>
+                                </li>
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Movies", new { 
+                                        page = (int)ViewBag.CurrentPage + 1,
+                                        searchString = ViewData["CurrentFilter"],
+                                        danhMucId = ViewData["CurrentDanhMuc"],
+                                        quocGiaId = ViewData["CurrentQuocGia"],
+                                        namSanXuat = ViewData["CurrentYear"],
+                                        sortOrder = ViewData["CurrentSort"]
+                                    })">
+                                        Sau
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Xác nhận xóa phim
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa phim <strong id="movieTitle"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Lưu ý:</strong> Hành động này sẽ xóa vĩnh viễn phim và tất cả dữ liệu liên quan (bình luận, đánh giá, lịch sử xem...).
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    Hủy
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash"></i>
+                    Xóa phim
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-submit form when filter changes
+            $('.form-select').on('change', function() {
+                $(this).closest('form').submit();
+            });
+
+            // Search on enter key
+            $('input[name="searchString"]').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $(this).closest('form').submit();
+                }
+            });
+
+            // Select all checkbox functionality
+            $('#selectAll').on('change', function() {
+                $('.movie-checkbox').prop('checked', $(this).prop('checked'));
+                updateBulkActionButtons();
+            });
+
+            $('.movie-checkbox').on('change', function() {
+                updateBulkActionButtons();
+                
+                // Update select all checkbox
+                var total = $('.movie-checkbox').length;
+                var checked = $('.movie-checkbox:checked').length;
+                $('#selectAll').prop('indeterminate', checked > 0 && checked < total);
+                $('#selectAll').prop('checked', checked === total);
+            });
+
+            // Delete movie functionality
+            $('.delete-movie').on('click', function() {
+                var movieId = $(this).data('movie-id');
+                var movieTitle = $(this).data('movie-title');
+                
+                $('#movieTitle').text(movieTitle);
+                $('#confirmDelete').data('movie-id', movieId);
+                $('#deleteModal').modal('show');
+            });
+
+            // Confirm delete
+            $('#confirmDelete').on('click', function() {
+                var movieId = $(this).data('movie-id');
+                var button = $(this);
+                
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang xóa...');
+                
+                $.ajax({
+                    url: '@Url.Action("DeleteMovie", "SimpleAdmin", new { area = "Admin" })',
+                    type: 'POST',
+                    data: { 
+                        id: movieId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#deleteModal').modal('hide');
+                            showNotification('success', 'Xóa phim thành công!');
+                            
+                            // Remove row from table
+                            $(`tr:has(.delete-movie[data-movie-id="${movieId}"])`).fadeOut(function() {
+                                $(this).remove();
+                                updateStats();
+                            });
+                        } else {
+                            showNotification('error', response.message || 'Có lỗi xảy ra khi xóa phim');
+                        }
+                    },
+                    error: function() {
+                        showNotification('error', 'Có lỗi xảy ra khi kết nối server');
+                    },
+                    complete: function() {
+                        button.prop('disabled', false).html('<i class="fas fa-trash"></i> Xóa phim');
+                    }
+                });
+            });
+
+            // Bulk actions
+            window.bulkAction = function(action) {
+                var selected = $('.movie-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+
+                if (selected.length === 0) {
+                    showNotification('warning', 'Vui lòng chọn ít nhất một phim');
+                    return;
+                }
+
+                switch(action) {
+                    case 'export':
+                        exportMovies(selected);
+                        break;
+                    case 'backup':
+                        backupMovies(selected);
+                        break;
+                    case 'delete':
+                        bulkDelete(selected);
+                        break;
+                }
+            };
+
+            // Export functionality
+            window.exportData = function() {
+                window.location.href = '@Url.Action("ExportMovies", "SimpleAdmin", new { area = "Admin" })';
+            };
+
+            function exportMovies(movieIds) {
+                var form = $('<form>', {
+                    'method': 'POST',
+                    'action': '@Url.Action("ExportSelectedMovies", "SimpleAdmin", new { area = "Admin" })'
+                });
+                
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'movieIds',
+                    'value': movieIds.join(',')
+                }));
+                
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': '__RequestVerificationToken',
+                    'value': $('input[name="__RequestVerificationToken"]').val()
+                }));
+                
+                $('body').append(form);
+                form.submit();
+                form.remove();
+            }
+
+            function updateBulkActionButtons() {
+                var selected = $('.movie-checkbox:checked').length;
+                $('.bulk-action-btn').prop('disabled', selected === 0);
+            }
+
+            function updateStats() {
+                // Update statistics after deletion
+                location.reload();
+            }
+
+            function showNotification(type, message) {
+                var alertClass = 'alert-info';
+                var icon = 'fas fa-info-circle';
+                
+                switch(type) {
+                    case 'success':
+                        alertClass = 'alert-success';
+                        icon = 'fas fa-check-circle';
+                        break;
+                    case 'error':
+                        alertClass = 'alert-danger';
+                        icon = 'fas fa-exclamation-triangle';
+                        break;
+                    case 'warning':
+                        alertClass = 'alert-warning';
+                        icon = 'fas fa-exclamation-circle';
+                        break;
+                }
+
+                var alert = $(`
+                    <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                         style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+                        <i class="${icon} me-2"></i>
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `);
+
+                $('body').append(alert);
+                
+                setTimeout(function() {
+                    alert.fadeOut(function() {
+                        $(this).remove();
+                    });
+                }, 5000);
+            }
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+}
