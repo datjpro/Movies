@@ -805,24 +805,27 @@ class CCFilmApp {
         this.trendingMovies = [];
         this.isLoading = false;
         this.init();
-    }
-
-    async init() {
+    }    async init() {
+        console.log('CCFilmApp initializing...');
         await this.loadFeaturedContent();
         await this.loadTrendingMovies();
         await this.loadRecommendedMovies();
         this.setupEventListeners();
         this.startDynamicEffects();
-    }
-
-    // Load featured content for hero section
+        console.log('CCFilmApp initialized successfully');
+    }    // Load featured content for hero section
     async loadFeaturedContent() {
         try {
+            console.log('Loading featured content...');
             const response = await fetch(`${this.apiBase}?pageSize=1`);
             const data = await response.json();
+            console.log('Featured content response:', data);
             
-            if (data.length > 0) {
-                const movie = data[0];
+            // API trả về cấu trúc {movies: [...], totalCount, ...}
+            const movies = data.movies || data;
+            if (movies && movies.length > 0) {
+                const movie = movies[0];
+                console.log('Featured movie:', movie);
                 this.updateHeroSection(movie);
                 this.updateMovieShowcase([movie]);
             }
@@ -843,10 +846,8 @@ class CCFilmApp {
                 Khám Phá<br>
                 <span class="gradient-text">${movie.tenPhim}</span>
             `;
-        }
-
-        if (movie && heroDescription) {
-            heroDescription.textContent = movie.moTaPhim || 'Trải nghiệm những bộ phim đỉnh cao với chất lượng 4K Ultra HD.';
+        }        if (movie && heroDescription) {
+            heroDescription.textContent = movie.moTaPhim || movie.moTa || 'Trải nghiệm những bộ phim đỉnh cao với chất lượng 4K Ultra HD.';
         }
 
         if (movie && heroWatchBtn) {
@@ -876,7 +877,7 @@ class CCFilmApp {
                     <h3>${movie.tenPhim}</h3>
                     <div class="showcase-meta">
                         ${movie.diemImdb ? `<span class="rating"><i class="fas fa-star"></i> ${movie.diemImdb}</span>` : ''}
-                        ${movie.namPhatHanh ? `<span class="year">${movie.namPhatHanh}</span>` : ''}
+                        ${movie.namPhatHanh || movie.namSanXuat ? `<span class="year">${movie.namPhatHanh || movie.namSanXuat}</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -884,15 +885,18 @@ class CCFilmApp {
 
         // Add CSS for showcase card
         this.addShowcaseStyles();
-    }
-
-    // Load trending movies with infinite scroll effect
+    }    // Load trending movies with infinite scroll effect
     async loadTrendingMovies() {
         try {
+            console.log('Loading trending movies...');
             const response = await fetch(`${this.apiBase}?pageSize=12`);
             const data = await response.json();
-            this.trendingMovies = data;
-            this.renderTrendingCarousel(data);
+            console.log('Trending movies response:', data);
+            
+            // API trả về cấu trúc {movies: [...], totalCount, ...}
+            const movies = data.movies || data;
+            this.trendingMovies = movies;
+            this.renderTrendingCarousel(movies);
         } catch (error) {
             console.error('Error loading trending movies:', error);
             this.showError('trendingCarousel', 'Không thể tải phim xu hướng');
@@ -932,7 +936,7 @@ class CCFilmApp {
                                 ` : ''}
                                 ${movie.namPhatHanh ? `<span class="movie-year">${movie.namPhatHanh}</span>` : ''}
                             </div>
-                            <p class="movie-description">${this.truncateText(movie.moTaPhim || 'Chưa có mô tả', 80)}</p>
+                            <p class="movie-description">${this.truncateText(movie.moTaPhim || movie.moTa || 'Chưa có mô tả', 80)}</p>
                         </div>
                     </div>
                 `).join('')}
@@ -940,14 +944,17 @@ class CCFilmApp {
         `;
         
         carousel.innerHTML = html;
-    }
-
-    // Load recommended movies with AI-like personalization
+    }    // Load recommended movies with AI-like personalization
     async loadRecommendedMovies() {
         try {
+            console.log('Loading recommended movies...');
             const response = await fetch(`${this.apiBase}?pageSize=8`);
             const data = await response.json();
-            this.renderRecommendedGrid(data);
+            console.log('Recommended movies response:', data);
+            
+            // API trả về cấu trúc {movies: [...], totalCount, ...}
+            const movies = data.movies || data;
+            this.renderRecommendedGrid(movies);
         } catch (error) {
             console.error('Error loading recommended movies:', error);
             this.showError('recommendedMovies', 'Không thể tải đề xuất phim');
@@ -992,7 +999,7 @@ class CCFilmApp {
                                 ` : ''}
                                 ${movie.namPhatHanh ? `<span class="movie-year">${movie.namPhatHanh}</span>` : ''}
                             </div>
-                            <p class="movie-description">${this.truncateText(movie.moTaPhim || 'Chưa có mô tả', 60)}</p>
+                            <p class="movie-description">${this.truncateText(movie.moTaPhim || movie.moTa || 'Chưa có mô tả', 60)}</p>
                         </div>
                     </div>
                 `).join('')}

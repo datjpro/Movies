@@ -94,9 +94,8 @@
                                 <td>
                                     <div>
                                         <strong>@movie.TenPhim</strong>
-                                    </div>
-                                    <div class="text-muted small">
-                                        @(movie.MoTa.Length > 100 ? movie.MoTa.Substring(0, 100) + "..." : movie.MoTa)
+                                    </div>                                    <div class="text-muted small">
+                                        @(string.IsNullOrEmpty(movie.MoTa) ? "Không có mô tả" : (movie.MoTa.Length > 100 ? movie.MoTa.Substring(0, 100) + "..." : movie.MoTa))
                                     </div>
                                     @if (movie.NamSanXuat.HasValue)
                                     {
@@ -113,9 +112,8 @@
                                     <div class="mt-1">
                                         <span class="badge bg-secondary">@movie.DanhMuc?.TenDanhMuc</span>
                                     </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">@movie.TapPhims?.Count tập</span>
+                                </td>                                <td>
+                                    <span class="badge bg-success">@((movie as dynamic)?.TapPhimsCount ?? movie.TapPhims?.Count ?? 0) tập</span>
                                 </td>
                                 <td>
                                     @movie.NgayTao.ToString("dd/MM/yyyy")

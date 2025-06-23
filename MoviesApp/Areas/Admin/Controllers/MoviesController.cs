@@ -5,75 +5,76 @@ using MoviesApp.Areas.Admin.Models;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services;
+using System.Text.Json;
 
 namespace MoviesApp.Areas.Admin.Controllers
-{
-    [Area("Admin")]
+{    [Area("Admin")]
     [Authorize(Roles = UserRoles.Admin)]
     public class MoviesController : Controller
     {
         private readonly WebMoviesDbContext _context;
         private readonly IUserActivityService _userActivityService;
         private readonly ILogger<MoviesController> _logger;
+        private readonly HttpClient _httpClient;
 
         public MoviesController(
             WebMoviesDbContext context,
             IUserActivityService userActivityService,
-            ILogger<MoviesController> logger)
+            ILogger<MoviesController> logger,
+            HttpClient httpClient)
         {
             _context = context;
             _userActivityService = userActivityService;
             _logger = logger;
-        }
-
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? search = null, int? filterGenre = null, int? filterCountry = null)
+            _httpClient = httpClient;
+        }        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? search = null, int? filterGenre = null, int? filterCountry = null)
         {
             try
             {
-                var query = _context.Phim
-                    .Include(p => p.TheLoaiPhim)
-                    .Include(p => p.QuocGia)
-                    .Include(p => p.DanhMuc)
-                    .AsQueryable();
-
-                // Search filter
+                // Call API to get movies data
+                var apiUrl = $"http://localhost:5032/api/phim?page={page}&pageSize={pageSize}";
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(p => p.TenPhim.Contains(search) || 
-                                           p.MoTa.Contains(search));
-                }                // Genre filter
-                if (filterGenre.HasValue && filterGenre.Value > 0)
+                    apiUrl += $"&search={Uri.EscapeDataString(search)}";
+                }
+                if (filterGenre.HasValue)
                 {
-                    query = query.Where(p => p.MaTL == filterGenre.Value.ToString());
+                    apiUrl += $"&genre={filterGenre}";
+                }
+                if (filterCountry.HasValue)
+                {
+                    apiUrl += $"&country={filterCountry}";
                 }
 
-                // Country filter
-                if (filterCountry.HasValue && filterCountry.Value > 0)
+                var response = await _httpClient.GetAsync(apiUrl);
+                if (!response.IsSuccessStatusCode)
                 {
-                    query = query.Where(p => p.MaQG == filterCountry.Value.ToString());
+                    _logger.LogError("Failed to fetch movies from API. Status: {StatusCode}", response.StatusCode);
+                    TempData["Error"] = "Không thể tải danh sách phim từ API.";
+                    return View(new MovieManagementViewModel());
                 }
 
-                var totalMovies = await query.CountAsync();
-                var movies = await query
-                    .OrderByDescending(p => p.NgayTao)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                var apiResult = JsonSerializer.Deserialize<ApiMovieResponse>(jsonContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
+                // Get lookup data for filters (still from local DB for performance)
                 var genres = await _context.TheLoaiPhim.OrderBy(g => g.TenTheLoai).ToListAsync();
                 var countries = await _context.QuocGia.OrderBy(c => c.TenQuocGia).ToListAsync();
                 var categories = await _context.DanhMuc.OrderBy(c => c.TenDanhMuc).ToListAsync();
 
                 var viewModel = new MovieManagementViewModel
                 {
-                    Movies = movies,
+                    Movies = apiResult?.Movies ?? new List<Phim>(),
                     Genres = genres,
                     Countries = countries,
                     Categories = categories,
-                    TotalMovies = totalMovies,
+                    TotalMovies = apiResult?.TotalCount ?? 0,
                     CurrentPage = page,
                     PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalMovies / pageSize),
+                    TotalPages = apiResult?.TotalPages ?? 0,
                     SearchTerm = search,
                     FilterGenre = filterGenre,
                     FilterCountry = filterCountry
@@ -81,7 +82,7 @@ namespace MoviesApp.Areas.Admin.Controllers
 
                 await _userActivityService.LogActivityAsync(
                     User.Identity!.Name!, 
-                    "Viewed Movies Management", 
+                    "Viewed Movies Management via API", 
                     $"Page {page}, Search: {search ?? "None"}"
                 );
 
@@ -89,67 +90,74 @@ namespace MoviesApp.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading movies management");
-                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách phim.";
+                _logger.LogError(ex, "Error loading movies management from API");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách phim từ API.";
                 return View(new MovieManagementViewModel());
             }
         }        public async Task<IActionResult> Details(string id)
-        {            var movie = await _context.Phim
-                .Include(p => p.TheLoaiPhim)
-                .Include(p => p.QuocGia)
-                .Include(p => p.DanhMuc)
-                .Include(p => p.TapPhims)
-                .FirstOrDefaultAsync(p => p.MaPhim == id);
-
-            if (movie == null)
+        {
+            try
             {
+                // Call API to get movie details
+                var response = await _httpClient.GetAsync($"http://localhost:5032/api/phim/{id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return NotFound();
+                }
+
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                var movie = JsonSerializer.Deserialize<Phim>(jsonContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (movie == null)
+                {
+                    return NotFound();
+                }
+
+                await _userActivityService.LogActivityAsync(
+                    User.Identity!.Name!, 
+                    "Viewed Movie Details via API", 
+                    $"Movie: {movie.TenPhim}"
+                );
+
+                return View(movie);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading movie details from API for {MovieId}", id);
                 return NotFound();
             }
-
-            await _userActivityService.LogActivityAsync(
-                User.Identity!.Name!, 
-                "Viewed Movie Details", 
-                $"Movie: {movie.TenPhim}"
-            );
-
-            return View(movie);
-        }
-
-        [HttpPost]
+        }        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
             try
-            {                var movie = await _context.Phim
-                    .Include(p => p.TapPhims)
-                    .FirstOrDefaultAsync(p => p.MaPhim == id);
-
-                if (movie == null)
+            {
+                // Call API to delete movie
+                var response = await _httpClient.DeleteAsync($"http://localhost:5032/api/phim/{id}");
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    return Json(new { success = false, message = "Không tìm thấy phim." });
-                }
+                    await _userActivityService.LogActivityAsync(
+                        User.Identity!.Name!, 
+                        "Deleted Movie via API", 
+                        $"Deleted movie ID: {id}"
+                    );
 
-                // Remove related episodes first
-                if (movie.TapPhims?.Any() == true)
+                    return Json(new { success = true });
+                }
+                else
                 {
-                    _context.TapPhim.RemoveRange(movie.TapPhims);
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, message = $"API Error: {errorContent}" });
                 }
-
-                _context.Phim.Remove(movie);
-                await _context.SaveChangesAsync();
-
-                await _userActivityService.LogActivityAsync(
-                    User.Identity!.Name!, 
-                    "Deleted Movie", 
-                    $"Deleted movie: {movie.TenPhim}"
-                );
-
-                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting movie {MovieId}", id);
-                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa phim." });
+                _logger.LogError(ex, "Error deleting movie via API {MovieId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa phim qua API." });
             }
         }
 
@@ -183,6 +191,33 @@ namespace MoviesApp.Areas.Admin.Controllers
                 _logger.LogError(ex, "Error toggling movie status for {MovieId}", id);
                 return Json(new { success = false, message = "Có lỗi xảy ra." });
             }
+        }        [HttpGet]
+        public async Task<IActionResult> TestData()
+        {
+            try
+            {
+                // Test API connection
+                var response = await _httpClient.GetAsync("http://localhost:5032/api/phim?page=1&pageSize=5");
+                var content = await response.Content.ReadAsStringAsync();
+                
+                return Json(new
+                {
+                    ApiStatus = response.IsSuccessStatusCode ? "OK" : "Error",
+                    StatusCode = response.StatusCode,
+                    Content = content
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
         }
+    }    // DTO for API response
+    public class ApiMovieResponse
+    {
+        public List<Phim> Movies { get; set; } = new List<Phim>();
+        public int TotalCount { get; set; }
+        public int TotalPages { get; set; }
+        public int CurrentPage { get; set; }
     }
 }

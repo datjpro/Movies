@@ -185,6 +185,9 @@ builder.Services.Configure<OMDbSettings>(builder.Configuration.GetSection("OMDbS
 builder.Services.AddHttpClient<CDNService>();
 builder.Services.AddHttpClient<ICDNVideoService, CDNVideoService>();
 
+// Add HttpClient for Admin controllers
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

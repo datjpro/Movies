@@ -135,35 +135,90 @@ namespace MoviesApp.Controllers
                 {
                     Console.WriteLine($"Tìm thấy tập {selectedEpisode.SoTapThuTu} với VideoUrl: {selectedEpisode.VideoUrl}");
                 }
-            }
-            else if (phim.TapPhims.Any())
+            }            else if (phim.TapPhims.Any())
             {
-                // Nếu không chỉ định tập nào, ưu tiên hiển thị tập 1, nếu không có thì tập đầu tiên
-                selectedEpisode = phim.TapPhims.FirstOrDefault(t => t.SoTapThuTu == 1) 
-                                ?? phim.TapPhims.OrderBy(t => t.SoTapThuTu).FirstOrDefault();
+                // Nếu không chỉ định tập nào, ưu tiên hiển thị tập 0 (trailer), nếu không có thì tập 1, cuối cùng mới là tập đầu tiên
+                selectedEpisode = phim.TapPhims.FirstOrDefault(t => t.SoTapThuTu == 0) // Ưu tiên trailer
+                                ?? phim.TapPhims.FirstOrDefault(t => t.SoTapThuTu == 1) // Sau đó đến tập 1
+                                ?? phim.TapPhims.OrderBy(t => t.SoTapThuTu).FirstOrDefault(); // Cuối cùng tập đầu tiên
                 if (selectedEpisode != null)
                 {
                     episode = selectedEpisode.SoTapThuTu;
-                    Console.WriteLine($"Tự động chọn tập {selectedEpisode.SoTapThuTu}");
+                    Console.WriteLine($"Tự động chọn tập {selectedEpisode.SoTapThuTu} ({(selectedEpisode.SoTapThuTu == 0 ? "Trailer" : "Tập " + selectedEpisode.SoTapThuTu)})");
                 }
-            }            ViewBag.SelectedEpisode = selectedEpisode;
+            }ViewBag.SelectedEpisode = selectedEpisode;
             ViewBag.EpisodeNumber = episode;
             
-            // Chỉ dùng MP4 URL đơn giản
-            if (selectedEpisode != null && !string.IsNullOrEmpty(selectedEpisode.VideoId))
+            // Xử lý video URL - Detect YouTube hoặc MP4 từ CDN
+            if (selectedEpisode != null)
             {
-                ViewBag.MP4Url = $"http://localhost:5288/api/v1/videos/{selectedEpisode.VideoId}/mp4";
-                ViewBag.HasVideo = true;
-                
-                // Debug logging
-                Console.WriteLine($"DEBUG - Selected Episode: {selectedEpisode.TenTap}");
-                Console.WriteLine($"DEBUG - VideoId: {selectedEpisode.VideoId}");
-                Console.WriteLine($"DEBUG - MP4 URL: {ViewBag.MP4Url}");
+                // Kiểm tra nếu có VideoId từ CDN
+                if (!string.IsNullOrEmpty(selectedEpisode.VideoId))
+                {
+                    ViewBag.MP4Url = $"http://localhost:5288/api/v1/videos/{selectedEpisode.VideoId}/mp4";
+                    ViewBag.HasVideo = true;
+                    ViewBag.VideoType = "MP4";
+                    
+                    Console.WriteLine($"DEBUG - CDN Video - Episode: {selectedEpisode.TenTap}");
+                    Console.WriteLine($"DEBUG - VideoId: {selectedEpisode.VideoId}");
+                    Console.WriteLine($"DEBUG - MP4 URL: {ViewBag.MP4Url}");
+                }
+                // Kiểm tra nếu có VideoUrl từ YouTube
+                else if (!string.IsNullOrEmpty(selectedEpisode.VideoUrl))
+                {
+                    if (selectedEpisode.VideoUrl.Contains("youtube.com") || selectedEpisode.VideoUrl.Contains("youtu.be"))
+                    {
+                        // Convert YouTube URL to embed format
+                        var youtubeUrl = selectedEpisode.VideoUrl;
+                        string videoId = "";
+                        
+                        if (youtubeUrl.Contains("watch?v="))
+                        {
+                            videoId = youtubeUrl.Split("watch?v=")[1].Split("&")[0];
+                        }
+                        else if (youtubeUrl.Contains("youtu.be/"))
+                        {
+                            videoId = youtubeUrl.Split("youtu.be/")[1].Split("?")[0];
+                        }
+                        
+                        if (!string.IsNullOrEmpty(videoId))
+                        {
+                            ViewBag.YouTubeEmbedUrl = $"https://www.youtube.com/embed/{videoId}";
+                            ViewBag.HasVideo = true;
+                            ViewBag.VideoType = "YOUTUBE";
+                            
+                            Console.WriteLine($"DEBUG - YouTube Video - Episode: {selectedEpisode.TenTap}");
+                            Console.WriteLine($"DEBUG - Original URL: {selectedEpisode.VideoUrl}");
+                            Console.WriteLine($"DEBUG - Embed URL: {ViewBag.YouTubeEmbedUrl}");
+                        }
+                        else
+                        {
+                            ViewBag.HasVideo = false;
+                            ViewBag.VideoType = "ERROR";
+                        }
+                    }
+                    else
+                    {
+                        // URL khác (có thể là MP4 direct link)
+                        ViewBag.MP4Url = selectedEpisode.VideoUrl;
+                        ViewBag.HasVideo = true;
+                        ViewBag.VideoType = "DIRECT";
+                        
+                        Console.WriteLine($"DEBUG - Direct Video - Episode: {selectedEpisode.TenTap}");
+                        Console.WriteLine($"DEBUG - Direct URL: {selectedEpisode.VideoUrl}");
+                    }
+                }
+                else
+                {
+                    ViewBag.HasVideo = false;
+                    ViewBag.VideoType = "NONE";
+                    Console.WriteLine($"DEBUG - No video available. Episode: {selectedEpisode?.TenTap}");
+                }
             }
             else
             {
                 ViewBag.HasVideo = false;
-                Console.WriteLine($"DEBUG - No video available. Episode: {selectedEpisode?.TenTap}, VideoId: {selectedEpisode?.VideoId}");
+                ViewBag.VideoType = "NONE";
             }
             
             return View(phim);

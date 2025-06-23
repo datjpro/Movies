@@ -156,11 +156,21 @@
                 const response = await fetch(`/TapPhim/GetVideoInfo/${episodeId}`);
                 if (!response.ok) {
                     throw new Error('Không thể lấy thông tin video');
+                }                const episodeData = await response.json();
+                
+                console.log('Episode data received:', episodeData); // Debug log
+                
+                // Kiểm tra có video không - bao gồm cả YouTube và MP4
+                if (!episodeData.hasVideo) {
+                    showVideoError('Tập phim này chưa có video để phát');
+                    return;
                 }
                 
-                const episodeData = await response.json();
+                // Kiểm tra có URL video hoặc YouTube embed URL
+                const hasVideoUrl = episodeData.videoUrl && episodeData.videoUrl.length > 0;
+                const hasYouTubeUrl = episodeData.youtubeEmbedUrl && episodeData.youtubeEmbedUrl.length > 0;
                 
-                if (!episodeData.hasVideo || !episodeData.videoUrl) {
+                if (!hasVideoUrl && !hasYouTubeUrl) {
                     showVideoError('Tập phim này chưa có video để phát');
                     return;
                 }
@@ -182,31 +192,67 @@
                 showVideoError('Lỗi khi tải video: ' + error.message);
             }
         }        function updateMainVideoPlayer(episodeData) {
-            const videoPlayer = document.getElementById('mainVideoPlayer');
+            console.log('Updating video player with data:', episodeData); // Debug log
+            
+            const videoContainer = document.querySelector('.video-player-wrapper');
             const videoTitle = document.querySelector('.video-title');
             const videoDescription = document.querySelector('#episodeDescription');
             const videoDescriptionText = document.querySelector('#episodeDescriptionText');
             const noVideoMessage = document.getElementById('noVideoMessage');
             const currentEpisodeInfo = document.getElementById('currentEpisodeInfo');
             
-            if (videoPlayer) {
+            if (videoContainer) {
                 // Clear any error state
                 hideVideoError();
                 
-                // Show video player and hide no-video message
-                videoPlayer.style.display = 'block';
+                // Hide no-video message
                 if (noVideoMessage) {
                     noVideoMessage.style.display = 'none';
                 }
                 
-                // Update video source
-                const sourceElement = videoPlayer.querySelector('source');
-                if (sourceElement) {
-                    sourceElement.src = episodeData.videoUrl;
-                    videoPlayer.load();
+                // Create new player based on video type
+                let playerHtml = '';
+                
+                console.log('Video type:', episodeData.videoType); // Debug log
+                
+                if (episodeData.videoType === 'YOUTUBE' && episodeData.youtubeEmbedUrl) {
+                    console.log('Creating YouTube player with URL:', episodeData.youtubeEmbedUrl); // Debug log
+                    // YouTube iframe player
+                    playerHtml = `
+                        <iframe id="mainVideoPlayer"
+                                class="simple-video-player"
+                                src="${episodeData.youtubeEmbedUrl}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                                style="width: 100%; height: 100%; background: #000;">
+                        </iframe>`;
+                } else if ((episodeData.videoType === 'MP4' || episodeData.videoType === 'DIRECT') && episodeData.videoUrl) {
+                    console.log('Creating MP4 player with URL:', episodeData.videoUrl); // Debug log
+                    // HTML5 video player
+                    playerHtml = `
+                        <video id="mainVideoPlayer" 
+                               class="simple-video-player" 
+                               controls 
+                               preload="metadata" 
+                               style="width: 100%; height: 100%; background: #000;">
+                            <source src="${episodeData.videoUrl}" type="video/mp4">
+                            Trình duyệt của bạn không hỗ trợ video HTML5.
+                        </video>`;
                 } else {
-                    videoPlayer.src = episodeData.videoUrl;
-                    videoPlayer.load();
+                    console.error('No valid video URL found:', episodeData); // Debug log
+                    showVideoError('Không thể tạo video player - thiếu URL video');
+                    return;
+                }
+                
+                // Replace video player
+                if (playerHtml) {
+                    console.log('Replacing video player HTML'); // Debug log
+                    videoContainer.innerHTML = playerHtml;
+                } else {
+                    console.error('No player HTML generated'); // Debug log
+                    showVideoError('Không thể tạo video player');
+                    return;
                 }
                 
                 // Update video title
@@ -242,12 +288,17 @@
                 // Hide loading indicator
                 hideVideoLoading();
                 
-                // Auto play video (optional)
-                setTimeout(() => {
-                    videoPlayer.play().catch(error => {
-                        console.log('Auto-play prevented by browser:', error);
-                    });
-                }, 100);
+                // Auto play for MP4 videos only (YouTube will handle its own autoplay)
+                if (episodeData.videoType === 'MP4' || episodeData.videoType === 'DIRECT') {
+                    const videoPlayer = document.getElementById('mainVideoPlayer');
+                    if (videoPlayer && videoPlayer.tagName === 'VIDEO') {
+                        setTimeout(() => {
+                            videoPlayer.play().catch(error => {
+                                console.log('Auto-play prevented by browser:', error);
+                            });
+                        }, 100);
+                    }
+                }
             }
         }
 
@@ -789,16 +840,42 @@
                                     <i class="fas fa-expand"></i>
                                 </button>
                             </div>
-                        </div>
-                        <div class="video-player-wrapper">
+                        </div>                        <div class="video-player-wrapper">
                             @{
                                 var hasVideo = ViewBag.HasVideo as bool? ?? false;
+                                var videoType = ViewBag.VideoType as string ?? "NONE";
                                 var mp4Url = ViewBag.MP4Url as string;
+                                var youtubeEmbedUrl = ViewBag.YouTubeEmbedUrl as string;
                             }
                             
-                            @if (hasVideo && !string.IsNullOrEmpty(mp4Url))
+                            @if (hasVideo && videoType == "MP4")
                             {
-                                <!-- Selected Episode Video Player -->
+                                <!-- CDN MP4 Video Player -->
+                                <video id="mainVideoPlayer" 
+                                       class="simple-video-player" 
+                                       controls 
+                                       preload="metadata" 
+                                       poster="@Model.AnhPhim"
+                                       style="width: 100%; height: 100%; background: #000;">
+                                    <source src="@mp4Url" type="video/mp4">
+                                    Trình duyệt của bạn không hỗ trợ video HTML5.
+                                </video>
+                            }
+                            else if (hasVideo && videoType == "YOUTUBE")
+                            {
+                                <!-- YouTube Embed Player -->
+                                <iframe id="mainVideoPlayer"
+                                        class="simple-video-player"
+                                        src="@youtubeEmbedUrl"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen
+                                        style="width: 100%; height: 100%; background: #000;">
+                                </iframe>
+                            }
+                            else if (hasVideo && videoType == "DIRECT")
+                            {
+                                <!-- Direct Link Video Player -->
                                 <video id="mainVideoPlayer" 
                                        class="simple-video-player" 
                                        controls 

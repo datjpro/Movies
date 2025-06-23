@@ -285,18 +285,49 @@ namespace MoviesApp.Controllers
                 {
                     return NotFound(new { error = "Tập phim không tồn tại" });
                 }                string videoUrl = null;
+                string videoType = "NONE";
+                string youtubeEmbedUrl = null;
+                
                 if (!string.IsNullOrEmpty(tapPhim.VideoId))
                 {
                     // Sử dụng VideoId để tạo URL streaming từ CDN
                     videoUrl = $"http://localhost:5288/api/v1/videos/{tapPhim.VideoId}/mp4";
+                    videoType = "MP4";
                 }
                 else if (!string.IsNullOrEmpty(tapPhim.VideoUrl))
                 {
-                    // Sử dụng VideoUrl trực tiếp
-                    videoUrl = tapPhim.VideoUrl;
-                }
-
-                var result = new
+                    if (tapPhim.VideoUrl.Contains("youtube.com") || tapPhim.VideoUrl.Contains("youtu.be"))
+                    {
+                        // Xử lý YouTube URL
+                        var youtubeUrl = tapPhim.VideoUrl;
+                        string videoId = "";
+                        
+                        if (youtubeUrl.Contains("watch?v="))
+                        {
+                            videoId = youtubeUrl.Split("watch?v=")[1].Split("&")[0];
+                        }
+                        else if (youtubeUrl.Contains("youtu.be/"))
+                        {
+                            videoId = youtubeUrl.Split("youtu.be/")[1].Split("?")[0];
+                        }
+                        
+                        if (!string.IsNullOrEmpty(videoId))
+                        {
+                            youtubeEmbedUrl = $"https://www.youtube.com/embed/{videoId}";
+                            videoType = "YOUTUBE";
+                        }
+                        else
+                        {
+                            videoType = "ERROR";
+                        }
+                    }
+                    else
+                    {
+                        // URL khác (có thể là MP4 direct link)
+                        videoUrl = tapPhim.VideoUrl;
+                        videoType = "DIRECT";
+                    }
+                }                var result = new
                 {
                     maTap = tapPhim.MaTap,
                     tenTap = tapPhim.TenTap,
@@ -305,7 +336,9 @@ namespace MoviesApp.Controllers
                     thoiLuongTap = tapPhim.ThoiLuongTap,
                     videoUrl = videoUrl,
                     videoId = tapPhim.VideoId,
-                    hasVideo = !string.IsNullOrEmpty(videoUrl),
+                    videoType = videoType,
+                    youtubeEmbedUrl = youtubeEmbedUrl,
+                    hasVideo = !string.IsNullOrEmpty(videoUrl) || !string.IsNullOrEmpty(youtubeEmbedUrl),
                     tenPhim = tapPhim.Phim?.TenPhim
                 };
 
