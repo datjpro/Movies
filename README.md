@@ -1,11 +1,10 @@
-# 🎬 Movies Management System
+# 🎬 Movies Management System with CDN Video Streaming
 
-A comprehensive web application for managing movies with OMDb API integration, built with ASP.NET Core MVC.
+A comprehensive web application for managing movies with OMDb API integration and CDN-powered video streaming, built with ASP.NET Core MVC.
 
 ## ✨ Features
 
 ### 🔍 OMDb API Integration
-
 - **Automatic Movie Data Fetching**: Search movies by title or IMDb ID
 - **Auto-fill Forms**: Automatically populate movie information from OMDb database
 - **Rich Movie Data**: Director, cast, plot, ratings, awards, runtime, and more
@@ -13,26 +12,34 @@ A comprehensive web application for managing movies with OMDb API integration, b
 - **Real-time Search**: AJAX-powered search with instant results
 - **Data Validation**: Ensures data integrity when importing from OMDb
 
-### 📱 Complete CRUD Operations
+### 🎥 CDN Video Streaming
+- **Video Upload API**: Upload videos through HTTP API endpoint `http://localhost:5288/api/v1/videos/upload`
+- **CDN Integration**: Optimized video delivery through Content Delivery Network
+- **Adaptive Bitrate Streaming**: Automatic quality adjustment based on user's internet connection
+- **Multiple Format Support**: Compatible with MP4, MOV, FLV, CMAF formats
+- **Streaming Protocols**: Support for HLS, DASH, WebRTC, RTMP, and RTSP protocols
+- **Video Content Management**: Secure video storage and delivery system
+- **DRM Protection**: Built-in Digital Rights Management for content security
 
-- **Create Movies**: Add new movies with comprehensive information
-- **View Details**: Beautiful detailed view with all movie information
-- **Edit Movies**: Full editing capabilities with validation
-- **Delete Movies**: Safe deletion with confirmation dialog
+### 📱 Complete CRUD Operations
+- **Create Movies**: Add new movies with comprehensive information and video upload
+- **View Details**: Beautiful detailed view with embedded video player
+- **Edit Movies**: Full editing capabilities with video replacement options
+- **Delete Movies**: Safe deletion with confirmation dialog and CDN cleanup
 
 ### 🎨 Modern UI/UX
-
 - **Responsive Design**: Works perfectly on desktop, tablet, and mobile
 - **Bootstrap 5**: Modern and clean interface
-- **Movie Cards**: Beautiful grid layout with posters and information
-- **Interactive Forms**: Real-time validation and user feedback
+- **Movie Cards**: Beautiful grid layout with posters and video previews
+- **Interactive Video Player**: HTML5 video player with CDN streaming
 - **Modal Dialogs**: Smooth user interactions
+- **Upload Progress**: Real-time video upload progress indicators
 
-### 🗄️ Database Features
-
+### 🗄️ Database & Storage Features
 - **Entity Framework Core**: Robust data management
 - **SQL Server**: Reliable database backend
-- **Foreign Key Relationships**: Proper data relationships
+- **CDN Storage**: Distributed video storage for optimal performance
+- **Foreign Key Relationships**: Proper data relationships including video metadata
 - **Migration Support**: Easy database updates
 
 ## 🛠️ Technology Stack
@@ -40,7 +47,9 @@ A comprehensive web application for managing movies with OMDb API integration, b
 - **Backend**: ASP.NET Core 8.0 MVC
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Database**: SQL Server with Entity Framework Core
-- **API Integration**: OMDb API, YouTube Data API v3 (optional)
+- **CDN**: Content Delivery Network for video streaming
+- **API Integration**: OMDb API, Video Upload API
+- **Video Processing**: HTTP-based video upload and streaming
 - **Authentication**: ASP.NET Core Identity
 - **Validation**: Server-side and client-side validation
 
@@ -49,19 +58,19 @@ A comprehensive web application for managing movies with OMDb API integration, b
 - .NET 8.0 SDK
 - SQL Server (LocalDB or full version)
 - Visual Studio 2022 or VS Code
-- OMDb API Key (free from [OMDb API](http://www.omdbapi.com/))
+- OMDb API Key (free from [OMDb API](https://www.omdbapi.com/))
+- CDN Service Account (Cloudflare, AWS CloudFront, or similar)
+- Video API endpoint running on `http://localhost:5288`
 
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
-
 ```bash
-git clone https://github.com/datjpro/Movies.git
-cd Movies/MoviesApp
+git clone https://github.com/datjpro/movie-web-mvc-dotnet.git
+cd movie-web-mvc-dotnet/MoviesApp
 ```
 
 ### 2. Configure Database
-
 Update `appsettings.json` with your SQL Server connection string:
 
 ```json
@@ -72,197 +81,181 @@ Update `appsettings.json` with your SQL Server connection string:
 }
 ```
 
-### 3. Configure OMDb API
-
-Get your free API key from [OMDb API](http://www.omdbapi.com/) and update `appsettings.json`:
+### 3. Configure APIs and CDN
+Update `appsettings.json` with your API keys and CDN settings:
 
 ```json
 {
   "OMDbSettings": {
     "ApiKey": "your-omdb-api-key-here",
     "BaseUrl": "http://www.omdbapi.com/"
+  },
+  "VideoSettings": {
+    "UploadApiUrl": "http://localhost:5288/api/v1/videos/upload",
+    "CdnBaseUrl": "https://your-cdn-domain.com",
+    "MaxFileSize": 104857600,
+    "AllowedFormats": ["mp4", "mov", "avi", "mkv"]
+  },
+  "CdnSettings": {
+    "Provider": "Cloudflare",
+    "ApiKey": "your-cdn-api-key",
+    "ZoneId": "your-zone-id"
   }
 }
 ```
 
 ### 4. Run Database Migrations
-
 ```bash
 dotnet ef database update
 ```
 
-### 5. Run the Application
+### 5. Start Video API Service
+Ensure your video API service is running on `http://localhost:5288`
 
+### 6. Run the Application
 ```bash
 dotnet run
 ```
-
-Navigate to `https://localhost:5001` or `http://localhost:5000`
+Navigate to `https://localhost:5000` or `http://localhost:5032`
 
 ## 📖 Usage
 
-### Adding a New Movie
-
+### Adding a Movie with Video
 1. Click "Thêm phim mới" (Add New Movie)
 2. Use OMDb search to find movie information
 3. Click "Điền vào form" to auto-fill movie details
-4. Add movie code and adjust any information
-5. Save the movie
+4. **Upload Video**: Select video file and upload through CDN API
+5. Monitor upload progress and CDN processing
+6. Save the movie with video URL
+
+### Video Management
+- **Video Upload**: Drag-and-drop or browse video files
+- **CDN Processing**: Automatic video optimization and distribution
+- **Streaming**: Adaptive bitrate streaming for optimal viewing
+- **Video Preview**: Thumbnail generation and preview functionality
+- **Quality Options**: Multiple quality levels for different devices
 
 ### Managing Movies
+- **View All Movies**: Browse the movie gallery with video previews
+- **Movie Details**: Click "Chi tiết" to see movie info with embedded video player
+- **Edit Movie**: Modify information and replace videos
+- **Delete Movie**: Safe deletion with CDN cleanup
 
-- **View All Movies**: Browse the movie gallery on the homepage
-- **Movie Details**: Click "Chi tiết" to see comprehensive movie information
-- **Edit Movie**: Click "Sửa" to modify movie information
-- **Delete Movie**: Click "Xóa" and confirm deletion
+## 🔧 Video API Integration
 
-### OMDb Integration
-
-- Search by movie title: `Inception`, `The Dark Knight`
-- Search by IMDb ID: `tt1375666`, `tt0468569`
-- Automatic mapping of countries and genres
-- Smart category detection (Movie vs Series)
-
-## 🔧 Configuration
-
-### Database Settings
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Your SQL Server connection string"
-  }
-}
+### Upload Video Endpoint
+```javascript
+// Upload video to CDN
+const uploadVideo = async (file, movieId) => {
+    const formData = new FormData();
+    formData.append('video', file);
+    formData.append('movieId', movieId);
+    
+    const response = await fetch('http://localhost:5288/api/v1/videos/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    });
+    
+    return await response.json();
+};
 ```
 
-### OMDb API Settings
-
-```json
-{
-  "OMDbSettings": {
-    "ApiKey": "Your OMDb API key",
-    "BaseUrl": "http://www.omdbapi.com/"
-  }
-}
+### CDN Configuration
+```csharp
+// Configure CDN in ASP.NET Core
+services.Configure<CdnSettings>(Configuration.GetSection("CdnSettings"));
+services.AddScoped<ICdnService, CdnService>();
+services.AddScoped<IVideoService, VideoService>();
 ```
 
-### JWT Settings (for API)
+## 🎥 Video Features
 
-```json
-{
-  "JwtSettings": {
-    "Secret": "Your JWT secret key",
-    "Issuer": "MoviesApp",
-    "Audience": "MoviesApp",
-    "TokenLifetimeInMinutes": 60
-  }
-}
-```
+### Upload Process
+- **File Validation**: Check format, size, and codec compatibility
+- **CDN Upload**: Transfer to CDN storage via HTTP API
+- **Processing**: Automatic transcoding and optimization
+- **Distribution**: Content distributed across CDN edge servers
+- **Metadata Storage**: Video information saved to database
+
+### Streaming Capabilities
+- **Adaptive Streaming**: Automatic quality adjustment based on bandwidth
+- **Global Delivery**: CDN edge servers for worldwide content delivery
+- **Security**: DRM protection and access control
+- **Analytics**: Video performance and viewing statistics
+- **Caching**: Intelligent caching for faster content delivery
 
 ## 📁 Project Structure
 
 ```
 MoviesApp/
-├── Areas/Admin/              # Admin area for advanced management
+├── Areas/Admin/              # Admin area with video management
 ├── Controllers/              # MVC Controllers
 │   ├── Api/                 # API Controllers
 │   ├── PhimController.cs    # Main movie controller
+│   ├── VideoController.cs   # Video management controller
 │   └── ...
 ├── Data/                    # Database context and migrations
 ├── Models/                  # Data models and DTOs
+│   ├── VideoModels/        # Video-related models
+│   └── ...
 ├── Services/               # Business logic services
 │   ├── OMDbService.cs      # OMDb API integration
+│   ├── CdnService.cs       # CDN integration service
+│   ├── VideoService.cs     # Video processing service
 │   └── ...
 ├── Views/                  # Razor views
-│   ├── Phim/              # Movie views
-│   │   ├── Index.cshtml   # Movie list
-│   │   ├── Details.cshtml # Movie details
-│   │   ├── Create.cshtml  # Add movie
-│   │   ├── Edit.cshtml    # Edit movie
-│   │   └── Delete.cshtml  # Delete confirmation
+│   ├── Phim/              # Movie views with video player
+│   ├── Video/             # Video management views
 │   └── ...
-└── wwwroot/               # Static files (CSS, JS, images)
+└── wwwroot/               # Static files including video player assets
 ```
 
-## 🌟 Key Features Showcase
+## 🌟 Advanced Video Features
 
-### OMDb Integration
+### CDN Integration Benefits
+- **Performance**: Reduced loading times through global distribution
+- **Scalability**: Handle high traffic loads with CDN infrastructure
+- **Reliability**: Multiple edge servers ensure high availability
+- **Cost Efficiency**: Optimized bandwidth usage and reduced server load
 
-- Real-time movie search and data fetching
-- Automatic form population with IMDb data
-- Smart mapping of genres and countries
-- Support for both movie titles and IMDb IDs
-
-### Movie Management
-
-- Complete CRUD operations with validation
-- Rich movie details with posters and metadata
-- Responsive design for all screen sizes
-- User-friendly confirmation dialogs
-
-### Data Model
-
-- Comprehensive movie information storage
-- Support for series and individual movies
-- IMDb ratings and metadata integration
-- Flexible categorization system
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [OMDb API](http://www.omdbapi.com/) for providing movie data
-- [Bootstrap](https://getbootstrap.com/) for the UI framework
-- [Font Awesome](https://fontawesome.com/) for icons
-- ASP.NET Core team for the excellent framework
-
-## 📞 Support
-
-If you have any questions or need help, please:
-
-- Open an issue on GitHub
-- Check the documentation in the `docs/` folder
-- Review the OMDb integration guide
+### Video Security
+- **DRM Protection**: Content protection against unauthorized access
+- **Access Control**: Role-based video access permissions
+- **Encrypted Streaming**: Secure video transmission
+- **Anti-Piracy**: Advanced protection mechanisms
 
 ## 🚀 Future Enhancements
 
-- [ ] Movie trailer integration
-- [ ] User reviews and ratings
-- [ ] Advanced search and filtering
-- [ ] Movie recommendations
-- [ ] Export/Import functionality
-- [ ] Multi-language support
+- [ ] **Live Streaming**: Real-time video streaming capabilities
+- [ ] **Video Analytics**: Detailed viewing statistics and insights
+- [ ] **Mobile App**: Native mobile applications for video streaming
+- [ ] **AI Integration**: Automatic video tagging and content analysis
+- [ ] **Social Features**: Comments, ratings, and sharing functionality
+- [ ] **Offline Viewing**: Download videos for offline consumption
+- [ ] **Multi-language Subtitles**: Support for multiple subtitle tracks
 
-## 📋 Recent Updates (v1.0)
+## 📋 Recent Updates (v2.0)
 
-### ✅ Latest Features
+### ✅ Latest Video Features
+- **CDN Integration**: Full Content Delivery Network integration for video streaming
+- **HTTP Video API**: RESTful API for video upload and management
+- **Adaptive Streaming**: Dynamic quality adjustment based on connection speed
+- **Multiple Format Support**: Support for various video formats and codecs
+- **Global Distribution**: Worldwide content delivery through CDN edge servers
+- **Video Security**: DRM protection and access control implementation
+- **Performance Optimization**: Enhanced loading times and streaming quality
 
-- **Complete OMDb Integration**: Full integration with OMDb API for automatic movie data fetching
-- **CRUD Operations**: Complete Create, Read, Update, Delete functionality for movies
-- **Smart Form Auto-fill**: Intelligent form population with automatic dropdown selection
-- **Responsive Movie Gallery**: Beautiful card-based layout with movie posters
-- **Data Validation**: Comprehensive server-side and client-side validation
-- **Database Migrations**: Fully configured Entity Framework Core with SQL Server
-- **Error Handling**: Robust error handling and logging for better debugging
-
-### 🔧 Technical Improvements
-
-- Enhanced `Phim` model with comprehensive movie metadata
-- Optimized OMDbService with proper error handling and logging
-- Improved JavaScript for real-time form interactions
-- Updated views with modern Bootstrap 5 components
-- Implemented proper navigation property handling in Entity Framework
+### 🔧 Technical Video Improvements
+- Enhanced video upload with progress tracking
+- CDN-optimized video delivery and caching
+- Improved video player with adaptive bitrate streaming
+- Robust error handling for video operations
+- Optimized database schema for video metadata storage
+- Implemented video thumbnail generation and preview
 
 ---
 
-**Made with ❤️ using ASP.NET Core MVC**
+Made with ❤️ using ASP.NET Core MVC + CDN Video Streaming
