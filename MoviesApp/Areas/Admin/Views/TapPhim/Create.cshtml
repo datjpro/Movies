@@ -417,6 +417,7 @@
             const videoUrlInput = document.getElementById('videoUrlInput');
             const videoPreview = document.getElementById('videoPreview');
             const videoPreviewContent = document.getElementById('videoPreviewContent');
+            const hiddenVideoUrl = document.getElementById('VideoUrl');
 
             videoUrlInput.addEventListener('input', function() {
                 const url = this.value.trim();
@@ -424,6 +425,7 @@
                     validateAndPreviewVideo(url);
                 } else {
                     hideVideoPreview();
+                    hiddenVideoUrl.value = '';
                 }
             });
 
@@ -435,185 +437,17 @@
                     showVideoPreview(embedUrl, videoType);
                     videoUrlInput.classList.remove('is-invalid');
                     videoUrlInput.classList.add('is-valid');
+                    hiddenVideoUrl.value = url; // Gán giá trị URL gốc vào input ẩn
                 } else if (isDirectVideoUrl(url)) {
                     showVideoPreview(url, 'direct');
                     videoUrlInput.classList.remove('is-invalid');
                     videoUrlInput.classList.add('is-valid');
+                    hiddenVideoUrl.value = url;
                 } else {
                     hideVideoPreview();
                     videoUrlInput.classList.remove('is-valid');
                     videoUrlInput.classList.add('is-invalid');
-                }
-            }
-
-            function isDirectVideoUrl(url) {
-                if (!url) return false;
-                
-                const videoExtensions = /\.(mp4|webm|ogg|avi|mov|mkv|flv|wmv|m4v)(\?.*)?$/i;
-                if (videoExtensions.test(url)) return true;
-                
-                const videoFormats = /\.(mp4|webm|ogg|avi|mov|mkv|flv|wmv|m4v)/i;
-                if (videoFormats.test(url)) return true;
-                
-                if (url.includes('/video/') || url.includes('/stream/') || url.includes('/play/')) {
-                    return true;
-                }
-                
-                return false;
-            }
-
-            function showVideoPreview(url, type) {
-                let previewHtml = '';
-                
-                if (type === 'youtube' || type === 'vimeo') {
-                    previewHtml = `
-                        <div class="ratio ratio-16x9">
-                            <iframe src="${url}" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                    `;
-                } else if (type === 'direct') {
-                    previewHtml = `
-                        <div class="ratio ratio-16x9">
-                            <video controls>
-                                <source src="${url}" type="video/mp4">
-                                Trình duyệt không hỗ trợ video này.
-                            </video>
-                        </div>
-                    `;
-                }
-                
-                videoPreviewContent.innerHTML = previewHtml;
-                videoPreview.style.display = 'block';
-            }
-
-            function hideVideoPreview() {
-                videoPreview.style.display = 'none';
-                videoPreviewContent.innerHTML = '';
-            }
-
-            function convertVideoUrl(url) {
-                if (!url) return '';
-                
-                if (url.includes('youtube.com/watch?v=')) {
-                    const videoId = url.split('v=')[1].split('&')[0];
-                    return `https://www.youtube.com/embed/${videoId}`;
-                }
-                
-                if (url.includes('youtu.be/')) {
-                    const videoId = url.split('youtu.be/')[1].split('?')[0];
-                    return `https://www.youtube.com/embed/${videoId}`;
-                }
-                
-                if (url.includes('youtube.com/embed/')) {
-                    return url;
-                }
-                
-                if (url.includes('vimeo.com/') && !url.includes('/embed/')) {
-                    const videoId = url.split('vimeo.com/')[1].split('/')[0];
-                    return `https://player.vimeo.com/video/${videoId}`;
-                }
-                
-                return url;
-            }
-
-            function getVideoType(url) {
-                if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                    return 'youtube';
-                } else if (url.includes('vimeo.com')) {
-                    return 'vimeo';
-                } else {
-                    return 'direct';
-                }
-            }
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
-            notification.style.top = '20px';
-            notification.style.right = '20px';
-            notification.style.zIndex = '9999';
-            notification.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 5000);
-        }
-
-        // Form submission validation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const videoUrl = document.getElementById('VideoUrl').value.trim();
-            
-            if (!videoUrl) {
-                e.preventDefault();
-                showNotification('Vui lòng upload video hoặc nhập URL video', 'error');
-                return false;
-            }
-        });
-    </script>
-
-    <style>
-        .upload-area {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .upload-area:hover {
-            border-color: var(--bs-primary) !important;
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
-        }
-
-        .upload-area.bg-light {
-            background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
-            border-color: var(--bs-primary) !important;
-        }
-
-        .progress {
-            height: 20px;
-        }
-
-        .progress-bar {
-            font-size: 12px;
-            line-height: 20px;
-        }
-
-        .video-preview-container {
-            max-width: 100%;
-            margin-top: 10px;
-        }
-
-        .nav-tabs .nav-link {
-            color: #6c757d;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: var(--bs-primary);
-            font-weight: 600;
-        }
-    </style>
-}function validateAndPreviewVideo(url) {
-                const embedUrl = convertVideoUrl(url);
-                const videoType = getVideoType(url);
-                
-                if (embedUrl && (videoType === 'youtube' || videoType === 'vimeo')) {
-                    showVideoPreview(embedUrl, videoType);
-                    videoUrlInput.classList.remove('is-invalid');
-                    videoUrlInput.classList.add('is-valid');
-                } else if (isDirectVideoUrl(url)) {
-                    showVideoPreview(url, 'direct');
-                    videoUrlInput.classList.remove('is-invalid');
-                    videoUrlInput.classList.add('is-valid');
-                } else {
-                    hideVideoPreview();
-                    videoUrlInput.classList.remove('is-valid');
-                    videoUrlInput.classList.add('is-invalid');
+                    hiddenVideoUrl.value = '';
                 }
             }
 
@@ -703,10 +537,79 @@
                 }
                 return 'direct';
             }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        // Form submission validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const videoUrl = document.getElementById('VideoUrl').value.trim();
+            
+            if (!videoUrl) {
+                e.preventDefault();
+                showNotification('Vui lòng upload video hoặc nhập URL video', 'error');
+                return false;
+            }
         });
     </script>
 
     <style>
+        .upload-area {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--bs-primary) !important;
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+        }
+
+        .upload-area.bg-light {
+            background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+            border-color: var(--bs-primary) !important;
+        }
+
+        .progress {
+            height: 20px;
+        }
+
+        .progress-bar {
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .video-preview-container {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--bs-primary);
+            font-weight: 600;
+        }
+
         .video-preview-container {
             background: #f8f9fa;
             border: 2px dashed #dee2e6;

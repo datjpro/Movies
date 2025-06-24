@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Features;
 using MoviesApp.Data;
 using MoviesApp.Models;
 using MoviesApp.Services;
+using MoviesApp.Middleware;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -176,6 +177,7 @@ builder.Services.AddHttpContextAccessor(); // Required for session access
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IUserActivityService, UserActivityService>();
+builder.Services.AddScoped<IVideoTokenService, VideoTokenService>();
 
 // Add HttpClient and OMDb service
 builder.Services.AddHttpClient<OMDbService>();
@@ -219,6 +221,9 @@ app.UseCors("AllowAll");
 // Authentication & Authorization (in correct order)
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add video security middleware
+app.UseVideoSecurity();
 
 app.MapStaticAssets();
 

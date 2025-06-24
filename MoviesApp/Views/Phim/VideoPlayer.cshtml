@@ -13,36 +13,41 @@
                     <i class="fas fa-play-circle me-2"></i>
                     Xem Phim: @(Model?.TenPhim ?? "Demo Video")
                 </h2>
-                
-                <!-- Video Player -->
+                  <!-- Video Player với Security -->
                 @{
                     var videoModel = new VideoPlayerViewModel
                     {
                         Title = Model?.TenPhim ?? "Demo Video Player",
-                        Description = Model?.MoTa ?? "Trải nghiệm video player hiện đại với đầy đủ tính năng điều khiển",
-                        VideoUrl = Model?.LinkPhim ?? "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-                        VideoUrl720 = "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-                        VideoUrl480 = "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4",
-                        VideoUrl360 = "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4",
+                        Description = Model?.MoTa ?? "Trải nghiệm video player hiện đại với bảo mật cao",
+                        VideoUrl = "#", // Sẽ được load động qua secure API
+                        VideoUrl720 = "#",
+                        VideoUrl480 = "#", 
+                        VideoUrl360 = "#",
                         PosterUrl = Model?.AnhPhim,
                         Autoplay = false,
                         Muted = false,
-                        ShowDownloadOptions = true,
+                        ShowDownloadOptions = false, // Tắt download để bảo mật
                         Subtitles = new List<SubtitleTrack>
                         {
                             new SubtitleTrack { Label = "Tiếng Việt", Url = "/subtitles/vi.vtt", Language = "vi" },
                             new SubtitleTrack { Label = "English", Url = "/subtitles/en.vtt", Language = "en" }
                         },
-                        DownloadLinks = new List<DownloadLink>
-                        {
-                            new DownloadLink { Quality = "1080p", Url = "#", Size = "2.5GB", Filename = "movie_1080p.mp4" },
-                            new DownloadLink { Quality = "720p", Url = "#", Size = "1.2GB", Filename = "movie_720p.mp4" },
-                            new DownloadLink { Quality = "480p", Url = "#", Size = "600MB", Filename = "movie_480p.mp4" }
-                        }
+                        DownloadLinks = new List<DownloadLink>() // Trống để bảo mật
                     };
-                }
-                
-                @await Html.PartialAsync("_VideoPlayer", videoModel)
+                    
+                    // Thêm security options
+                    var securityOptions = new {
+                        videoId = Model?.PhimId?.ToString() ?? "demo_video",
+                        requireAuth = true,
+                        tokenRefreshThreshold = 300,
+                        maxRetries = 3,
+                        enableAntiDebug = true
+                    };
+                }                
+                @await Html.PartialAsync("_SecureVideoPlayer", videoModel, new ViewDataDictionary(ViewData) 
+                { 
+                    ["SecurityOptions"] = securityOptions 
+                })
                 
                 <!-- Video Controls Info -->
                 <div class="video-controls-info mt-4">

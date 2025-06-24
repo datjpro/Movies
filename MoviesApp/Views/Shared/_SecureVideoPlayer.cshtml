@@ -1,0 +1,252 @@
+@model VideoPlayerViewModel
+
+@{
+    var playerId = "secureVideoPlayer_" + Guid.NewGuid().ToString("N")[..8];
+    var securityOptions = ViewData["SecurityOptions"] ?? new { };
+    var playerOptions = new {
+        videoId = ((dynamic)securityOptions).videoId,
+        requireAuth = ((dynamic)securityOptions).requireAuth,
+        security = securityOptions,
+        poster = Model.PosterUrl,
+        autoplay = Model.Autoplay,
+        muted = Model.Muted,
+        subtitles = Model.Subtitles?.Select(s => new { label = s.Label, src = s.Url }).ToArray() ?? new object[0]
+    };
+    var optionsJson = System.Text.Json.JsonSerializer.Serialize(playerOptions);
+}
+
+<!-- Security Notice -->
+<div class="security-notice alert alert-info mb-3">
+    <i class="fas fa-shield-alt me-2"></i>
+    <strong>Video Được Bảo Vệ:</strong> Nội dung này được mã hóa và chỉ có thể xem khi đã đăng nhập.
+</div>
+
+<!-- Secure Video Player CSS -->
+<link rel="stylesheet" href="~/css/video-player.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/secure-video-player.css" asp-append-version="true" />
+
+<!-- Video Player Container -->
+<div class="secure-video-player-wrapper">
+    @if (!string.IsNullOrEmpty(Model.Title))
+    {
+        <div class="video-header">
+            <h3 class="video-title">
+                <i class="fas fa-lock me-2 text-warning"></i>
+                @Model.Title
+            </h3>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="video-description">@Model.Description</p>
+            }
+        </div>
+    }
+    
+    <div id="@playerId" class="secure-video-player-container" data-video-options='@Html.Raw(optionsJson)'>
+        <!-- Loading state -->
+        <div class="secure-loading-state">
+            <div class="loading-spinner"></div>
+            <p>Đang xác thực và tải video bảo mật...</p>
+        </div>
+        <!-- Video player sẽ được khởi tạo bằng JavaScript -->
+    </div>
+    
+    <!-- Security Information -->
+    <div class="security-info mt-3">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="security-feature">
+                    <i class="fas fa-key text-primary"></i>
+                    <span>Mã hóa token động</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="security-feature">
+                    <i class="fas fa-clock text-info"></i>
+                    <span>Token tự động gia hạn</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="security-feature">
+                    <i class="fas fa-ban text-danger"></i>
+                    <span>Chống tải xuống</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="security-feature">
+                    <i class="fas fa-user-shield text-success"></i>
+                    <span>Xác thực người dùng</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Files -->
+<script src="~/js/video-player.js" asp-append-version="true"></script>
+<script src="~/js/secure-video-player.js" asp-append-version="true"></script>
+
+<style>
+.secure-video-player-wrapper {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.security-notice {
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 123, 255, 0.05));
+    border: 1px solid rgba(0, 123, 255, 0.3);
+    border-radius: 8px;
+}
+
+.video-title i.fa-lock {
+    animation: pulse 2s infinite;
+}
+
+@@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.secure-loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    background: var(--glass-bg, rgba(0, 0, 0, 0.7));
+    border-radius: 12px;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.security-info {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.security-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    color: var(--text-secondary, #b0b0b0);
+    font-size: 0.9rem;
+}
+
+.security-feature i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Anti-debugging styles */
+.secure-video-player-container {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    -webkit-context-menu: none;
+    -moz-context-menu: none;
+    -ms-context-menu: none;
+    context-menu: none;
+}
+
+.secure-video-player-container video {
+    pointer-events: auto;
+}
+
+.secure-video-player-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Hide in developer tools */
+@@media (max-width: 0px) {
+    .secure-video-player-wrapper {
+        display: none !important;
+    }
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .security-info .row {
+        gap: 0.5rem;
+    }
+    
+    .security-feature {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('@playerId');
+    if (container) {
+        try {
+            const options = JSON.parse(container.dataset.videoOptions);
+            
+            // Initialize secure video player
+            const securePlayer = new SecureVideoPlayer(container, options);
+            
+            // Store reference for external access
+            window['@playerId'] = securePlayer;
+            
+            // Handle authentication errors
+            container.addEventListener('authError', function(event) {
+                console.error('Authentication error:', event.detail);
+                window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+            });
+            
+            // Handle security violations
+            container.addEventListener('securityViolation', function(event) {
+                console.warn('Security violation detected:', event.detail);
+                securePlayer.showError('Phát hiện hành vi bất thường. Video đã bị tạm dừng.');
+            });
+            
+            console.log('Secure video player initialized successfully');
+        } catch (error) {
+            console.error('Error initializing secure video player:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Lỗi khởi tạo video player. Vui lòng tải lại trang.
+                </div>
+            `;
+        }
+    }
+});
+
+// Additional security: Clear sensitive data on page unload
+window.addEventListener('beforeunload', function() {
+    // Clear any cached tokens
+    sessionStorage.removeItem('video_token');
+    
+    // Clear console
+    if (typeof console !== 'undefined' && console.clear) {
+        console.clear();
+    }
+});
+</script>
